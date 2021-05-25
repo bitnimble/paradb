@@ -1,0 +1,7 @@
+@value gridBaseline from 'pages/paradb/base/metrics/metrics.css';
+
+.navbar {
+    width: 100vw;
+    height: calc(gridBaseline * 5);
+    background-color: green;
+}
