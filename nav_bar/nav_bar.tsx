@@ -1,4 +1,6 @@
+import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
+import { routeFor, RoutePath } from 'pages/paradb/router/routes';
 import React from 'react';
 import styles from './nav_bar.css';
 
@@ -10,9 +12,9 @@ export class NavBar extends React.Component<NavBarProps> {
   render() {
     return (
       <div className={styles.navbar}>
-        <div className={styles.logo}>
+        <RouteLink className={styles.logo} to={routeFor([RoutePath.MAP_LIST])}>
           <T.Medium style="title">paraDB</T.Medium>
-        </div>
+        </RouteLink>
       </div>
     )
   }

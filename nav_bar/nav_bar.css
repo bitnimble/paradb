@@ -1,16 +1,22 @@
 @value gridBaseline from 'pages/paradb/base/metrics/metrics.css';
-@value colorDarkGrey from 'pages/paradb/base/colors/colors.css';
+@value colorDarkGrey, colorPurple, colorWhite from 'pages/paradb/base/colors/colors.css';
 
 .navbar {
     display: flex;
     width: 100vw;
     height: calc(gridBaseline * 7);
     background: colorDarkGrey;
-    color: white;
+    color: colorWhite;
 }
 
 .logo {
     display: flex;
     align-items: center;
     margin-left: calc(gridBaseline * 2.5);
+    color: colorWhite;
+    text-decoration: none;
+    transition: color 0.1s ease;
+}
+.logo:hover {
+    color: colorPurple;
 }
