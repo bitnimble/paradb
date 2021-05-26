@@ -1,10 +1,10 @@
 @value colorBlack, colorPurple from "pages/paradb/base/colors/colors.css";
-@value bodyStyled from "./text.css";
 
 .link {
     color: colorBlack;
-    transition: 0.15s color ease-in-out;
+    transition: color 0.15s ease;
 }
+
 .link:hover {
     color: colorPurple;
 }

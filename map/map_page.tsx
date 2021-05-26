@@ -30,9 +30,12 @@ const ComplexityPills = (props: { complexities: Complexity[] }) => (
 );
 
 const DownloadButton = (props: { to: string }) => (
-  <RouteLink to={props.to} className={styles.downloadButton}>
-    <T.Medium>Download</T.Medium>
+  <RouteLink to={'//' + props.to} referrerPolicy="no-referrer" target="_blank">
+    <div className={styles.downloadButton}>
+      <T.Medium>Download</T.Medium>
+    </div>
   </RouteLink>
+
 );
 
 export class MapPage extends React.Component<Props> {

@@ -8,6 +8,7 @@ export type PDMap = {
   title: string;
   artist: string;
   author: string;
+  uploader: string;
   albumArt?: string;
   complexities: Complexity[];
   description: string;
@@ -55,6 +56,7 @@ export function validatePDMap(input: any): PDMap {
     title: validateString(input.title),
     artist: validateString(input.artist),
     author: validateString(input.author),
+    uploader: validateString(input.uploader),
     albumArt: validateOptional(validateString, input.albumArt),
     complexities: validateArray(validateComplexity, input.complexities),
     description: validateString(input.description),

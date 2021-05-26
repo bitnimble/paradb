@@ -43,6 +43,7 @@
     display: inline-block;
     border: 1px solid colorPurple;
     padding: gridBaseline calc(gridBaseline * 2);
+    color: colorPurple;
     text-decoration: none;
     transition: background 0.15s ease, color 0.15s ease;
 }

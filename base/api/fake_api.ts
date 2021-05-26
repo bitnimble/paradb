@@ -32,6 +32,7 @@ const allStar: PDMap = {
   title: 'All Star',
   artist: 'Smash Mouth',
   author: 'Nobody',
+  uploader: 'Nobody',
   albumArt: 'https://upload.wikimedia.org/wikipedia/en/1/16/All_star.jpg',
   complexities: [
     { complexity: 1 },
@@ -40,7 +41,7 @@ const allStar: PDMap = {
     { complexity: 5 },
   ],
   description: 'Test description',
-  downloadLink: '',
+  downloadLink: 'www.google.com',
 };
 
 const californication: PDMap = {
@@ -48,6 +49,7 @@ const californication: PDMap = {
   title: 'Californication',
   artist: 'Red Hot Chili Peppers',
   author: 'Nobody',
+  uploader: 'Nobody',
   albumArt: 'https://upload.wikimedia.org/wikipedia/en/d/df/RedHotChiliPeppersCalifornication.jpg',
   complexities: [
     { complexity: 1, complexityName: 'anon\'s Easy' },
@@ -56,7 +58,7 @@ const californication: PDMap = {
     { complexity: 5, complexityName: 'Sacramento' },
   ],
   description: 'Test description',
-  downloadLink: '',
+  downloadLink: 'drive.google.com',
 };
 
 const fakeMaps = [allStar, californication];
