@@ -1,5 +1,6 @@
 import { History } from 'history';
 import { observer } from 'mobx-react';
+import { PDMap, validatePDMap } from 'pages/paradb/map/map_schema';
 import { NotFound } from 'pages/paradb/router/not_found';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
 import React from 'react';
@@ -9,7 +10,7 @@ import styles from './skeleton.css';
 export type SkeletonProps = {
   history: History,
   NavBar: React.ComponentType,
-  MapPage: React.ComponentType<{ id: string }>,
+  MapPage: React.ComponentType<{ id: string, map?: PDMap }>,
   MapList: React.ComponentType,
 }
 
@@ -28,8 +29,8 @@ export class Skeleton extends React.Component<SkeletonProps> {
                 <MapList/>
               </Route>
               <Route path={routeFor([RoutePath.MAP, ':id'])}>
-                {({ match }) => (
-                  match && match.params.id != null && <MapPage id={match.params.id}/>
+                {({ match, location }) => (
+                  match && match.params.id != null && <MapPage id={match.params.id} map={location.state != null ? validatePDMap(location.state) : undefined}/>
                 )}
               </Route>
               <Route>

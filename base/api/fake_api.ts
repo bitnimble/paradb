@@ -1,7 +1,7 @@
 import { PDMap } from 'pages/paradb/map/map_schema';
 import { Api, FindMapsResponse, GetMapRequest, GetMapResponse } from './api';
 
-const DELAY = 200;
+const DELAY = 500;
 
 async function delay(ms: number = DELAY) {
   return new Promise<void>(res => {
@@ -17,7 +17,7 @@ export class FakeApi implements Api {
     };
   }
   async getMap(req: GetMapRequest): Promise<GetMapResponse> {
-    await delay();
+    await delay(1000);
     const map = fakeMaps.find(m => m.id === req.id);
     if (map) {
       return { map };
@@ -27,21 +27,20 @@ export class FakeApi implements Api {
   }
 }
 
-
 const allStar: PDMap = {
   id: '1',
   title: 'All Star',
   artist: 'Smash Mouth',
   author: 'Nobody',
-  albumArt: undefined,
-  complexity: [
-    { difficulty: 1, difficultyName: 'Easy' },
-    { difficulty: 2, difficultyName: 'Medium' },
-    { difficulty: 3, difficultyName: 'Hard' },
-    { difficulty: 5, difficultyName: 'Extreme' },
+  albumArt: 'https://upload.wikimedia.org/wikipedia/en/1/16/All_star.jpg',
+  complexities: [
+    { complexity: 1 },
+    { complexity: 2 },
+    { complexity: 3 },
+    { complexity: 5 },
   ],
   description: 'Test description',
-  blobUrl: '',
+  downloadLink: '',
 };
 
 const californication: PDMap = {
@@ -49,15 +48,15 @@ const californication: PDMap = {
   title: 'Californication',
   artist: 'Red Hot Chili Peppers',
   author: 'Nobody',
-  albumArt: undefined,
-  complexity: [
-    { difficulty: 1, difficultyName: 'Easy' },
-    { difficulty: 2, difficultyName: 'Medium' },
-    { difficulty: 3, difficultyName: 'Hard' },
-    { difficulty: 5, difficultyName: 'Extreme' },
+  albumArt: 'https://upload.wikimedia.org/wikipedia/en/d/df/RedHotChiliPeppersCalifornication.jpg',
+  complexities: [
+    { complexity: 1, complexityName: 'anon\'s Easy' },
+    { complexity: 2, complexityName: 'Medium' },
+    { complexity: 3, complexityName: 'West Coast' },
+    { complexity: 5, complexityName: 'Sacramento' },
   ],
   description: 'Test description',
-  blobUrl: '',
+  downloadLink: '',
 };
 
 const fakeMaps = [allStar, californication];

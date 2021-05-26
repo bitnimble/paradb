@@ -11,7 +11,7 @@ export function createApp() {
   const api = new FakeApi();
 
   const NavBar = createNavBar();
-  const MapPage = createMapPage();
+  const MapPage = createMapPage(api);
   const MapList = createMapList(api);
 
   const { history, navigate } = installRouter();

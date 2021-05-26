@@ -1,0 +1,59 @@
+@value gridBaseline from "pages/paradb/base/metrics/metrics.css";
+@value colorGrey, colorPurple from "pages/paradb/base/colors/colors.css";
+
+@value margins: calc(gridBaseline * 3);
+@value albumArtMaxWidth: 300px;
+@value gap: calc(gridBaseline * 3);
+@value minContentWidth: calc(gridBaseline * 80);
+@value breakpoint: calc(albumArtMaxWidth + gap + minContentWidth + margins);
+
+.mapPage {
+    margin: margins;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.albumArt {
+    max-width: 300px;
+    margin-right: calc(gridBaseline * 3);
+}
+
+.mapContent {
+    width: min(100%, calc(gridBaseline * 100));
+}
+
+.complexities {
+    display: flex;
+    margin: gridBaseline calc(-1 * gridBaseline);
+}
+.complexityPill {
+    background: colorGrey;
+    margin: 0 gridBaseline;
+    padding: calc(gridBaseline * 0.5) calc(gridBaseline * 2);
+    border-radius: calc(gridBaseline * 2);
+}
+
+.description {
+    margin: calc(gridBaseline * 2) 0;
+}
+
+.downloadButton {
+    display: inline-block;
+    border: 1px solid colorPurple;
+    padding: gridBaseline calc(gridBaseline * 2);
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.downloadButton:hover {
+    background: colorPurple;
+    color: white;
+}
+
+@media screen and (min-width: breakpoint) {
+    .mapPage {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}
