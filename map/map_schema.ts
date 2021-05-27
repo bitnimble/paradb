@@ -11,7 +11,7 @@ export type PDMap = {
   uploader: string;
   albumArt?: string;
   complexities: Complexity[];
-  description: string;
+  description?: string;
   downloadLink: string;
 }
 
@@ -59,7 +59,7 @@ export function validatePDMap(input: any): PDMap {
     uploader: validateString(input.uploader),
     albumArt: validateOptional(validateString, input.albumArt),
     complexities: validateArray(validateComplexity, input.complexities),
-    description: validateString(input.description),
+    description: validateOptional(validateString, input.description),
     downloadLink: validateString(input.downloadLink),
   };
 }
