@@ -30,7 +30,7 @@ const ComplexityPills = (props: { complexities: Complexity[] }) => (
 );
 
 const DownloadButton = (props: { to: string }) => (
-  <RouteLink to={'//' + props.to} referrerPolicy="no-referrer" target="_blank">
+  <RouteLink to={props.to} referrerPolicy="no-referrer" target="_blank">
     <div className={styles.downloadButton}>
       <T.Medium>Download</T.Medium>
     </div>

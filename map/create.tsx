@@ -11,11 +11,13 @@ export function createMapPage(api: Api) {
   const presenter = new MapPagePresenter(api, store);
 
   return observer(({ id, map }: { id: string, map?: PDMap }) => {
-    if (map) {
-      runInAction(() => store.map = map);
-    } else {
-      presenter.getMap(id);
-    }
+    React.useEffect(() => {
+      if (map) {
+        runInAction(() => store.map = map);
+      } else {
+        presenter.getMap(id);
+      }
+    }, [])
 
     return (
         <MapPage
