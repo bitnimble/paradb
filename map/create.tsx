@@ -15,6 +15,7 @@ export function createMapPage(api: Api) {
       if (map) {
         runInAction(() => store.map = map);
       } else {
+        runInAction(() => store.map = undefined);
         presenter.getMap(id);
       }
     }, [])
