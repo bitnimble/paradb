@@ -1,4 +1,3 @@
-import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
 import { Complexity, PDMap } from 'pages/paradb/map/map_schema';
 import React from 'react';
@@ -30,11 +29,11 @@ const ComplexityPills = (props: { complexities: Complexity[] }) => (
 );
 
 const DownloadButton = (props: { to: string }) => (
-  <RouteLink to={props.to} referrerPolicy="no-referrer" target="_blank">
+  <a href={props.to} referrerPolicy="no-referrer" target="_blank">
     <div className={styles.downloadButton}>
       <T.Medium>Download</T.Medium>
     </div>
-  </RouteLink>
+  </a>
 
 );
 
