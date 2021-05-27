@@ -44,7 +44,7 @@ export class MapPage extends React.Component<Props> {
       return <div className={styles.mapPage}>Loading...</div>;
     }
     return (
-      <div key={map.id} className={styles.mapPage}>
+      <div className={styles.mapPage}>
         {map.albumArt && (
           <div className={styles.albumArt}>
             <img src={map.albumArt}></img>

@@ -7,7 +7,7 @@ import React from 'react';
 export function createMapList(api: Api) {
   const store = new MapListStore();
   const presenter = new MapListPresenter(api, store);
-  const onMount = () => presenter.findMaps();
+  const onMount = () => store.maps == null && presenter.findMaps();
 
   return observer(() => (
     <MapList
