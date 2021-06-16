@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react';
+import { createLoginSignupPage } from 'pages/paradb/auth/create';
 import { HttpApi } from 'pages/paradb/base/api/api';
 import { createMapPage } from 'pages/paradb/map/create';
 import { createMapList } from 'pages/paradb/map_list/create';
@@ -9,12 +10,13 @@ import * as React from 'react';
 
 export function createApp() {
   const api = new HttpApi();
+  const { history, navigate } = installRouter();
 
   const NavBar = createNavBar();
   const MapPage = createMapPage(api);
   const MapList = createMapList(api);
+  const LoginSignupPage = createLoginSignupPage(api, navigate);
 
-  const { history, navigate } = installRouter();
 
   return observer(() => (
     <Skeleton
@@ -22,6 +24,7 @@ export function createApp() {
         NavBar={NavBar}
         MapPage={MapPage}
         MapList={MapList}
+        LoginSignupPage={LoginSignupPage}
     />
   ));
 }

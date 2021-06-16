@@ -1,5 +1,14 @@
 import { PDMap } from 'pages/paradb/map/map_schema';
-import { Api, FindMapsResponse, GetMapRequest, GetMapResponse } from './api';
+import {
+  Api,
+  FindMapsResponse,
+  GetMapRequest,
+  GetMapResponse,
+  LoginRequest,
+  LoginResponse,
+  SignupRequest,
+  SignupResponse,
+} from './api';
 
 const DELAY = 500;
 
@@ -10,6 +19,14 @@ async function delay(ms: number = DELAY) {
 };
 
 export class FakeApi implements Api {
+  async login(req: LoginRequest): Promise<LoginResponse> {
+    return { success: true };
+  }
+
+  async signup(req: SignupRequest): Promise<SignupResponse> {
+    return {};
+  }
+
   async findMaps(): Promise<FindMapsResponse> {
     await delay();
     return {

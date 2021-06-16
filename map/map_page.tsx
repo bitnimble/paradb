@@ -4,7 +4,7 @@ import React from 'react';
 import styles from './map_page.css';
 
 type Props = {
-  map?: PDMap;
+  map: PDMap | undefined;
 }
 
 function getComplexityNameDefault(complexity: number) {

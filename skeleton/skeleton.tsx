@@ -10,14 +10,15 @@ import styles from './skeleton.css';
 export type SkeletonProps = {
   history: History,
   NavBar: React.ComponentType,
-  MapPage: React.ComponentType<{ id: string, map?: PDMap }>,
+  MapPage: React.ComponentType<{ id: string, map: PDMap | undefined }>,
   MapList: React.ComponentType,
+  LoginSignupPage: React.ComponentType,
 }
 
 @observer
 export class Skeleton extends React.Component<SkeletonProps> {
   render() {
-    const { history, NavBar, MapPage, MapList } = this.props;
+    const { history, NavBar, MapPage, MapList, LoginSignupPage } = this.props;
 
     return (
       <Router history={history}>
@@ -32,6 +33,9 @@ export class Skeleton extends React.Component<SkeletonProps> {
                 {({ match, location }) => (
                   match && match.params.id != null && <MapPage id={match.params.id} map={location.state != null ? validatePDMap(location.state) : undefined}/>
                 )}
+              </Route>
+              <Route path={routeFor([RoutePath.LOGIN])}>
+                <LoginSignupPage/>
               </Route>
               <Route>
                 <NotFound/>

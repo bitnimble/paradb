@@ -7,7 +7,7 @@ import { PDMap } from 'pages/paradb/map/map_schema';
 import React from 'react';
 
 export function createMapPage(api: Api) {
-  return observer(({ id, map }: { id: string, map?: PDMap }) => {
+  return observer(({ id, map }: { id: string, map: PDMap | undefined }) => {
     const store = new MapPageStore();
     const presenter = new MapPagePresenter(api, store);
 
