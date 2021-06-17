@@ -1,6 +1,6 @@
 export type Complexity = {
   complexity: number;
-  complexityName?: string;
+  complexityName: string | undefined;
 }
 
 export type PDMap = {
@@ -9,9 +9,9 @@ export type PDMap = {
   artist: string;
   author: string;
   uploader: string;
-  albumArt?: string;
+  albumArt: string | undefined;
   complexities: Complexity[];
-  description?: string;
+  description: string | undefined;
   downloadLink: string;
 }
 
