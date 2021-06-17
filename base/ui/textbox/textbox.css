@@ -1,3 +1,23 @@
+@value colorGrey from "pages/paradb/base/colors/colors.css";
+@value gridBaseline from "pages/paradb/base/metrics/metrics.css";
+
+.container {
+    margin: gridBaseline;
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-size: 16px;
+    margin-bottom: calc(gridBaseline * 0.5);
+}
+
 .textbox {
-    border: 1px solid red;
+    outline: none;
+
+    border: 1px solid colorGrey;
+    padding: calc(gridBaseline * 0.5) gridBaseline;
+
+    font-family: 'Futura Light';
+    font-size: 20px;
 }

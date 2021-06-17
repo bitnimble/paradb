@@ -4,6 +4,7 @@ import styles from './text.css';
 
 type TextStyle = 'regular' | 'title' | 'monospace';
 type TextWeight = 'regular' | 'semibold' | 'bold' | 'extrabold' | 'black';
+type TextColor = 'black' | 'red' | 'white' | 'grey' | 'purple';
 
 const styleMap: Record<TextStyle, string> = {
   'regular': styles.styleRegular,
@@ -19,16 +20,24 @@ const weightMap: Record<TextWeight, string> = {
   'black': styles.weightBlack,
 };
 
+const colorMap: Record<TextColor, string> = {
+  'black': styles.textColorBlack,
+  'red': styles.textColorRed,
+  'white': styles.textColorWhite,
+  'grey': styles.textColorGrey,
+  'purple': styles.textColorPurple,
+}
+
 export type TextProps = {
   children: React.ReactNode;
-  color?: 'black' | 'red' | 'white' | 'grey';
+  color?: TextColor;
   style?: TextStyle;
   weight?: TextWeight;
 }
 
 function createTextClass(className: string) {
-  return ({ children, color, style = 'regular', weight = 'regular' }: TextProps) => (
-    <span className={classNames(styles.text, className, styleMap[style], weightMap[weight])} style={{ color }}>{children}</span>
+  return ({ children, color = 'black', style = 'regular', weight = 'regular' }: TextProps) => (
+    <span className={classNames(styles.text, className, styleMap[style], weightMap[weight], colorMap[color])}>{children}</span>
   );
 }
 

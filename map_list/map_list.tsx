@@ -22,14 +22,16 @@ export class MapList extends React.Component<Props> {
     return (
       <div className={styles.mapList}>
         {this.props.maps.map(m => (
-          <RouteLink to={{
-            pathname: routeFor([RoutePath.MAP, m.id]),
-            state: m,
-          }} >
-            <div className={styles.map}>
-              <T.Medium>{m.title} - {m.artist}</T.Medium>
-            </div>
-          </RouteLink>
+          <T.Medium>
+            <RouteLink to={{
+              pathname: routeFor([RoutePath.MAP, m.id]),
+              state: m,
+            }}>
+              <div className={styles.map}>
+                {m.title} - {m.artist}
+              </div>
+            </RouteLink>
+          </T.Medium>
         ))}
       </div>
     )

@@ -1,5 +1,5 @@
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
-@value colorGrey, colorPurple from "pages/paradb/base/colors/colors.css";
+@value colorGrey from "pages/paradb/base/colors/colors.css";
 
 @value margins: calc(gridBaseline * 3);
 @value albumArtMaxWidth: 300px;
@@ -39,18 +39,7 @@
     margin: calc(gridBaseline * 2) 0;
 }
 
-.downloadButton {
-    display: inline-block;
-    border: 1px solid colorPurple;
-    padding: gridBaseline calc(gridBaseline * 2);
-    color: colorPurple;
-    text-decoration: none;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-.downloadButton:hover {
-    background: colorPurple;
-    color: white;
-}
+
 
 @media screen and (min-width: breakpoint) {
     .mapPage {

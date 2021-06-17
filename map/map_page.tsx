@@ -1,4 +1,5 @@
 import { T } from 'pages/paradb/base/text/text';
+import { Button } from 'pages/paradb/base/ui/button/button';
 import { Complexity, PDMap } from 'pages/paradb/map/map_schema';
 import React from 'react';
 import styles from './map_page.css';
@@ -28,15 +29,6 @@ const ComplexityPills = (props: { complexities: Complexity[] }) => (
   </div>
 );
 
-const DownloadButton = (props: { to: string }) => (
-  <a href={props.to} referrerPolicy="no-referrer" target="_blank">
-    <div className={styles.downloadButton}>
-      <T.Medium>Download</T.Medium>
-    </div>
-  </a>
-
-);
-
 export class MapPage extends React.Component<Props> {
   render() {
     const { map } = this.props;
@@ -60,7 +52,7 @@ export class MapPage extends React.Component<Props> {
               <T.Small color="grey">{map.description}</T.Small>
             </div>
           ) : undefined}
-          <DownloadButton to={map.downloadLink}/>
+          <Button link={map.downloadLink}>Download</Button>
         </div>
       </div>
     )

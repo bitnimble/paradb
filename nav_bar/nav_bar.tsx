@@ -13,7 +13,7 @@ export class NavBar extends React.Component<NavBarProps> {
     return (
       <div className={styles.navbar}>
         <RouteLink className={styles.logo} to={routeFor([RoutePath.MAP_LIST])}>
-          <T.Medium style="title">paraDB</T.Medium>
+          <T.Medium style="title" color="white">paraDB</T.Medium>
         </RouteLink>
       </div>
     )
