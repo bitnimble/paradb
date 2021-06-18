@@ -31,6 +31,10 @@
     font-weight: 900;
 }
 
+.tiny {
+    font-size: 14px;
+    line-height: 1.8;
+}
 .small {
     font-size: 18px;
 }

@@ -42,6 +42,7 @@ function createTextClass(className: string) {
 }
 
 export namespace T {
+  export const Tiny = createTextClass(styles.tiny);
   export const Small = createTextClass(styles.small);
   export const Medium = createTextClass(styles.medium);
   export const Large = createTextClass(styles.large);
