@@ -6,6 +6,8 @@ import { RoutePath } from 'pages/paradb/router/routes';
 export type LoginSignupField = 'username' | 'password' | 'email';
 export const enum FieldError {
   REQUIRED = 'This field is required.',
+  INVALID_EMAIL_FORMAT = 'This doesn\'t look like a valid email address.',
+  PASSWORD_TOO_SHORT = 'Your password needs to be at least 8 characters long.',
 }
 
 export class LoginSignupStore {
@@ -43,7 +45,11 @@ export class LoginSignupPresenter {
     const username = this.username.get();
     const email = this.email.get();
     const password = this.password.get();
-    const errors = this.checkRequiredFields(['username', username], ['password', password], ['email', email]);
+    const errors = [
+      ...this.checkEmailFields(['email', email]),
+      ...this.checkPasswordRestrictionFields(['password', password]),
+      ...this.checkRequiredFields(['username', username], ['password', password], ['email', email]),
+    ];
     if (errors.length) {
       return;
     }
@@ -56,8 +62,27 @@ export class LoginSignupPresenter {
 
   @action
   private checkRequiredFields(...fields: [LoginSignupField, string][]) {
-    const errors = fields.filter(f => f[1].trim() === '').map(f => f[0]);
-    errors.forEach(f => this.store.errors.set(f, FieldError.REQUIRED));
-    return errors;
+    const errorFields = fields.filter(f => f[1].trim() === '').map(f => f[0]);
+    this.pushErrors(errorFields, FieldError.REQUIRED);
+    return errorFields;
+  }
+
+  @action
+  private checkEmailFields(...fields: [LoginSignupField, string][]) {
+    const errorFields = fields.filter(f => !f[1].trim().match(/^\S+@\S+$/)).map(f => f[0]);
+    this.pushErrors(errorFields, FieldError.INVALID_EMAIL_FORMAT);
+    return errorFields;
+  }
+
+  @action
+  private checkPasswordRestrictionFields(...fields: [LoginSignupField, string][]) {
+    const errorFields = fields.filter(f => f.length < 8).map(f => f[0]);
+    this.pushErrors(errorFields, FieldError.PASSWORD_TOO_SHORT);
+    return errorFields;
+  }
+
+  @action
+  private pushErrors(fields: LoginSignupField[], error: FieldError) {
+    fields.forEach(f => this.store.errors.set(f, error));
   }
 }
