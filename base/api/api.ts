@@ -1,5 +1,10 @@
 import { PDMap, validatePDMap } from 'pages/paradb/map/map_schema';
 
+// TODO: share type definition with backend
+export type User = {
+  username: string,
+};
+
 // TODO: use shared schema (e.g. a common .d.ts) to keep client and server in sync
 export type FindMapsResponse = {
   maps: PDMap[];
@@ -19,9 +24,12 @@ export type LoginResponse = {
 };
 export type SignupRequest = {
   username: string;
+  email: string;
   password: string;
 };
-export type SignupResponse = {};
+export type SignupResponse = {
+  success: boolean;
+};
 
 export interface Api {
   /* Auth */
@@ -29,6 +37,7 @@ export interface Api {
   signup(req: SignupRequest): Promise<SignupResponse>;
 
   /* User */
+  getMe(): Promise<User>;
 
   /* Maps */
   findMaps(): Promise<FindMapsResponse>;
@@ -44,7 +53,16 @@ export class HttpApi implements Api {
   }
 
   async signup(req: SignupRequest): Promise<SignupResponse> {
-    return {};
+    const resp = await post(path(this.apiBase, 'users', 'signup'), req);
+    return resp;
+  }
+
+  async getMe(): Promise<User> {
+    const resp = await get(path(this.apiBase, 'users', 'me'));
+    if (!resp.success) {
+      throw new Error();
+    }
+    return resp.user;
   }
 
   async findMaps(): Promise<FindMapsResponse> {

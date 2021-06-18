@@ -1,7 +1,8 @@
-@value colorBlack, colorPurple from "pages/paradb/base/colors/colors.css";
+@value colorPurple from "pages/paradb/base/colors/colors.css";
 
 .link {
-    color: colorBlack;
+    cursor: pointer;
+    color: inherit;
     transition: color 0.15s ease;
 }
 

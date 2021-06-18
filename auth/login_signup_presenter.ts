@@ -8,6 +8,7 @@ export class LoginSignupPresenter {
       private readonly api: Api,
       private readonly navigate: Navigate,
       private readonly username: IObservableValue<string>,
+      private readonly email: IObservableValue<string>,
       private readonly password: IObservableValue<string>,
   ) { }
 
@@ -17,11 +18,18 @@ export class LoginSignupPresenter {
 
     const resp = await this.api.login({ username, password });
     if (resp.success) {
-      this.navigate([RoutePath.MAP_LIST]);
+      this.navigate([RoutePath.MAP_LIST], true);
     }
   };
 
-  signup = () => {
+  signup = async () => {
+    const username = this.username.get();
+    const email = this.email.get();
+    const password = this.password.get();
 
+    const resp = await this.api.signup({ username, email, password });
+    if (resp.success) {
+      this.navigate([RoutePath.MAP_LIST], true);
+    }
   };
 }

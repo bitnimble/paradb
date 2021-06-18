@@ -12,7 +12,7 @@ export function createApp() {
   const api = new HttpApi();
   const { history, navigate } = installRouter();
 
-  const NavBar = createNavBar();
+  const NavBar = createNavBar(api);
   const MapPage = createMapPage(api);
   const MapList = createMapList(api);
   const LoginSignupPage = createLoginSignupPage(api, navigate);

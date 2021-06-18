@@ -8,16 +8,19 @@ export type ButtonProps = {
   children: React.ReactNode,
 };
 
-export const Button = (props: ButtonProps) => props.link
-  ? (
-    <a href={props.link} referrerPolicy="no-referrer" target="_blank">
+export const Button = (props: ButtonProps) => {
+  const onClick = () => props.onClick?.();
+  return props.link
+    ? (
+      <a href={props.link} referrerPolicy="no-referrer" target="_blank">
+        <T.Medium color="purple">
+          <div className={styles.button}>{props.children}</div>
+        </T.Medium>
+      </a>
+    )
+    : (
       <T.Medium color="purple">
-        <div className={styles.button}>{props.children}</div>
+        <button className={styles.button} onClick={onClick}>{props.children}</button>
       </T.Medium>
-    </a>
-  )
-  : (
-    <T.Medium color="purple">
-      <button className={styles.button}>{props.children}</button>
-    </T.Medium>
-  );
+    );
+};

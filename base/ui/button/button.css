@@ -1,15 +1,19 @@
-@value colorPurple from "pages/paradb/base/colors/colors.css";
+@value colorWhite, colorPurple from "pages/paradb/base/colors/colors.css";
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
 
 .button {
     display: inline-block;
+    font-family: inherit;
+    color: inherit;
     border: 1px solid colorPurple;
     padding: gridBaseline calc(gridBaseline * 2);
     text-decoration: none;
+    background: colorWhite;
     transition: background 0.15s ease, color 0.15s ease;
+    cursor: pointer;
 }
 
 .button:hover {
     background: colorPurple;
-    color: white;
+    color: colorWhite;
 }

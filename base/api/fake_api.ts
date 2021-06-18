@@ -8,6 +8,7 @@ import {
   LoginResponse,
   SignupRequest,
   SignupResponse,
+  User,
 } from './api';
 
 const DELAY = 500;
@@ -24,7 +25,11 @@ export class FakeApi implements Api {
   }
 
   async signup(req: SignupRequest): Promise<SignupResponse> {
-    return {};
+    return { success: true };
+  }
+
+  async getMe(): Promise<User> {
+    return { username: 'alice' };
   }
 
   async findMaps(): Promise<FindMapsResponse> {

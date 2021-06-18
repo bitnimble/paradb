@@ -39,8 +39,6 @@
     margin: calc(gridBaseline * 2) 0;
 }
 
-
-
 @media screen and (min-width: breakpoint) {
     .mapPage {
         flex-direction: row;

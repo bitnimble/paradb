@@ -7,16 +7,17 @@
     height: calc(gridBaseline * 7);
     background: colorDarkGrey;
     color: colorWhite;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .logo {
-    display: flex;
-    align-items: center;
+    color: inherit;
     margin-left: calc(gridBaseline * 2.5);
-    color: colorWhite;
     text-decoration: none;
     transition: color 0.1s ease;
 }
-.logo:hover {
-    color: colorPurple;
+
+.userStatus {
+    margin-right: calc(gridBaseline * 3);
 }

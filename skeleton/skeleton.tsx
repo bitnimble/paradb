@@ -12,7 +12,7 @@ export type SkeletonProps = {
   NavBar: React.ComponentType,
   MapPage: React.ComponentType<{ id: string, map: PDMap | undefined }>,
   MapList: React.ComponentType,
-  LoginSignupPage: React.ComponentType,
+  LoginSignupPage: React.ComponentType<{ mode: 'signup' | 'login' }>,
 }
 
 @observer
@@ -35,7 +35,10 @@ export class Skeleton extends React.Component<SkeletonProps> {
                 )}
               </Route>
               <Route path={routeFor([RoutePath.LOGIN])}>
-                <LoginSignupPage/>
+                <LoginSignupPage mode="login"/>
+              </Route>
+              <Route path={routeFor([RoutePath.SIGNUP])}>
+                <LoginSignupPage mode="signup"/>
               </Route>
               <Route>
                 <NotFound/>
@@ -44,6 +47,6 @@ export class Skeleton extends React.Component<SkeletonProps> {
           </div>
         </div>
       </Router>
-    )
+    );
   }
 }

@@ -1,3 +1,4 @@
+import { action } from 'mobx';
 import { observer } from 'mobx-react';
 import { LoginSignup } from 'pages/paradb/auth/login_signup';
 import { Api } from 'pages/paradb/base/api/api';
@@ -8,20 +9,27 @@ import { useComponentDidMount } from '../base/helpers';
 import { LoginSignupPresenter } from './login_signup_presenter';
 
 export function createLoginSignupPage(api: Api, navigate: Navigate) {
-  let presenter: LoginSignupPresenter;
+  const [UsernameTextbox, username] = createTextbox();
+  const [EmailTextbox, email] = createTextbox();
+  const [PasswordTextbox, password] = createTextbox();
+  const presenter = new LoginSignupPresenter(api, navigate, username, email, password);
 
-  return observer(() => {
-    const [UsernameTextbox, username] = createTextbox();
-    const [PasswordTextbox, password] = createTextbox();
-
-    useComponentDidMount(() => {
-      presenter = new LoginSignupPresenter(api, navigate, username, password)
-    });
-
-    const login = () => presenter.login();
+  return observer(({ mode }: { mode: 'signup' | 'login' }) => {
+    useComponentDidMount(action(() => {
+      username.set('');
+      email.set('');
+      password.set('');
+    }));
 
     return (
-      <LoginSignup Username={UsernameTextbox} Password={PasswordTextbox} login={login}/>
+      <LoginSignup
+          mode={mode}
+          Username={UsernameTextbox}
+          Email={EmailTextbox}
+          Password={PasswordTextbox}
+          login={presenter.login}
+          signup={presenter.signup}
+      />
     );
   });
 }

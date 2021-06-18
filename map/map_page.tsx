@@ -21,8 +21,8 @@ function getComplexityNameDefault(complexity: number) {
 
 const ComplexityPills = (props: { complexities: Complexity[] }) => (
   <div className={styles.complexities}>
-    {props.complexities.map(c => (
-      <div className={styles.complexityPill}>
+    {props.complexities.map((c, i) => (
+      <div key={i} className={styles.complexityPill}>
         <T.Small color="white">{c.complexityName || getComplexityNameDefault(c.complexity)}</T.Small>
       </div>
     ))}
@@ -55,6 +55,6 @@ export class MapPage extends React.Component<Props> {
           <Button link={map.downloadLink}>Download</Button>
         </div>
       </div>
-    )
+    );
   }
 }
