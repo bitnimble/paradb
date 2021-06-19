@@ -1,6 +1,6 @@
 import { observable, runInAction } from 'mobx';
 import { Api } from 'pages/paradb/base/api/api';
-import { PDMap } from 'pages/paradb/map/map_schema';
+import { PDMap } from 'paradb-api-schema';
 
 export class MapListStore {
   @observable.shallow

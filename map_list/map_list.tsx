@@ -1,7 +1,7 @@
 import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
-import { PDMap } from 'pages/paradb/map/map_schema';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
+import { PDMap } from 'paradb-api-schema';
 import React from 'react';
 import styles from './map_list.css';
 

@@ -1,8 +1,8 @@
 import { History } from 'history';
 import { observer } from 'mobx-react';
-import { PDMap, validatePDMap } from 'pages/paradb/map/map_schema';
 import { NotFound } from 'pages/paradb/router/not_found';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
+import { deserializeMap, PDMap } from 'paradb-api-schema';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import styles from './skeleton.css';
@@ -31,7 +31,7 @@ export class Skeleton extends React.Component<SkeletonProps> {
               </Route>
               <Route path={routeFor([RoutePath.MAP, ':id'])}>
                 {({ match, location }) => (
-                  match && match.params.id != null && <MapPage id={match.params.id} map={location.state != null ? validatePDMap(location.state) : undefined}/>
+                  match && match.params.id != null && <MapPage id={match.params.id} map={location.state != null ? deserializeMap(location.state) : undefined}/>
                 )}
               </Route>
               <Route path={routeFor([RoutePath.LOGIN])}>

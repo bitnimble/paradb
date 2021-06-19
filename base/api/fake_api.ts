@@ -1,4 +1,4 @@
-import { PDMap } from 'pages/paradb/map/map_schema';
+import { PDMap } from 'paradb-api-schema';
 import {
   Api,
   FindMapsResponse,

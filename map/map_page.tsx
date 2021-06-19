@@ -1,6 +1,6 @@
 import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
-import { Complexity, PDMap } from 'pages/paradb/map/map_schema';
+import { Complexity, PDMap } from 'paradb-api-schema';
 import React from 'react';
 import styles from './map_page.css';
 

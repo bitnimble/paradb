@@ -1,4 +1,4 @@
-import { PDMap, validatePDMap } from 'pages/paradb/map/map_schema';
+import { deserializeMap, PDMap } from 'paradb-api-schema';
 
 // TODO: share type definition with backend
 export type User = {
@@ -73,12 +73,12 @@ export class HttpApi implements Api {
     if (!Array.isArray(resp.maps)) {
       throw new Error('expected array for findMaps');
     }
-    return { maps: resp.maps.map((m: any) => validatePDMap(m)) };
+    return { maps: resp.maps.map((m: any) => deserializeMap(m)) };
   }
 
   async getMap(req: GetMapRequest): Promise<GetMapResponse> {
     const resp = await get(path(this.apiBase, `maps/${req.id}`));
-    return { map: validatePDMap(resp.map) };
+    return { map: deserializeMap(resp.map) };
   }
 }
 

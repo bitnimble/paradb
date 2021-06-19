@@ -4,7 +4,7 @@ import { Api } from 'pages/paradb/base/api/api';
 import { useComponentDidMount } from 'pages/paradb/base/helpers';
 import { MapPage } from 'pages/paradb/map/map_page';
 import { MapPagePresenter, MapPageStore } from 'pages/paradb/map/map_presenter';
-import { PDMap } from 'pages/paradb/map/map_schema';
+import { PDMap } from 'paradb-api-schema';
 import React from 'react';
 
 export function createMapPage(api: Api) {

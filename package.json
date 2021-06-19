@@ -1,0 +1,11 @@
+{
+  "name": "paradb",
+  "version": "1.0.0",
+  "main": "index.tsx",
+  "repository": "git@github.com:anonymousthing/paradb.git",
+  "author": "D <me@kumo.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "paradb-api-schema": "file:../../../../paradb-api-schema"
+  }
+}
