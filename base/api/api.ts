@@ -1,4 +1,11 @@
-import { deserializeMap, PDMap, SignupResponse } from 'paradb-api-schema';
+import {
+  deserializeMap,
+  LoginRequest,
+  LoginResponse,
+  PDMap,
+  SignupRequest,
+  SignupResponse,
+} from 'paradb-api-schema';
 
 // TODO: share type definition with backend
 export type User = {
@@ -14,18 +21,6 @@ export type GetMapRequest = {
 };
 export type GetMapResponse = {
   map: PDMap;
-};
-export type LoginRequest = {
-  username: string;
-  password: string;
-};
-export type LoginResponse = {
-  success: boolean;
-};
-export type SignupRequest = {
-  username: string;
-  email: string;
-  password: string;
 };
 
 export interface Api {
@@ -90,9 +85,6 @@ function path(...parts: string[]) {
 const xssiPrefix = '\'"])}while(1);</x>//';
 async function get(path: string): Promise<any> {
   const resp = await fetch(path);
-  if (!resp.ok) {
-    throw new Error(`unexpected error ${resp.status}`);
-  }
   const text = await resp.text();
   return JSON.parse(text.substr(xssiPrefix.length));
 }
@@ -104,9 +96,6 @@ async function post(path: string, body: object): Promise<any> {
     },
     body: JSON.stringify(body),
   });
-  if (!resp.ok) {
-    throw new Error(`unexpected error ${resp.status}`);
-  }
   const text = await resp.text();
   return JSON.parse(text.substr(xssiPrefix.length));
 }

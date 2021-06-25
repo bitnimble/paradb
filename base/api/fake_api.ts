@@ -1,14 +1,11 @@
-import { PDMap, SignupResponse } from 'paradb-api-schema';
 import {
-  Api,
-  FindMapsResponse,
-  GetMapRequest,
-  GetMapResponse,
   LoginRequest,
   LoginResponse,
+  PDMap,
   SignupRequest,
-  User,
-} from './api';
+  SignupResponse,
+} from 'paradb-api-schema';
+import { Api, FindMapsResponse, GetMapRequest, GetMapResponse, User } from './api';
 
 const DELAY = 500;
 

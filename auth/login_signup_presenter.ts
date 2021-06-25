@@ -3,7 +3,7 @@ import { Api } from 'pages/paradb/base/api/api';
 import { Navigate } from 'pages/paradb/router/install';
 import { RoutePath } from 'pages/paradb/router/routes';
 
-export type LoginSignupField = 'username' | 'password' | 'email';
+export type LoginSignupField = 'username' | 'password' | 'email' | 'form';
 const enum FieldError {
   REQUIRED = 'This field is required',
   INVALID_EMAIL_FORMAT = 'This doesn\'t look like a valid email address',
@@ -37,6 +37,8 @@ export class LoginSignupPresenter {
     const resp = await this.api.login({ username, password });
     if (resp.success) {
       this.navigate([RoutePath.MAP_LIST], true);
+    } else {
+      this.pushErrors(['form'], resp.errorMessage || 'Could not login. Please try again later.');
     }
   };
 
