@@ -1,11 +1,15 @@
 import {
+  FindMapsResponse,
+  GetMapRequest,
+  GetMapResponse,
   LoginRequest,
   LoginResponse,
   PDMap,
   SignupRequest,
   SignupResponse,
+  User,
 } from 'paradb-api-schema';
-import { Api, FindMapsResponse, GetMapRequest, GetMapResponse, User } from './api';
+import { Api } from './api';
 
 const DELAY = 500;
 
@@ -25,12 +29,13 @@ export class FakeApi implements Api {
   }
 
   async getMe(): Promise<User> {
-    return { username: 'alice' };
+    return { id: '0', username: 'alice', email: 'alice@test.com' };
   }
 
   async findMaps(): Promise<FindMapsResponse> {
     await delay();
     return {
+      success: true,
       maps: fakeMaps,
     };
   }
@@ -38,7 +43,10 @@ export class FakeApi implements Api {
     await delay(1000);
     const map = fakeMaps.find(m => m.id === req.id);
     if (map) {
-      return { map };
+      return {
+        success: true,
+        map,
+      };
     }
     // TODO: fake http errors
     throw new Error(`Could not find map with ID ${req.id}`);

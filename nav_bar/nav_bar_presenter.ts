@@ -1,5 +1,6 @@
 import { observable, runInAction } from 'mobx';
-import { Api, User } from 'pages/paradb/base/api/api';
+import { Api } from 'pages/paradb/base/api/api';
+import { User } from 'paradb-api-schema';
 
 export class NavBarStore {
   @observable.ref

@@ -12,7 +12,10 @@ export class MapListPresenter {
   }
 
   async findMaps() {
-    const { maps } = await this.api.findMaps();
-    runInAction(() => this.store.maps = maps);
+    const resp = await this.api.findMaps();
+    if (!resp.success) {
+      throw new Error();
+    }
+    runInAction(() => this.store.maps = resp.maps);
   }
 }

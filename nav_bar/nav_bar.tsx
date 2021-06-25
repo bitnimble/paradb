@@ -1,7 +1,7 @@
-import { User } from 'pages/paradb/base/api/api';
 import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
+import { User } from 'paradb-api-schema';
 import React from 'react';
 import styles from './nav_bar.css';
 
