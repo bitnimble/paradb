@@ -1,4 +1,4 @@
-import { deserializeMap, PDMap } from 'paradb-api-schema';
+import { deserializeMap, PDMap, SignupResponse } from 'paradb-api-schema';
 
 // TODO: share type definition with backend
 export type User = {
@@ -27,9 +27,6 @@ export type SignupRequest = {
   email: string;
   password: string;
 };
-export type SignupResponse = {
-  success: boolean;
-};
 
 export interface Api {
   /* Auth */
@@ -54,6 +51,7 @@ export class HttpApi implements Api {
 
   async signup(req: SignupRequest): Promise<SignupResponse> {
     const resp = await post(path(this.apiBase, 'users', 'signup'), req);
+    // TODO: deserialize responses using schema deserializer
     return resp;
   }
 

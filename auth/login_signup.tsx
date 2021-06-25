@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { FieldError, LoginSignupField } from 'pages/paradb/auth/login_signup_presenter';
+import { LoginSignupField } from 'pages/paradb/auth/login_signup_presenter';
 import { RouteLink } from 'pages/paradb/base/text/link';
 import { Button } from 'pages/paradb/base/ui/button/button';
 import { TextboxProps } from 'pages/paradb/base/ui/textbox/create';
@@ -12,7 +12,7 @@ type LoginSignupProps = {
   Username: React.ComponentType<TextboxProps>,
   Email: React.ComponentType<TextboxProps>,
   Password: React.ComponentType<TextboxProps>,
-  errors: Map<LoginSignupField, FieldError>;
+  errors: Map<LoginSignupField, string>;
   login(): void,
   signup(): void,
 }

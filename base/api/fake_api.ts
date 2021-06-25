@@ -1,4 +1,4 @@
-import { PDMap } from 'paradb-api-schema';
+import { PDMap, SignupResponse } from 'paradb-api-schema';
 import {
   Api,
   FindMapsResponse,
@@ -7,7 +7,6 @@ import {
   LoginRequest,
   LoginResponse,
   SignupRequest,
-  SignupResponse,
   User,
 } from './api';
 

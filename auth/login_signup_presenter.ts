@@ -4,15 +4,15 @@ import { Navigate } from 'pages/paradb/router/install';
 import { RoutePath } from 'pages/paradb/router/routes';
 
 export type LoginSignupField = 'username' | 'password' | 'email';
-export const enum FieldError {
-  REQUIRED = 'This field is required.',
-  INVALID_EMAIL_FORMAT = 'This doesn\'t look like a valid email address.',
-  PASSWORD_TOO_SHORT = 'Your password needs to be at least 8 characters long.',
+const enum FieldError {
+  REQUIRED = 'This field is required',
+  INVALID_EMAIL_FORMAT = 'This doesn\'t look like a valid email address',
+  PASSWORD_TOO_SHORT = 'Your password needs to be at least 8 characters long',
 }
 
 export class LoginSignupStore {
   @observable.shallow
-  errors = new Map<LoginSignupField, FieldError>();
+  errors = new Map<LoginSignupField, string>();
 }
 
 export class LoginSignupPresenter {
@@ -57,6 +57,16 @@ export class LoginSignupPresenter {
     const resp = await this.api.signup({ username, email, password });
     if (resp.success) {
       this.navigate([RoutePath.MAP_LIST], true);
+    } else {
+      if (resp.email) {
+        this.pushErrors(['email'], resp.email);
+      }
+      if (resp.username) {
+        this.pushErrors(['username'], resp.username);
+      }
+      if (resp.password) {
+        this.pushErrors(['password'], resp.password);
+      }
     }
   };
 
@@ -76,13 +86,13 @@ export class LoginSignupPresenter {
 
   @action
   private checkPasswordRestrictionFields(...fields: [LoginSignupField, string][]) {
-    const errorFields = fields.filter(f => f.length < 8).map(f => f[0]);
+    const errorFields = fields.filter(f => f[1].length < 8).map(f => f[0]);
     this.pushErrors(errorFields, FieldError.PASSWORD_TOO_SHORT);
     return errorFields;
   }
 
   @action
-  private pushErrors(fields: LoginSignupField[], error: FieldError) {
+  private pushErrors(fields: LoginSignupField[], error: string) {
     fields.forEach(f => this.store.errors.set(f, error));
   }
 }
