@@ -66,9 +66,9 @@ export const ComplexitiesList = observer((props: ComplexitiesListProps) => (
 export const SubmitMapPage = observer((props: SubmitMapPageProps) => (
   <div className={styles.submitMap}>
     <div className={styles.fields}>
-      <Textbox value={props.title} onChange={props.onChangeTitle} className={styles.title} required={true} label="Title" error={props.errors.get('title')}/>
-      <Textbox value={props.artist} onChange={props.onChangeArtist} className={styles.artist} required={true}  label="Artist" error={props.errors.get('artist')}/>
-      <Textbox value={props.author} onChange={props.onChangeAuthor} className={styles.author} label="Author" error={props.errors.get('author')}/>
+      <Textbox value={props.title} onChange={props.onChangeTitle} className={styles.title} required={true} label="Song title" error={props.errors.get('title')}/>
+      <Textbox value={props.artist} onChange={props.onChangeArtist} className={styles.artist} required={true}  label="Song artist" error={props.errors.get('artist')}/>
+      <Textbox value={props.author} onChange={props.onChangeAuthor} className={styles.author} label="Map author" error={props.errors.get('author')}/>
       <Textbox value={props.albumArt} onChange={props.onChangeAlbumArt} className={styles.albumArt} label="Link to album art" error={props.errors.get('albumArt')}/>
       <Textbox value={props.downloadLink} onChange={props.onChangeDownloadLink} className={styles.downloadLink} required={true} label="Download link" error={props.errors.get('downloadLink')}/>
       <div className={styles.descriptionContainer}>
