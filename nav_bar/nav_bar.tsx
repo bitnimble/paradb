@@ -27,7 +27,7 @@ export class NavBar extends React.Component<NavBarProps> {
             )
             : (
               <T.Small color="white">
-                Logged in as {this.props.user.username} | <RouteLink to={routeFor([RoutePath.LOGOUT])} force={true}>Logout</RouteLink>
+                <RouteLink to={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>Submit map</RouteLink> | Logged in as {this.props.user.username} ({this.props.user.email}) | <RouteLink to={routeFor([RoutePath.LOGOUT])} force={true}>Logout</RouteLink>
               </T.Small>
             )
           }

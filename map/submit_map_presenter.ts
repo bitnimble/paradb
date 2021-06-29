@@ -9,7 +9,6 @@ export const complexityNumericKey = (i: number): `complexityNumeric${number}` =>
 export const complexityNameKey = (i: number): `complexityName${number}` => `complexityName${i}`;
 
 export type SubmitMapField = 'title' | 'artist' | 'author' | 'albumArt' | 'downloadLink' | 'description' | `complexityNumeric${number}` | `complexityName${number}`;
-
 export class SubmitMapStore extends FormStore<SubmitMapField> {
   @observable.deep
   complexities: Complexity[] = [{ complexity: 1, complexityName: 'Easy' }];
@@ -80,20 +79,26 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     const fieldValues = {
       title: this.store.title,
       artist: this.store.artist,
-      author: this.store.author,
-      albumArt: this.store.albumArt,
-      description: this.store.description,
+      author: this.undefinedIfEmpty(this.store.author),
+      albumArt: this.undefinedIfEmpty(this.store.albumArt),
+      description: this.undefinedIfEmpty(this.store.description),
       downloadLink: this.store.downloadLink,
     };
-    const errors = this.checkRequiredFields(
-      ['title', fieldValues.title],
-      ['artist', fieldValues.artist],
-      ['downloadLink', fieldValues.downloadLink],
-      ...this.store.complexities.flatMap((c, i) => [
-        [complexityNumericKey(i), c.complexity.toString()],
-        [complexityNameKey(i), c.complexityName]
-      ] as const),
-    );
+    const errors = [
+      ...this.checkRequiredFields(
+        ['title', fieldValues.title],
+        ['artist', fieldValues.artist],
+        ['downloadLink', fieldValues.downloadLink],
+        ...this.store.complexities.flatMap((c, i) => [
+          [complexityNumericKey(i), c.complexity.toString()],
+          [complexityNameKey(i), c.complexityName]
+        ] as const),
+      ),
+      ...this.checkUrlFields(
+        ['albumArt', fieldValues.albumArt],
+        ['downloadLink', fieldValues.downloadLink],
+      ),
+    ];
     if (errors.length) {
       return;
     }
