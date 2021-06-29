@@ -45,7 +45,7 @@ export class MapPage extends React.Component<Props> {
         <div className={styles.mapContent}>
           <T.Large style="title">{map.title}</T.Large>
           <br/>
-          <T.Medium color="grey">{map.artist} | mapped by {map.author}</T.Medium>
+          <T.Medium color="grey">{map.artist}{map.author != null ? <>| mapped by {map.author}</> : undefined}</T.Medium>
           <ComplexityPills complexities={map.complexities}/>
           {map.description != null ? (
             <div className={styles.description}>

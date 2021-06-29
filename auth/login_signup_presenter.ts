@@ -1,34 +1,39 @@
-import { action, IObservableValue, observable, runInAction } from 'mobx';
+import { action, observable, runInAction } from 'mobx';
 import { Api } from 'pages/paradb/base/api/api';
+import { FormPresenter, FormStore } from 'pages/paradb/base/form/form_presenter';
 import { Navigate } from 'pages/paradb/router/install';
 import { RoutePath } from 'pages/paradb/router/routes';
 
 export type LoginSignupField = 'username' | 'password' | 'email' | 'form';
-const enum FieldError {
-  REQUIRED = 'This field is required',
-  INVALID_EMAIL_FORMAT = 'This doesn\'t look like a valid email address',
-  PASSWORD_TOO_SHORT = 'Your password needs to be at least 8 characters long',
+
+export class LoginSignupStore extends FormStore<LoginSignupField> {
+  @observable.ref
+  username = '';
+
+  @observable.ref
+  email = '';
+
+  @observable.ref
+  password = '';
 }
 
-export class LoginSignupStore {
-  @observable.shallow
-  errors = new Map<LoginSignupField, string>();
-}
-
-export class LoginSignupPresenter {
+export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
   constructor(
       private readonly api: Api,
       private readonly navigate: Navigate,
       private readonly store: LoginSignupStore,
-      private readonly username: IObservableValue<string>,
-      private readonly email: IObservableValue<string>,
-      private readonly password: IObservableValue<string>,
-  ) { }
+  ) {
+    super(store);
+  }
+
+  onChangeUsername = action((value: string) => this.store.username = value);
+  onChangeEmail = action((value: string) => this.store.email = value);
+  onChangePassword = action((value: string) => this.store.password = value);
 
   login = async () => {
     runInAction(() => this.store.errors.clear());
-    const username = this.username.get();
-    const password = this.password.get();
+    const username = this.store.username;
+    const password = this.store.password;
     const errors = this.checkRequiredFields(['username', username], ['password', password]);
     if (errors.length) {
       return;
@@ -44,9 +49,9 @@ export class LoginSignupPresenter {
 
   signup = async () => {
     runInAction(() => this.store.errors.clear());
-    const username = this.username.get();
-    const email = this.email.get();
-    const password = this.password.get();
+    const username = this.store.username;
+    const email = this.store.email;
+    const password = this.store.password;
     const errors = [
       ...this.checkEmailFields(['email', email]),
       ...this.checkPasswordRestrictionFields(['password', password]),
@@ -71,30 +76,4 @@ export class LoginSignupPresenter {
       }
     }
   };
-
-  @action
-  private checkRequiredFields(...fields: [LoginSignupField, string][]) {
-    const errorFields = fields.filter(f => f[1].trim() === '').map(f => f[0]);
-    this.pushErrors(errorFields, FieldError.REQUIRED);
-    return errorFields;
-  }
-
-  @action
-  private checkEmailFields(...fields: [LoginSignupField, string][]) {
-    const errorFields = fields.filter(f => !f[1].trim().match(/^\S+@\S+$/)).map(f => f[0]);
-    this.pushErrors(errorFields, FieldError.INVALID_EMAIL_FORMAT);
-    return errorFields;
-  }
-
-  @action
-  private checkPasswordRestrictionFields(...fields: [LoginSignupField, string][]) {
-    const errorFields = fields.filter(f => f[1].length < 8).map(f => f[0]);
-    this.pushErrors(errorFields, FieldError.PASSWORD_TOO_SHORT);
-    return errorFields;
-  }
-
-  @action
-  private pushErrors(fields: LoginSignupField[], error: string) {
-    fields.forEach(f => this.store.errors.set(f, error));
-  }
 }

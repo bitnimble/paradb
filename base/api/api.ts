@@ -3,6 +3,7 @@ import {
   deserializeGetMapResponse,
   deserializeLoginResponse,
   deserializeSignupResponse,
+  deserializeSubmitMapResponse,
   FindMapsResponse,
   GetMapRequest,
   GetMapResponse,
@@ -10,6 +11,8 @@ import {
   LoginResponse,
   SignupRequest,
   SignupResponse,
+  SubmitMapRequest,
+  SubmitMapResponse,
   User,
 } from 'paradb-api-schema';
 
@@ -24,6 +27,7 @@ export interface Api {
   /* Maps */
   findMaps(): Promise<FindMapsResponse>;
   getMap(req: GetMapRequest): Promise<GetMapResponse>;
+  submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse>;
 }
 
 export class HttpApi implements Api {
@@ -53,8 +57,13 @@ export class HttpApi implements Api {
   }
 
   async getMap(req: GetMapRequest): Promise<GetMapResponse> {
-    const resp = await get(path(this.apiBase, `maps/${req.id}`));
+    const resp = await get(path(this.apiBase, 'maps', req.id));
     return deserializeGetMapResponse(resp);
+  }
+
+  async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
+    const resp = await post(path(this.apiBase, 'maps', 'submit'), req);
+    return deserializeSubmitMapResponse(resp);
   }
 }
 

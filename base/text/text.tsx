@@ -29,6 +29,7 @@ const colorMap: Record<TextColor, string> = {
 }
 
 export type TextProps = {
+  className?: string;
   children: React.ReactNode;
   color?: TextColor;
   style?: TextStyle;
@@ -36,8 +37,8 @@ export type TextProps = {
 }
 
 function createTextClass(className: string) {
-  return ({ children, color = 'black', style = 'regular', weight = 'regular' }: TextProps) => (
-    <span className={classNames(styles.text, className, styleMap[style], weightMap[weight], colorMap[color])}>{children}</span>
+  return ({ className: classNameProp, children, color = 'black', style = 'regular', weight = 'regular' }: TextProps) => (
+    <span className={classNames(classNameProp, styles.text, className, styleMap[style], weightMap[weight], colorMap[color])}>{children}</span>
   );
 }
 

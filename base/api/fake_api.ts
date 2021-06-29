@@ -7,6 +7,8 @@ import {
   PDMap,
   SignupRequest,
   SignupResponse,
+  SubmitMapRequest,
+  SubmitMapResponse,
   User,
 } from 'paradb-api-schema';
 import { Api } from './api';
@@ -51,10 +53,15 @@ export class FakeApi implements Api {
     // TODO: fake http errors
     throw new Error(`Could not find map with ID ${req.id}`);
   }
+  async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
+    await delay();
+    return { success: true, id: allStar.id };
+  }
 }
 
 const allStar: PDMap = {
   id: '1',
+  submissionDate: '2021-06-01T00:00:00',
   title: 'All Star',
   artist: 'Smash Mouth',
   author: 'Nobody',
@@ -72,6 +79,7 @@ const allStar: PDMap = {
 
 const californication: PDMap = {
   id: '2',
+  submissionDate: '2021-06-01T00:00:00',
   title: 'Californication',
   artist: 'Red Hot Chili Peppers',
   author: 'Nobody',

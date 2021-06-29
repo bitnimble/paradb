@@ -13,11 +13,11 @@ export class NavBar extends React.Component<NavBarProps> {
   render() {
     return (
       <div className={styles.navbar}>
-        <T.Medium style="title" color="white">
+        <T.Large style="title" color="white">
           <RouteLink className={styles.logo} to={routeFor([RoutePath.MAP_LIST])}>
             paraDB
           </RouteLink>
-        </T.Medium>
+        </T.Large>
         <div className={styles.userStatus}>
           {this.props.user == null
             ? (

@@ -13,12 +13,13 @@ export type SkeletonProps = {
   MapPage: React.ComponentType<{ id: string, map: PDMap | undefined }>,
   MapList: React.ComponentType,
   LoginSignupPage: React.ComponentType<{ mode: 'signup' | 'login' }>,
+  SubmitMapPage: React.ComponentType,
 }
 
 @observer
 export class Skeleton extends React.Component<SkeletonProps> {
   render() {
-    const { history, NavBar, MapPage, MapList, LoginSignupPage } = this.props;
+    const { history, NavBar, MapPage, MapList, LoginSignupPage, SubmitMapPage } = this.props;
 
     return (
       <Router history={history}>
@@ -28,6 +29,9 @@ export class Skeleton extends React.Component<SkeletonProps> {
             <Switch>
               <Route path={routeFor([RoutePath.MAP_LIST])} exact={true}>
                 <MapList/>
+              </Route>
+              <Route path={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>
+                <SubmitMapPage/>
               </Route>
               <Route path={routeFor([RoutePath.MAP, ':id'])}>
                 {({ match, location }) => (

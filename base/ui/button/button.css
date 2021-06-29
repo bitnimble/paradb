@@ -1,4 +1,4 @@
-@value colorWhite, colorPurple from "pages/paradb/base/colors/colors.css";
+@value colorWhite, colorPurple, colorGrey from "pages/paradb/base/colors/colors.css";
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
 
 .button {
@@ -13,7 +13,13 @@
     cursor: pointer;
 }
 
-.button:hover {
+.button:hover:not(.disabled) {
     background: colorPurple;
     color: colorWhite;
+}
+
+.button.disabled {
+    border: 1px solid colorGrey;
+    color: colorGrey;
+    cursor: not-allowed;
 }

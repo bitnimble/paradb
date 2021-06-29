@@ -4,9 +4,11 @@ export const enum RoutePath {
   LOGIN = 'login',
   LOGOUT = 'logout',
   SIGNUP = 'signup',
+  SUBMIT = 'submit',
 };
 
 export type RouteSegments =
+  | [RoutePath.MAP, RoutePath.SUBMIT]
   | [RoutePath.MAP, string] // string = map ID
   | [RoutePath.MAP_LIST]
   | [RoutePath.LOGIN]
