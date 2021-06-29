@@ -3,7 +3,7 @@ import { LoginSignupField } from 'pages/paradb/auth/login_signup_presenter';
 import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
-import { Textbox } from 'pages/paradb/base/ui/textbox/create';
+import { Textbox } from 'pages/paradb/base/ui/textbox/textbox';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
 import React from 'react';
 import styles from './login_signup.css';

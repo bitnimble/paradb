@@ -32,19 +32,29 @@ export function createMapPage(api: Api) {
 }
 
 export function createSubmitMapPage(api: Api, navigate: Navigate) {
-  const store = new SubmitMapStore();
-  const presenter = new SubmitMapPresenter(api, navigate, store);
-
-  const Complexities = observer(() => (
-    <ComplexitiesList
-      complexities={store.complexities}
-      errors={store.errors}
-      onComplexityAdd={presenter.addComplexity}
-      onComplexityRemove={presenter.removeComplexity}
-    />
-  ));
+  let store: SubmitMapStore = new SubmitMapStore();
+  let presenter = new SubmitMapPresenter(api, navigate, store);
+  let mounted = false;
 
   return observer(() => {
+    useComponentDidMount(() => {
+      if (!mounted) {
+        mounted = true;
+      } else {
+        store.reset();
+      }
+    });
+
+    const Complexities = observer(() => (
+      <ComplexitiesList
+        complexities={store.complexities}
+        errors={store.errors}
+        isSubmitting={store.isSubmitting}
+        onComplexityAdd={presenter.addComplexity}
+        onComplexityRemove={presenter.removeComplexity}
+      />
+    ));
+
     return (
       <SubmitMapPage
         title={store.title}
@@ -54,6 +64,7 @@ export function createSubmitMapPage(api: Api, navigate: Navigate) {
         description={store.description}
         downloadLink={store.downloadLink}
         errors={store.errors}
+        isSubmitting={store.isSubmitting}
         onChangeTitle={presenter.onChangeTitle}
         onChangeArtist={presenter.onChangeArtist}
         onChangeAuthor={presenter.onChangeAuthor}

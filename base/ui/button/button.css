@@ -1,8 +1,15 @@
 @value colorWhite, colorPurple, colorGrey from "pages/paradb/base/colors/colors.css";
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
 
+.a {
+    text-decoration: none;
+}
+
 .button {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
     font-family: inherit;
     color: inherit;
     border: 1px solid colorPurple;
@@ -22,4 +29,8 @@
     border: 1px solid colorGrey;
     color: colorGrey;
     cursor: not-allowed;
+}
+
+.loadingSpinner {
+    margin-left: gridBaseline;
 }

@@ -30,6 +30,22 @@ export class SubmitMapStore extends FormStore<SubmitMapField> {
 
   @observable.ref
   downloadLink = '';
+
+  @observable.ref
+  isSubmitting = false;
+
+  @action.bound
+  reset() {
+    this.errors.clear();
+    this.complexities = [{ complexity: 1, complexityName: 'Easy' }];
+    this.title = '';
+    this.artist = '';
+    this.author = '';
+    this.albumArt = '';
+    this.description = '';
+    this.downloadLink = '';
+    this.isSubmitting = false;
+  }
 }
 
 export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
@@ -103,10 +119,13 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
       return;
     }
 
+    runInAction(() => this.store.isSubmitting = true);
     const resp = await this.api.submitMap({
       ...fieldValues,
       complexities: this.store.complexities,
     });
+    runInAction(() => this.store.isSubmitting = false);
+
     if (resp.success) {
       this.navigate([RoutePath.MAP, resp.id]);
     } else {

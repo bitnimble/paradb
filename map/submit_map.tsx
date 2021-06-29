@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react';
 import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
-import { Numeric } from 'pages/paradb/base/ui/numeric/create';
-import { Textbox } from 'pages/paradb/base/ui/textbox/create';
+import { Numeric } from 'pages/paradb/base/ui/numeric/numeric';
+import { Textbox } from 'pages/paradb/base/ui/textbox/textbox';
 import {
   complexityNameKey,
   complexityNumericKey,
@@ -14,7 +14,8 @@ import styles from './submit_map.css';
 
 type ComplexitiesListProps = {
   complexities: Complexity[],
-  errors: Map<SubmitMapField, string>;
+  errors: Map<SubmitMapField, string>,
+  isSubmitting: boolean,
   onComplexityAdd(): void,
   onComplexityRemove(i: number): void,
 };
@@ -26,7 +27,8 @@ type SubmitMapPageProps = {
   albumArt: string,
   description: string,
   downloadLink: string,
-  errors: Map<SubmitMapField, string>;
+  errors: Map<SubmitMapField, string>,
+  isSubmitting: boolean,
   onChangeTitle(value: string): void,
   onChangeArtist(value: string): void,
   onChangeAuthor(value: string): void,
@@ -53,12 +55,12 @@ export const ComplexitiesList = observer((props: ComplexitiesListProps) => (
           <div className={styles.complexity} key={i}>
             <Numeric value={c.complexity} onChange={onNumericChange} min={1} max={4} required={true} label="Difficulty" error={numericError}/>
             <Textbox value={c.complexityName || ''} onChange={onNameChange} required={true} label="Name" error={nameError}/>
-            <Button className={styles.removeComplexityButton} onClick={removeComplexity} disabled={props.complexities.length === 1}>✖</Button>
+            <Button className={styles.removeComplexityButton} onClick={removeComplexity} disabled={props.complexities.length === 1 || props.isSubmitting}>✖</Button>
           </div>
         );
       })}
       <br/>
-      <Button onClick={props.onComplexityAdd}>Add complexity</Button>
+      <Button disabled={props.isSubmitting} onClick={props.onComplexityAdd}>Add complexity</Button>
     </div>
   </>
 ));
@@ -77,6 +79,6 @@ export const SubmitMapPage = observer((props: SubmitMapPageProps) => (
       </div>
     </div>
     <br/>
-    <Button onClick={props.onSubmit}>Submit</Button>
+    <Button loading={props.isSubmitting} onClick={props.onSubmit}>Submit</Button>
   </div>
 ));
