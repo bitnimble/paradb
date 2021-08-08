@@ -4,7 +4,7 @@ import { Api } from 'pages/paradb/base/api/api';
 import { useComponentDidMount } from 'pages/paradb/base/helpers';
 import { MapPage } from 'pages/paradb/map/map_page';
 import { MapPagePresenter, MapPageStore } from 'pages/paradb/map/map_presenter';
-import { ComplexitiesList, SubmitMapPage } from 'pages/paradb/map/submit_map';
+import { SubmitMapPage } from 'pages/paradb/map/submit_map';
 import { SubmitMapPresenter, SubmitMapStore } from 'pages/paradb/map/submit_map_presenter';
 import { Navigate } from 'pages/paradb/router/install';
 import { PDMap } from 'paradb-api-schema';
@@ -45,34 +45,12 @@ export function createSubmitMapPage(api: Api, navigate: Navigate) {
       }
     });
 
-    const Complexities = observer(() => (
-      <ComplexitiesList
-        complexities={store.complexities}
-        errors={store.errors}
-        isSubmitting={store.isSubmitting}
-        onComplexityAdd={presenter.addComplexity}
-        onComplexityRemove={presenter.removeComplexity}
-      />
-    ));
-
     return (
       <SubmitMapPage
-        title={store.title}
-        artist={store.artist}
-        author={store.author}
-        albumArt={store.albumArt}
-        description={store.description}
-        downloadLink={store.downloadLink}
-        errors={store.errors}
+        hasMapData={!!store.data}
         isSubmitting={store.isSubmitting}
-        onChangeTitle={presenter.onChangeTitle}
-        onChangeArtist={presenter.onChangeArtist}
-        onChangeAuthor={presenter.onChangeAuthor}
-        onChangeAlbumArt={presenter.onChangeAlbumArt}
-        onChangeDescription={presenter.onChangeDescription}
-        onChangeDownloadLink={presenter.onChangeDownloadLink}
+        onChangeData={presenter.onChangeData}
         onSubmit={presenter.submit}
-        ComplexitiesList={Complexities}
       />
     );
   });

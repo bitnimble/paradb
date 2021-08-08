@@ -1,50 +1,23 @@
+import { checkExists } from 'base/preconditions';
 import { action, observable, runInAction } from 'mobx';
 import { Api } from 'pages/paradb/base/api/api';
 import { FormPresenter, FormStore } from 'pages/paradb/base/form/form_presenter';
 import { Navigate } from 'pages/paradb/router/install';
 import { RoutePath } from 'pages/paradb/router/routes';
-import { Complexity } from 'paradb-api-schema';
 
-export const complexityNumericKey = (i: number): `complexityNumeric${number}` => `complexityNumeric${i}`;
-export const complexityNameKey = (i: number): `complexityName${number}` => `complexityName${i}`;
+const zipPrefix = 'data:application/x-zip-compressed;base64,';
 
-export type SubmitMapField = 'title' | 'artist' | 'author' | 'albumArt' | 'downloadLink' | 'description' | `complexityNumeric${number}` | `complexityName${number}`;
+export type SubmitMapField = 'data';
 export class SubmitMapStore extends FormStore<SubmitMapField> {
-  @observable.deep
-  complexities: Complexity[] = [{ complexity: 1, complexityName: 'Easy' }];
-
-  @observable.ref
-  title = '';
-
-  @observable.ref
-  artist = '';
-
-  @observable.ref
-  author = '';
-
-  @observable.ref
-  albumArt = '';
-
-  @observable.ref
-  description = '';
-
-  @observable.ref
-  downloadLink = '';
-
   @observable.ref
   isSubmitting = false;
 
-  @action.bound
+  @observable.ref
+  data: File | undefined;
+
   reset() {
-    this.errors.clear();
-    this.complexities = [{ complexity: 1, complexityName: 'Easy' }];
-    this.title = '';
-    this.artist = '';
-    this.author = '';
-    this.albumArt = '';
-    this.description = '';
-    this.downloadLink = '';
     this.isSubmitting = false;
+    this.data = undefined;
   }
 }
 
@@ -57,73 +30,32 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     super(store);
   }
 
-  onChangeTitle = action((value: string) => this.store.title = value);
-  onChangeArtist = action((value: string) => this.store.artist = value);
-  onChangeAuthor = action((value: string) => this.store.author = value);
-  onChangeAlbumArt = action((value: string) => this.store.albumArt = value);
-  onChangeDescription = action((value: string) => this.store.description = value);
-  onChangeDownloadLink = action((value: string) => this.store.downloadLink = value);
-
-  addComplexity = action(() => {
-    this.store.complexities.push({ complexity: 1, complexityName: '' });
-  });
-
-  removeComplexity = action((i: number) => {
-    this.store.complexities.splice(i, 1);
-    if (this.store.errors.has(complexityNameKey(i))) {
-      this.store.errors.delete(complexityNameKey(i));
-    }
-    if (this.store.errors.has(complexityNumericKey(i))) {
-      this.store.errors.delete(complexityNumericKey(i));
-    }
-    for (let j = i + 1; j < this.store.complexities.length + 1; j++) {
-      const nameError = this.store.errors.get(complexityNameKey(j));
-      const numericError = this.store.errors.get(complexityNumericKey(j));
-      if (nameError != null) {
-        this.store.errors.set(complexityNameKey(j - 1), nameError);
-        this.store.errors.delete(complexityNameKey(j));
-      }
-      if (numericError != null) {
-        this.store.errors.set(complexityNumericKey(j - 1), numericError);
-        this.store.errors.delete(complexityNumericKey(j));
-      }
-    }
-  });
+  @action.bound
+  onChangeData(file: File) {
+    this.store.data = file;
+  }
 
   submit = async () => {
     runInAction(() => this.store.errors.clear());
     const fieldValues = {
-      title: this.store.title,
-      artist: this.store.artist,
-      author: this.undefinedIfEmpty(this.store.author),
-      albumArt: this.undefinedIfEmpty(this.store.albumArt),
-      description: this.undefinedIfEmpty(this.store.description),
-      downloadLink: this.store.downloadLink,
+      data: this.store.data,
     };
-    const errors = [
-      ...this.checkRequiredFields(
-        ['title', fieldValues.title],
-        ['artist', fieldValues.artist],
-        ['downloadLink', fieldValues.downloadLink],
-        ...this.store.complexities.flatMap((c, i) => [
-          [complexityNumericKey(i), c.complexity.toString()],
-          [complexityNameKey(i), c.complexityName]
-        ] as const),
-      ),
-      ...this.checkUrlFields(
-        ['albumArt', fieldValues.albumArt],
-        ['downloadLink', fieldValues.downloadLink],
-      ),
-    ];
-    if (errors.length) {
+    this.checkRequiredFields(['data', fieldValues.data]);
+    const maybeMapData = await asBase64(checkExists(fieldValues.data));
+    if (maybeMapData == null) {
+      this.pushErrors(['data'], 'Invalid map data');
+    }
+    let mapData = checkExists(maybeMapData);
+    if (!mapData.startsWith(zipPrefix)) {
+      this.pushErrors(['data'], 'File was not a zip');
+    }
+    mapData = mapData.substr(zipPrefix.length);
+    if (this.store.hasErrors) {
       return;
     }
-
     runInAction(() => this.store.isSubmitting = true);
-    const resp = await this.api.submitMap({
-      ...fieldValues,
-      complexities: this.store.complexities,
-    });
+
+    const resp = await this.api.submitMap({ mapData });
     runInAction(() => this.store.isSubmitting = false);
 
     if (resp.success) {
@@ -132,4 +64,13 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
 
     }
   };
+}
+
+function asBase64(blob: Blob): Promise<string | undefined> {
+  return new Promise((res) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onload = () => res(reader.result?.toString());
+    reader.onerror = () => res(undefined);
+  });
 }

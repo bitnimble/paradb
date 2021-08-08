@@ -20,6 +20,12 @@
     margin-right: calc(gridBaseline * 3);
 }
 
+.albumArtImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .mapContent {
     width: min(100%, calc(gridBaseline * 100));
 }

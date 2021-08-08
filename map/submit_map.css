@@ -12,48 +12,14 @@
     align-items: center;
 }
 
-.fields {
-    width: 100%;
-    display: grid;
-    gap: 0 calc(gridBaseline * 2);
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-        "title        descriptionContainer"
-        "artist       descriptionContainer"
-        "author       descriptionContainer"
-        "albumArt     descriptionContainer"
-        "downloadLink descriptionContainer"
-        ".            descriptionContainer";
-}
-.title { grid-area: title; }
-.artist { grid-area: artist; }
-.author { grid-area: author; }
-.albumArt { grid-area: albumArt; }
-.downloadLink { grid-area: downloadLink; }
-.descriptionContainer {
-    grid-area: descriptionContainer;
-    display: flex;
-    flex-direction: column;
-}
-.description {
-    flex: 1;
-    margin-bottom: calc(gridBaseline * 2);
+.fileContainer {
+    height: 100px;
+    width: 100px;
+    border-width: 1px;
+    border-style: dashed;
+    border-color: black;
 }
 
-.complexitiesList {
-    border: 1px solid colorLightGrey;
-    padding: gridBaseline;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-.complexity {
-    display: grid;
-    gap: gridBaseline;
-    grid-template-columns: 1fr 2fr auto;
-    align-items: flex-start;
-}
-.removeComplexityButton {
-    /* TODO: align button with textbox properly */
-    margin-top: calc(gridBaseline * 3.45);
+.fileContainer.hasMapData {
+    border-color: green;
 }

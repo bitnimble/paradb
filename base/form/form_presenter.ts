@@ -14,6 +14,10 @@ const enum FieldError {
 export class FormStore<Field extends string> {
   @observable.shallow
   errors = new Map<Field, string>();
+
+  get hasErrors() {
+    return this.errors.size > 0;
+  }
 }
 
 export class FormPresenter<Field extends string> {
@@ -26,8 +30,8 @@ export class FormPresenter<Field extends string> {
   }
 
   @action
-  protected checkRequiredFields(...fields: (readonly [Field, string | undefined])[]) {
-    const errorFields = fields.filter(f => f[1] == null || f[1].trim() === '').map(f => f[0]);
+  protected checkRequiredFields(...fields: (readonly [Field, any])[]) {
+    const errorFields = fields.filter(f => f[1] == null || typeof f[1] === 'string' && f[1].trim() === '').map(f => f[0]);
     this.pushErrors(errorFields, FieldError.REQUIRED);
     return errorFields;
   }

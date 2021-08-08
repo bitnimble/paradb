@@ -74,7 +74,6 @@ const allStar: PDMap = {
     { complexity: 5, complexityName: undefined  },
   ],
   description: 'Test description',
-  downloadLink: 'www.google.com',
 };
 
 const californication: PDMap = {
@@ -92,7 +91,6 @@ const californication: PDMap = {
     { complexity: 5, complexityName: 'Sacramento' },
   ],
   description: 'Test description',
-  downloadLink: 'drive.google.com',
 };
 
 const fakeMaps = [allStar, californication];

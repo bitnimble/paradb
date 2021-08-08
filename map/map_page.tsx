@@ -30,6 +30,18 @@ const ComplexityPills = (props: { complexities: Complexity[] }) => (
 );
 
 export class MapPage extends React.Component<Props> {
+  private get albumArtLink() {
+    return this.props.map
+        ? `/static/map_data/${this.props.map.id}/${this.props.map.albumArt}`
+        : undefined;
+  }
+
+  private get downloadLink() {
+    return this.props.map
+        ? `/static/map_data/${this.props.map.id}.zip`
+        : undefined;
+  }
+
   render() {
     const { map } = this.props;
     if (!map) {
@@ -37,9 +49,9 @@ export class MapPage extends React.Component<Props> {
     }
     return (
       <div className={styles.mapPage}>
-        {map.albumArt && (
+        {this.albumArtLink && (
           <div className={styles.albumArt}>
-            <img src={map.albumArt}></img>
+            <img className={styles.albumArtImg} src={this.albumArtLink}></img>
           </div>
         )}
         <div className={styles.mapContent}>
@@ -52,7 +64,9 @@ export class MapPage extends React.Component<Props> {
               <T.Small color="grey">{map.description}</T.Small>
             </div>
           ) : undefined}
-          <Button link={map.downloadLink}>Download</Button>
+          {this.downloadLink && (
+            <Button link={this.downloadLink}>Download</Button>
+          )}
         </div>
       </div>
     );
