@@ -47,7 +47,7 @@ export function createSubmitMapPage(api: Api, navigate: Navigate) {
 
     return (
       <SubmitMapPage
-        hasMapData={!!store.data}
+        filename={store.data?.name}
         isSubmitting={store.isSubmitting}
         onChangeData={presenter.onChangeData}
         onSubmit={presenter.submit}

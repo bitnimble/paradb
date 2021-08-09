@@ -1,10 +1,11 @@
 import classNames from 'classnames';
+import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
 import React from 'react';
 import styles from './submit_map.css';
 
 type SubmitMapPageProps = {
-  hasMapData: boolean,
+  filename: string | undefined,
   isSubmitting: boolean,
   onChangeData(file: File): void,
   onSubmit(): void,
@@ -33,12 +34,21 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
   render() {
     return (
       <div className={styles.submitMap}>
-        <input
-          type="file"
-          className={classNames(styles.fileontainer, this.props.hasMapData && styles.hasMapData)}
-          onDrop={this.onDrop}
-          onChange={this.onChange}
-        />
+        <button className={classNames(styles.fileContainer, this.props.filename != null && styles.hasMapData)}>
+          <input
+            type="file"
+            onDrop={this.onDrop}
+            onChange={this.onChange}
+          />
+          <div className={styles.filename}>
+            <T.Small>
+              {this.props.filename
+                  ? this.props.filename
+                  : 'Click or drag to upload your zipped map.'
+              }
+            </T.Small>
+          </div>
+        </button>
         <br/>
         <Button loading={this.props.isSubmitting} onClick={this.props.onSubmit}>Submit</Button>
       </div>

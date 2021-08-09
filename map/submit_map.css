@@ -1,5 +1,5 @@
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
-@value colorLightGrey from "pages/paradb/base/colors/colors.css";
+@value colorPurple, colorLightGrey, colorUltraLightGrey from "pages/paradb/base/colors/colors.css";
 
 .submitMap {
     height: 100%;
@@ -13,13 +13,37 @@
 }
 
 .fileContainer {
-    height: 100px;
-    width: 100px;
-    border-width: 1px;
+    position: relative;
+    height: calc(gridBaseline * 30);
+    width: calc(gridBaseline * 30);
+    padding: 0;
+    border-width: 2px;
     border-style: dashed;
-    border-color: black;
+    border-color: colorLightGrey;
+    background: colorUltraLightGrey;
+    cursor: pointer;
 }
 
 .fileContainer.hasMapData {
-    border-color: green;
+    border-color: colorPurple;
+}
+
+
+.fileContainer > input {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: inherit;
+}
+
+.filename {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;;
 }
