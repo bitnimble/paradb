@@ -9,6 +9,7 @@ import {
   GetMapResponse,
   LoginRequest,
   LoginResponse,
+  serializeSubmitMapRequest,
   SignupRequest,
   SignupResponse,
   SubmitMapRequest,
@@ -27,7 +28,7 @@ export interface Api {
   /* Maps */
   findMaps(): Promise<FindMapsResponse>;
   getMap(req: GetMapRequest): Promise<GetMapResponse>;
-  submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse>;
+  submitMap(req: SubmitMapRequest, onProgress: (e: ProgressEvent) => void): Promise<SubmitMapResponse>;
 }
 
 export class HttpApi implements Api {
@@ -61,9 +62,17 @@ export class HttpApi implements Api {
     return deserializeGetMapResponse(resp);
   }
 
-  async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
-    const resp = await post(path(this.apiBase, 'maps', 'submit'), req);
-    return deserializeSubmitMapResponse(resp);
+  async submitMap(req: SubmitMapRequest, onProgress: (e: ProgressEvent) => void): Promise<SubmitMapResponse> {
+    return new Promise((res) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', path(this.apiBase, 'maps', 'submit'), true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.upload.onprogress = onProgress;
+      xhr.send(serializeSubmitMapRequest(req));
+      xhr.onload = () => {
+        res(deserializeSubmitMapResponse((xhr.response as string).substr(xssiPrefix.length)));
+      };
+    });
   }
 }
 

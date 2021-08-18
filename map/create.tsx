@@ -5,7 +5,11 @@ import { useComponentDidMount } from 'pages/paradb/base/helpers';
 import { MapPage } from 'pages/paradb/map/map_page';
 import { MapPagePresenter, MapPageStore } from 'pages/paradb/map/map_presenter';
 import { SubmitMapPage } from 'pages/paradb/map/submit_map';
-import { SubmitMapPresenter, SubmitMapStore } from 'pages/paradb/map/submit_map_presenter';
+import {
+  SubmitMapPresenter,
+  SubmitMapStore,
+  ThrottledMapUploader,
+} from 'pages/paradb/map/submit_map_presenter';
 import { Navigate } from 'pages/paradb/router/install';
 import { PDMap } from 'paradb-api-schema';
 import React from 'react';
@@ -32,8 +36,9 @@ export function createMapPage(api: Api) {
 }
 
 export function createSubmitMapPage(api: Api, navigate: Navigate) {
-  let store: SubmitMapStore = new SubmitMapStore();
-  let presenter = new SubmitMapPresenter(api, navigate, store);
+  const store: SubmitMapStore = new SubmitMapStore();
+  const uploader = new ThrottledMapUploader(api);
+  const presenter = new SubmitMapPresenter(uploader, navigate, store);
   let mounted = false;
 
   return observer(() => {
@@ -47,8 +52,8 @@ export function createSubmitMapPage(api: Api, navigate: Navigate) {
 
     return (
       <SubmitMapPage
-        filename={store.data?.name}
-        isSubmitting={store.isSubmitting}
+        filenames={store.filenames}
+        isSubmitting={uploader.isUploading}
         onChangeData={presenter.onChangeData}
         onSubmit={presenter.submit}
       />

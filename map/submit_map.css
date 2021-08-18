@@ -14,7 +14,7 @@
 
 .fileContainer {
     position: relative;
-    height: calc(gridBaseline * 30);
+    min-height: calc(gridBaseline * 30);
     width: calc(gridBaseline * 30);
     padding: 0;
     border-width: 2px;
@@ -30,6 +30,9 @@
 
 
 .fileContainer > input {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     opacity: 0;
@@ -37,11 +40,6 @@
 }
 
 .filename {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
