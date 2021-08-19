@@ -87,11 +87,6 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
 
   render() {
     const { uploadProgress, isSubmitting, onSubmit } = this.props;
-    // const { onSubmit } = this.props;
-    // const isSubmitting = true;
-    // const uploadProgress = [
-    //   { name: 'asdasda', progress: 0},
-    // ];
     return (
       <div className={styles.submitMap}>
         {isSubmitting
