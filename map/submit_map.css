@@ -1,5 +1,5 @@
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
-@value colorPurple, colorLightGrey, colorUltraLightGrey from "pages/paradb/base/colors/colors.css";
+@value colorPurple, colorRed, colorLightGrey, colorUltraLightGrey from "pages/paradb/base/colors/colors.css";
 
 .submitMap {
     height: 100%;
@@ -15,8 +15,8 @@
 .fileContainer {
     position: relative;
     min-height: calc(gridBaseline * 30);
-    width: calc(gridBaseline * 30);
-    padding: 0;
+    min-width: calc(gridBaseline * 30);
+    padding: calc(gridBaseline * 2);
     border-width: 2px;
     border-style: dashed;
     border-color: colorLightGrey;
@@ -39,9 +39,37 @@
     cursor: inherit;
 }
 
-.filename {
+.filenames {
     display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: none;
+}
+
+.uploadProgress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.progressContainer {
+    margin-left: calc(gridBaseline * 2);
+    position: relative;
+    height: gridBaseline;
+    width: calc(gridBaseline * 40);
+    border-radius: calc(gridBaseline / 2);
+    overflow: hidden;
+    background: colorLightGrey;
+}
+
+.progressInner {
+    position: absolute;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: colorPurple;
+}
+
+.progressError {
+    background: colorRed;
 }

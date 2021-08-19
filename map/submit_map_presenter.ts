@@ -21,9 +21,12 @@ export class ThrottledMapUploader {
   @observable.deep
   private readonly uploads = new Map<string, UploadState>();
 
+  @observable.shallow
   private readonly queue = new Map<string, File>();
-  private readonly successes: SubmitMapSuccess[] = [];
-  private readonly errors: string[] = [];
+  @observable.shallow
+  private readonly successes = new Map<File, SubmitMapSuccess>();
+  @observable.shallow
+  private readonly errors = new Map<File, string>();
 
   constructor(private readonly api: Api) { }
 
@@ -32,14 +35,41 @@ export class ThrottledMapUploader {
     return [...this.uploads.values()].some(s => s.isSubmitting);
   }
 
+  @computed
+  get uploadProgress() {
+    const queued = [...this.queue.values()].map(f => ({
+      name: f.name,
+      progress: 0,
+    }));
+    const uploading = [...this.uploads.values()].map(s => ({
+      name: s.file.name,
+      progress: s.progress,
+    }));
+    const done = [...this.successes.keys()].map(f => ({
+      name: f.name,
+      progress: 100,
+    }));
+    const errors = [...this.errors.keys()].map(f => ({
+      name: f.name,
+      progress: -1,
+    }));
+    return [
+      ...queued,
+      ...uploading,
+      ...done
+    ].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   private async fileToMapData(file: File) {
     const maybeMapData = await asBase64(checkExists(file));
     if (maybeMapData == null) {
+      this.errors.set(file, 'Unknown error.');
       return;
     }
     let mapData = checkExists(maybeMapData);
     const prefix = zipPrefixes.find(p => mapData.startsWith(p));
     if (!prefix) {
+      this.errors.set(file, 'Not a valid zipped map.');
       return;
     }
     mapData = mapData.substr(prefix.length);
@@ -65,10 +95,6 @@ export class ThrottledMapUploader {
       return;
     }
     const [id, file] = next;
-    const mapData = await this.fileToMapData(file);
-    if (!mapData) {
-      return;
-    }
     runInAction(() => {
       this.uploads.set(id, {
         file,
@@ -76,6 +102,10 @@ export class ThrottledMapUploader {
         progress: 0,
       });
     });
+    const mapData = await this.fileToMapData(file);
+    if (!mapData) {
+      return;
+    }
     // Re-retrieve the observable wrapped version
     const state = checkExists(this.uploads.get(id));
     const onProgress = action((e: ProgressEvent) => {
@@ -83,9 +113,9 @@ export class ThrottledMapUploader {
     });
     const resp = await this.api.submitMap({ mapData }, onProgress);
     if (resp.success) {
-      this.successes.push(resp);
+      this.successes.set(file, resp);
     } else {
-      this.errors.push(resp.errorMessage);
+      this.errors.set(file, resp.errorMessage);
     }
     runInAction(() => {
       state.isSubmitting = false;
@@ -98,8 +128,8 @@ export class ThrottledMapUploader {
   async start() {
     await Promise.all(Array(MAX_CONNECTIONS).fill(0).map((_, i) => this.processQueue()));
     return [
-      this.successes.map(r => r.id),
-      this.errors,
+      [...this.successes.values()].map(r => r.id),
+      [...this.errors.values()],
     ];
   }
 
@@ -110,6 +140,13 @@ export class ThrottledMapUploader {
 
   addFiles(files: File[]) {
     files.forEach(f => this.addFile(f));
+  }
+
+  reset() {
+    this.uploads.clear();
+    this.queue.clear();
+    this.successes.clear();
+    this.errors.clear();
   }
 }
 

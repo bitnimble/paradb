@@ -47,12 +47,14 @@ export function createSubmitMapPage(api: Api, navigate: Navigate) {
         mounted = true;
       } else {
         store.reset();
+        uploader.reset();
       }
     });
 
     return (
       <SubmitMapPage
         filenames={store.filenames}
+        uploadProgress={uploader.uploadProgress}
         isSubmitting={uploader.isUploading}
         onChangeData={presenter.onChangeData}
         onSubmit={presenter.submit}

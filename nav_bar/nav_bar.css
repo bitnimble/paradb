@@ -2,8 +2,8 @@
 @value colorDarkGrey, colorPurple, colorWhite from 'pages/paradb/base/colors/colors.css';
 
 .navbar {
+    flex-shrink: 0;
     display: flex;
-    width: 100vw;
     height: calc(gridBaseline * 7);
     background: colorDarkGrey;
     color: colorWhite;
