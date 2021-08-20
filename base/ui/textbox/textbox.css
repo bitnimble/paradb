@@ -1,4 +1,4 @@
-@value colorRed, colorGrey from "pages/paradb/base/colors/colors.css";
+@value colorRed, colorGrey, colorPurple from "pages/paradb/base/colors/colors.css";
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
 
 .container {
@@ -7,10 +7,25 @@
     flex-direction: column;
 }
 
-.textbox {
-    outline: none;
+.textboxBorder {
+    border-width: 2px;
+    border-style: solid;
+    display: flex;
+    align-items: center;
+    padding: gridBaseline;
+}
 
-    border: 1px solid colorGrey;
+.borderGrey {
+    border-color: colorGrey;
+}
+.borderPurple {
+    border-color: colorPurple;
+}
+
+.textbox {
+    flex: 1;
+    border: none;
+    outline: none;
     padding: calc(gridBaseline * 0.5) gridBaseline;
 
     font-family: 'Futura Light';

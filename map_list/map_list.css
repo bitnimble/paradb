@@ -4,6 +4,10 @@
     color: #666;
 }
 
+.filter {
+    padding: gridBaseline calc(gridBaseline * 2);
+}
+
 .map {
     border: 1px solid #666;
     padding: calc(gridBaseline * 2);

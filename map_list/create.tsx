@@ -10,9 +10,11 @@ export function createMapList(api: Api) {
   const onMount = () => store.maps == null && presenter.findMaps();
 
   return observer(() => (
-    <MapList
-        maps={store.maps}
-        onMount={onMount}
-    />
-  ))
+      <MapList
+          maps={store.maps}
+          filterQuery={store.filterQuery}
+          onMount={onMount}
+          onChangeFilterQuery={presenter.onChangeFilterQuery}
+      />
+  ));
 }
