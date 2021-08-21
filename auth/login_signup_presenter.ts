@@ -1,4 +1,4 @@
-import { action, observable, runInAction } from 'mobx';
+import { action, makeObservable, observable, runInAction } from 'mobx';
 import { Api } from 'pages/paradb/base/api/api';
 import { FormPresenter, FormStore } from 'pages/paradb/base/form/form_presenter';
 import { Navigate } from 'pages/paradb/router/install';
@@ -7,14 +7,25 @@ import { RoutePath } from 'pages/paradb/router/routes';
 export type LoginSignupField = 'username' | 'password' | 'email' | 'form';
 
 export class LoginSignupStore extends FormStore<LoginSignupField> {
-  @observable.ref
   username = '';
-
-  @observable.ref
   email = '';
-
-  @observable.ref
   password = '';
+
+  constructor() {
+    super();
+    makeObservable(this, {
+      username: observable.ref,
+      email: observable.ref,
+      password: observable.ref,
+      reset: action.bound,
+    });
+  }
+
+  reset() {
+    this.errors.clear();
+    this.email = '';
+    this.password = '';
+  }
 }
 
 export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
@@ -24,11 +35,16 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
       private readonly store: LoginSignupStore,
   ) {
     super(store);
+    makeObservable(this, {
+      onChangeUsername: action.bound,
+      onChangeEmail: action.bound,
+      onChangePassword: action.bound,
+    });
   }
 
-  onChangeUsername = action((value: string) => this.store.username = value);
-  onChangeEmail = action((value: string) => this.store.email = value);
-  onChangePassword = action((value: string) => this.store.password = value);
+  onChangeUsername = (value: string) => this.store.username = value;
+  onChangeEmail = (value: string) => this.store.email = value;
+  onChangePassword = (value: string) => this.store.password = value;
 
   login = async () => {
     runInAction(() => this.store.errors.clear());

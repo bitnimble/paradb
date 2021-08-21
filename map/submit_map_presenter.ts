@@ -1,5 +1,5 @@
 import { checkExists } from 'base/preconditions';
-import { action, computed, observable, runInAction } from 'mobx';
+import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 import * as nanoid from 'nanoid';
 import { Api } from 'pages/paradb/base/api/api';
 import { FormPresenter, FormStore } from 'pages/paradb/base/form/form_presenter';
@@ -7,7 +7,7 @@ import { Navigate } from 'pages/paradb/router/install';
 import { RoutePath } from 'pages/paradb/router/routes';
 import { SubmitMapSuccess } from 'paradb-api-schema';
 
-const zipTypes = ['application/zip', 'application/x-zip', 'application/x-zip-compressed'];
+export const zipTypes = ['application/zip', 'application/x-zip', 'application/x-zip-compressed'];
 const zipPrefixes = zipTypes.map(t => `data:${t};base64,`);
 
 type UploadState = {
@@ -28,7 +28,9 @@ export class ThrottledMapUploader {
   @observable.shallow
   private readonly errors = new Map<string, string>();
 
-  constructor(private readonly api: Api) {}
+  constructor(private readonly api: Api) {
+    makeObservable(this);
+  }
 
   @computed
   get isUploading() {
@@ -176,12 +178,19 @@ export type FileState = {
 };
 export type SubmitMapField = 'files';
 export class SubmitMapStore extends FormStore<SubmitMapField> {
-  @observable.shallow
   files = new Map<string, FileState>();
 
-  @computed
   get filenames() {
     return [...this.files.values()].map(f => f.file.name).sort((a, b) => a.localeCompare(b));
+  }
+
+  constructor() {
+    super();
+    makeObservable(this, {
+      files: observable.shallow,
+      filenames: computed,
+      reset: action.bound,
+    });
   }
 
   reset() {
@@ -196,9 +205,11 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
       private readonly store: SubmitMapStore,
   ) {
     super(store);
+    makeObservable(this, {
+      onChangeData: action.bound,
+    });
   }
 
-  @action.bound
   onChangeData(files: FileList) {
     for (const file of files) {
       const fileState: FileState = {

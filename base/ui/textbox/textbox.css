@@ -8,7 +8,6 @@
 }
 
 .textboxBorder {
-    border-width: 2px;
     border-style: solid;
     display: flex;
     align-items: center;
@@ -35,6 +34,6 @@
     resize: vertical;
 }
 
-.errorContainer .textbox {
-    border: 1px solid colorRed;
+.errorContainer .textboxBorder {
+    border-color: colorRed;
 }

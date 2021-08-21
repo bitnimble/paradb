@@ -1,8 +1,10 @@
+import { observer } from 'mobx-react';
+import { serializationDeps } from 'pages/paradb/base/helpers';
 import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
 import { Textbox } from 'pages/paradb/base/ui/textbox/textbox';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
-import { PDMap } from 'paradb-api-schema';
+import { PDMap, serializeMap } from 'paradb-api-schema';
 import React from 'react';
 import styles from './map_list.css';
 
@@ -13,6 +15,7 @@ type Props = {
   onChangeFilterQuery(val: string): void,
 };
 
+@observer
 export class MapList extends React.Component<Props> {
   componentDidMount() {
     this.props.onMount();
@@ -31,6 +34,7 @@ export class MapList extends React.Component<Props> {
                 search={true}
                 value={filterQuery}
                 borderColor="purple"
+                borderWidth={2}
                 placeholder="Search for a song or artist..."
                 onChange={onChangeFilterQuery}
             />
@@ -40,7 +44,7 @@ export class MapList extends React.Component<Props> {
                 <RouteLink
                     to={{
                       pathname: routeFor([RoutePath.MAP, m.id]),
-                      state: m,
+                      state: serializeMap(serializationDeps, m),
                     }}
                 >
                   <div className={styles.map}>

@@ -1,5 +1,6 @@
 import { History } from 'history';
 import { observer } from 'mobx-react';
+import { serializationDeps } from 'pages/paradb/base/helpers';
 import { NotFound } from 'pages/paradb/router/not_found';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
 import { deserializeMap, PDMap } from 'paradb-api-schema';
@@ -14,7 +15,7 @@ export type SkeletonProps = {
   MapList: React.ComponentType,
   LoginSignupPage: React.ComponentType<{ mode: 'signup' | 'login' }>,
   SubmitMapPage: React.ComponentType,
-}
+};
 
 @observer
 export class Skeleton extends React.Component<SkeletonProps> {
@@ -22,35 +23,41 @@ export class Skeleton extends React.Component<SkeletonProps> {
     const { history, NavBar, MapPage, MapList, LoginSignupPage, SubmitMapPage } = this.props;
 
     return (
-      <Router history={history}>
-        <div className={styles.skeleton}>
-          <NavBar/>
-          <div className={styles.content}>
-            <Switch>
-              <Route path={routeFor([RoutePath.MAP_LIST])} exact={true}>
-                <MapList/>
-              </Route>
-              <Route path={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>
-                <SubmitMapPage/>
-              </Route>
-              <Route path={routeFor([RoutePath.MAP, ':id'])}>
-                {({ match, location }) => (
-                  match && match.params.id != null && <MapPage id={match.params.id} map={location.state != null ? deserializeMap(location.state) : undefined}/>
-                )}
-              </Route>
-              <Route path={routeFor([RoutePath.LOGIN])}>
-                <LoginSignupPage mode="login"/>
-              </Route>
-              <Route path={routeFor([RoutePath.SIGNUP])}>
-                <LoginSignupPage mode="signup"/>
-              </Route>
-              <Route>
-                <NotFound/>
-              </Route>
-            </Switch>
+        <Router history={history}>
+          <div className={styles.skeleton}>
+            <NavBar/>
+            <div className={styles.content}>
+              <Switch>
+                <Route path={routeFor([RoutePath.MAP_LIST])} exact={true}>
+                  <MapList/>
+                </Route>
+                <Route path={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>
+                  <SubmitMapPage/>
+                </Route>
+                <Route path={routeFor([RoutePath.MAP, ':id'])}>
+                  {({ match, location }) => (
+                      match && match.params.id != null
+                      && <MapPage
+                          id={match.params.id}
+                          map={location.state != null
+                              ? deserializeMap(serializationDeps, location.state)
+                              : undefined}
+                      />
+                  )}
+                </Route>
+                <Route path={routeFor([RoutePath.LOGIN])}>
+                  <LoginSignupPage mode="login"/>
+                </Route>
+                <Route path={routeFor([RoutePath.SIGNUP])}>
+                  <LoginSignupPage mode="signup"/>
+                </Route>
+                <Route>
+                  <NotFound/>
+                </Route>
+              </Switch>
+            </div>
           </div>
-        </div>
-      </Router>
+        </Router>
     );
   }
 }

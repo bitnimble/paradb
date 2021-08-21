@@ -1,7 +1,8 @@
-import { action, observable } from 'mobx';
+import { action, computed, makeObservable, observable } from 'mobx';
 
 // Some simple regexes for quick validation. Non exhaustive.
-const basicUrlRegex = /(https?:\/\/)?([\w\-])+\.{1}([a-zA-Z]{2,63})([\/\w-]*)*\/?\??([^#\n\r]*)?#?([^\n\r]*)/;
+const basicUrlRegex =
+    /(https?:\/\/)?([\w\-])+\.{1}([a-zA-Z]{2,63})([\/\w-]*)*\/?\??([^#\n\r]*)?#?([^\n\r]*)/;
 const basicEmailRegex = /^\S+@\S+$/;
 
 const enum FieldError {
@@ -12,33 +13,45 @@ const enum FieldError {
 }
 
 export class FormStore<Field extends string> {
-  @observable.shallow
   errors = new Map<Field, string>();
 
   get hasErrors() {
     return this.errors.size > 0;
   }
+
+  constructor() {
+    makeObservable(this, {
+      errors: observable.shallow,
+      hasErrors: computed,
+    });
+  }
 }
 
 export class FormPresenter<Field extends string> {
-  constructor(private readonly _store: FormStore<Field>) { }
+  constructor(private readonly _store: FormStore<Field>) {
+    makeObservable(this, {}, { autoBind: true });
+  }
 
   protected undefinedIfEmpty(s: string): string | undefined {
     return s.trim() === ''
-      ? undefined
-      : s;
+        ? undefined
+        : s;
   }
 
   @action
   protected checkRequiredFields(...fields: (readonly [Field, any])[]) {
-    const errorFields = fields.filter(f => f[1] == null || typeof f[1] === 'string' && f[1].trim() === '').map(f => f[0]);
+    const errorFields = fields.filter(f =>
+        f[1] == null || typeof f[1] === 'string' && f[1].trim() === '',
+    ).map(f => f[0]);
     this.pushErrors(errorFields, FieldError.REQUIRED);
     return errorFields;
   }
 
   @action
   protected checkUrlFields(...fields: (readonly [Field, string | undefined])[]) {
-    const errorFields = fields.filter(f => f[1] != null && f[1].trim() !== '' && !f[1].match(basicUrlRegex)).map(f => f[0]);
+    const errorFields = fields.filter(f =>
+        f[1] != null && f[1].trim() !== '' && !f[1].match(basicUrlRegex),
+    ).map(f => f[0]);
     this.pushErrors(errorFields, FieldError.INVALID_URL_FORMAT);
     return errorFields;
   }

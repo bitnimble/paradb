@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import { observer } from 'mobx-react';
 import { T } from 'pages/paradb/base/text/text';
 import { searchIcon } from 'pages/paradb/base/ui/textbox/search_icon';
 import React from 'react';
@@ -14,6 +13,7 @@ export type TextboxProps = {
   search?: boolean,
   placeholder?: string,
   borderColor?: TextboxBorderColor,
+  borderWidth?: number,
   inputType?: 'text' | 'password' | 'area',
   error: string | undefined,
   value: string,
@@ -26,7 +26,7 @@ const borderColors: Record<TextboxBorderColor, string> = {
   ['purple']: styles.borderPurple,
 };
 
-export const Textbox = observer((props: TextboxProps) => {
+export const Textbox = (props: TextboxProps) => {
   const onChange = ({ target }: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       props.onChange(target.value);
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) =>
@@ -53,6 +53,9 @@ export const Textbox = observer((props: TextboxProps) => {
         )}
         <div
             className={classNames(styles.textboxBorder, borderColors[props.borderColor || 'grey'])}
+            style={{
+              borderWidth: `${props.borderWidth || 1}px`,
+            }}
         >
           {props.search && searchIcon}
           {props.inputType === 'area'
@@ -67,4 +70,4 @@ export const Textbox = observer((props: TextboxProps) => {
             : undefined}
       </div>
   );
-});
+};

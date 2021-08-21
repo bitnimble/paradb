@@ -7,13 +7,12 @@ import React from 'react';
 export function createMapList(api: Api) {
   const store = new MapListStore();
   const presenter = new MapListPresenter(api, store);
-  const onMount = () => store.maps == null && presenter.findMaps();
 
   return observer(() => (
       <MapList
           maps={store.maps}
           filterQuery={store.filterQuery}
-          onMount={onMount}
+          onMount={presenter.fetchInitialMaps}
           onChangeFilterQuery={presenter.onChangeFilterQuery}
       />
   ));

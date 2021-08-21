@@ -1,4 +1,3 @@
-import { observer } from 'mobx-react';
 import { createLoginSignupPage } from 'pages/paradb/auth/create';
 import { HttpApi } from 'pages/paradb/base/api/api';
 import { createMapPage, createSubmitMapPage } from 'pages/paradb/map/create';
@@ -18,14 +17,14 @@ export function createApp() {
   const LoginSignupPage = createLoginSignupPage(api, navigate);
   const SubmitMapPage = createSubmitMapPage(api, navigate);
 
-  return observer(() => (
-    <Skeleton
-        history={history}
-        NavBar={NavBar}
-        MapPage={MapPage}
-        MapList={MapList}
-        LoginSignupPage={LoginSignupPage}
-        SubmitMapPage={SubmitMapPage}
-    />
-  ));
+  return () => (
+      <Skeleton
+          history={history}
+          NavBar={NavBar}
+          MapPage={MapPage}
+          MapList={MapList}
+          LoginSignupPage={LoginSignupPage}
+          SubmitMapPage={SubmitMapPage}
+      />
+  );
 }

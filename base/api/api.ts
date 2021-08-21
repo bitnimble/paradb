@@ -1,6 +1,9 @@
+import { Buffer } from 'buffer';
+import { serializationDeps } from 'pages/paradb/base/helpers';
 import {
   deserializeFindMapsResponse,
   deserializeGetMapResponse,
+  deserializeGetUserResponse,
   deserializeLoginResponse,
   deserializeSignupResponse,
   deserializeSubmitMapResponse,
@@ -9,6 +12,8 @@ import {
   GetMapResponse,
   LoginRequest,
   LoginResponse,
+  serializeLoginRequest,
+  serializeSignupRequest,
   serializeSubmitMapRequest,
   SignupRequest,
   SignupResponse,
@@ -28,24 +33,30 @@ export interface Api {
   /* Maps */
   findMaps(): Promise<FindMapsResponse>;
   getMap(req: GetMapRequest): Promise<GetMapResponse>;
-  submitMap(req: SubmitMapRequest, onProgress: (e: ProgressEvent) => void): Promise<SubmitMapResponse>;
+  submitMap(
+      req: SubmitMapRequest,
+      onProgress: (e: ProgressEvent) => void,
+  ): Promise<SubmitMapResponse>;
 }
 
 export class HttpApi implements Api {
-  private apiBase = '/api'
+  private apiBase = '/api';
 
   async login(req: LoginRequest): Promise<LoginResponse> {
-    const resp = await post(path(this.apiBase, 'users', 'login'), req);
-    return deserializeLoginResponse(resp);
+    const bsonReq = serializeLoginRequest(serializationDeps, req);
+    const resp = await post(path(this.apiBase, 'users', 'login'), bsonReq);
+    return deserializeLoginResponse(serializationDeps, resp);
   }
 
   async signup(req: SignupRequest): Promise<SignupResponse> {
-    const resp = await post(path(this.apiBase, 'users', 'signup'), req);
-    return deserializeSignupResponse(resp);
+    const bsonReq = serializeSignupRequest(serializationDeps, req);
+    const resp = await post(path(this.apiBase, 'users', 'signup'), bsonReq);
+    return deserializeSignupResponse(serializationDeps, resp);
   }
 
   async getMe(): Promise<User> {
-    const resp = await get(path(this.apiBase, 'users', 'me'));
+    const bsonResp = await get(path(this.apiBase, 'users', 'me'));
+    const resp = deserializeGetUserResponse(serializationDeps, bsonResp);
     if (!resp.success) {
       throw new Error();
     }
@@ -54,23 +65,26 @@ export class HttpApi implements Api {
 
   async findMaps(): Promise<FindMapsResponse> {
     const resp = await get(path(this.apiBase, 'maps'));
-    return deserializeFindMapsResponse(resp);
+    return deserializeFindMapsResponse(serializationDeps, resp);
   }
 
   async getMap(req: GetMapRequest): Promise<GetMapResponse> {
     const resp = await get(path(this.apiBase, 'maps', req.id));
-    return deserializeGetMapResponse(resp);
+    return deserializeGetMapResponse(serializationDeps, resp);
   }
 
-  async submitMap(req: SubmitMapRequest, onProgress: (e: ProgressEvent) => void): Promise<SubmitMapResponse> {
+  async submitMap(
+      req: SubmitMapRequest,
+      onProgress: (e: ProgressEvent) => void,
+  ): Promise<SubmitMapResponse> {
     return new Promise((res) => {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', path(this.apiBase, 'maps', 'submit'), true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('Content-Type', 'application/bson');
       xhr.upload.onprogress = onProgress;
-      xhr.send(serializeSubmitMapRequest(req));
+      xhr.send(serializeSubmitMapRequest(serializationDeps, req));
       xhr.onload = () => {
-        res(deserializeSubmitMapResponse((xhr.response as string).substr(xssiPrefix.length)));
+        res(deserializeSubmitMapResponse(serializationDeps, xhr.response));
       };
     });
   }
@@ -79,24 +93,23 @@ export class HttpApi implements Api {
 function path(...parts: string[]) {
   return [
     ...parts.slice(0, parts.length - 1).map((part, i) => part.endsWith('/') ? part : `${part}/`),
-    parts[parts.length - 1]
+    parts[parts.length - 1],
   ].join('');
 }
 
-const xssiPrefix = '\'"])}while(1);</x>//';
-async function get(path: string): Promise<any> {
+async function get(path: string): Promise<Buffer> {
   const resp = await fetch(path);
-  const text = await resp.text();
-  return JSON.parse(text.substr(xssiPrefix.length));
+  const buf = await resp.arrayBuffer();
+  return Buffer.from(buf);
 }
-async function post(path: string, body: object): Promise<any> {
+async function post(path: string, body: Buffer): Promise<Buffer> {
   const resp = await fetch(path, {
     method: 'POST',
     headers: {
-      ['Content-Type']: 'application/json',
+      ['Content-Type']: 'application/bson',
     },
-    body: JSON.stringify(body),
+    body,
   });
-  const text = await resp.text();
-  return JSON.parse(text.substr(xssiPrefix.length));
+  const buf = await resp.arrayBuffer();
+  return Buffer.from(buf);
 }
