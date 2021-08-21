@@ -4,5 +4,8 @@
     ".",
     "../../base",
     "../../../config"
+  ],
+  "exclude": [
+    "fallback"
   ]
 }
