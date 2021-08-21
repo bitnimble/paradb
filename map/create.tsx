@@ -28,9 +28,9 @@ export function createMapPage(api: Api) {
     });
 
     return (
-      <MapPage
-        map={store.map}
-      />
+        <MapPage
+            map={store.map}
+        />
     );
   });
 }
@@ -52,13 +52,13 @@ export function createSubmitMapPage(api: Api, navigate: Navigate) {
     });
 
     return (
-      <SubmitMapPage
-        filenames={store.filenames}
-        uploadProgress={uploader.uploadProgress}
-        isSubmitting={uploader.isUploading}
-        onChangeData={presenter.onChangeData}
-        onSubmit={presenter.submit}
-      />
+        <SubmitMapPage
+            filenames={store.filenames}
+            uploadProgress={uploader.uploadProgress}
+            isSubmitting={uploader.isUploading}
+            onChangeData={presenter.onChangeData}
+            onSubmit={presenter.submit}
+        />
     );
   });
 }

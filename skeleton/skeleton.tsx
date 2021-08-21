@@ -1,6 +1,5 @@
 import { History } from 'history';
 import { observer } from 'mobx-react';
-import { serializationDeps } from 'pages/paradb/base/helpers';
 import { NotFound } from 'pages/paradb/router/not_found';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
 import { deserializeMap, PDMap } from 'paradb-api-schema';
@@ -40,7 +39,7 @@ export class Skeleton extends React.Component<SkeletonProps> {
                       && <MapPage
                           id={match.params.id}
                           map={location.state != null
-                              ? deserializeMap(serializationDeps, location.state)
+                              ? deserializeMap(location.state)
                               : undefined}
                       />
                   )}

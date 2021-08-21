@@ -9,7 +9,7 @@ import styles from './submit_map.css';
 
 type SubmitMapPageProps = {
   filenames: string[],
-  uploadProgress: ({ name: string, progress: number })[],
+  uploadProgress: ({ name: string, progress: number | undefined })[],
   isSubmitting: boolean,
   onChangeData(files: FileList): void,
   onSubmit(): void,
@@ -86,12 +86,14 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
     );
   }
 
-  private renderProgressBar(progress: number) {
-    if (progress === 100) {
-      return <div>Done.</div>;
+  private renderProgressBar(progress: number | undefined) {
+    if (progress == null) {
+      return <div className={styles.progressContainer}>Pending</div>;
+    } else if (progress === 1) {
+      return <div className={styles.progressContainer}>Done</div>;
     }
     return (
-        <div className={styles.progressContainer}>
+        <div className={classNames(styles.progressContainer, styles.progressBar)}>
           <div
               className={classNames(styles.progressInner, progress === -1 && styles.progressError)}
               style={{ width: `${progress * 100}%` }}
@@ -109,14 +111,12 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
               ? (
                   <div className={classNames(styles.fileContainer, styles.hasMapData)}>
                     <div className={styles.filenames}>
-                      <T.Small>
-                        {uploadProgress.map(p => (
-                            <div className={styles.uploadProgress}>
-                              <span>{p.name}</span>
-                              {this.renderProgressBar(p.progress)}
-                            </div>
-                        ))}
-                      </T.Small>
+                      {uploadProgress.map(p => (
+                          <T.Small className={styles.uploadProgress}>
+                            <span>{p.name}</span>
+                            {this.renderProgressBar(p.progress)}
+                          </T.Small>
+                      ))}
                     </div>
                   </div>
               )

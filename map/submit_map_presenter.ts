@@ -8,7 +8,6 @@ import { RoutePath } from 'pages/paradb/router/routes';
 import { SubmitMapSuccess } from 'paradb-api-schema';
 
 export const zipTypes = ['application/zip', 'application/x-zip', 'application/x-zip-compressed'];
-const zipPrefixes = zipTypes.map(t => `data:${t};base64,`);
 
 type UploadState = {
   file: File,
@@ -16,7 +15,7 @@ type UploadState = {
   progress: number,
 };
 
-const MAX_CONNECTIONS = 4;
+const MAX_CONNECTIONS = 10;
 export class ThrottledMapUploader {
   @observable.deep
   private readonly uploads = new Map<string, UploadState>();
@@ -38,18 +37,14 @@ export class ThrottledMapUploader {
   }
 
   @computed
-  get uploadProgress() {
+  private get queuedDoneErrorProgress() {
     const queued = [...this.queue.values()].map(f => ({
       name: f.name,
-      progress: 0,
-    }));
-    const uploading = [...this.uploads.values()].map(s => ({
-      name: s.file.name,
-      progress: s.progress,
+      progress: undefined,
     }));
     const done = [...this.successes.keys()].map(filename => ({
       name: filename,
-      progress: 100,
+      progress: 1,
     }));
     const errors = [...this.errors.keys()].map(filename => ({
       name: filename,
@@ -57,41 +52,24 @@ export class ThrottledMapUploader {
     }));
     return [
       ...queued,
-      ...uploading,
       ...done,
       ...errors,
+    ];
+  }
+
+  @computed
+  get uploadProgress() {
+    const uploading = [...this.uploads.values()].map(s => ({
+      name: s.file.name,
+      progress: s.progress,
+    }));
+    return [
+      ...uploading,
+      ...this.queuedDoneErrorProgress,
     ].sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  private asBase64(file: File): Promise<string | undefined> {
-    return new Promise(async (res) => {
-      const fileReader = new FileReader();
-      fileReader.onload = () => {
-        res(fileReader.result?.toString());
-      };
-      fileReader.onerror = () => {
-        res(undefined);
-      };
-      fileReader.readAsDataURL(file);
-    });
-  }
-
-  private async fileToMapData(file: File) {
-    const maybeMapData = await this.asBase64(checkExists(file));
-    if (maybeMapData == null) {
-      this.errors.set(file.name, 'Unknown error.');
-      return;
-    }
-    let mapData = checkExists(maybeMapData);
-    const prefix = zipPrefixes.find(p => mapData.startsWith(p));
-    if (!prefix) {
-      this.errors.set(file.name, 'Not a valid zipped map.');
-      return;
-    }
-    mapData = mapData.substr(prefix.length);
-    return mapData;
-  }
-
+  @action.bound
   private getNextInQueue(): [string, File] | undefined {
     const entry: [string, File] = this.queue.entries().next().value;
     if (!entry) {
@@ -115,25 +93,32 @@ export class ThrottledMapUploader {
         progress: 0,
       });
     });
-    const mapData = await this.fileToMapData(file);
-    if (!mapData) {
-      return;
-    }
     // Re-retrieve the observable wrapped version
     const state = checkExists(this.uploads.get(id));
     const onProgress = action((e: ProgressEvent) => {
-      state.progress = Math.round(e.loaded / e.total);
+      state.progress = e.loaded / e.total;
     });
-    const resp = await this.api.submitMap({ mapData }, onProgress);
-    if (resp.success) {
-      this.successes.set(file.name, resp);
-    } else {
-      this.errors.set(file.name, resp.errorMessage);
+    const mapData = new Uint8Array(await file.arrayBuffer());
+    try {
+      const resp = await this.api.submitMap({ mapData }, onProgress);
+      runInAction(() => {
+        if (resp.success) {
+          this.successes.set(file.name, resp);
+        } else {
+          this.errors.set(file.name, resp.errorMessage);
+        }
+      });
+    } catch (e) {
+      runInAction(() => {
+        this.errors.set(file.name, 'Unknown error');
+        console.error(JSON.stringify(e));
+      });
+    } finally {
+      runInAction(() => {
+        state.isSubmitting = false;
+        this.uploads.delete(id);
+      });
     }
-    runInAction(() => {
-      state.isSubmitting = false;
-      this.uploads.delete(id);
-    });
   }
 
   async start() {
@@ -142,28 +127,31 @@ export class ThrottledMapUploader {
     return new Promise<[string[], string[]]>((res) => {
       const intervalHandler = setInterval(() => {
         // Work on the next queue item
-        if (this.queue.size === 0) {
+        if (this.queue.size === 0 && this.uploads.size === 0) {
           clearInterval(intervalHandler);
           res([
             [...this.successes.values()].map(r => r.id),
             [...this.errors.values()],
           ]);
-        } else if (this.uploads.size < MAX_CONNECTIONS) {
+        } else if (this.queue.size && this.uploads.size < MAX_CONNECTIONS) {
           this.processQueue();
         }
       }, 500);
     });
   }
 
+  @action.bound
   addFile(file: File) {
     const id = nanoid.nanoid();
     this.queue.set(id, file);
   }
 
+  @action.bound
   addFiles(files: File[]) {
     files.forEach(f => this.addFile(f));
   }
 
+  @action.bound
   reset() {
     this.uploads.clear();
     this.queue.clear();

@@ -1,5 +1,4 @@
 import { observer } from 'mobx-react';
-import { serializationDeps } from 'pages/paradb/base/helpers';
 import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
 import { Textbox } from 'pages/paradb/base/ui/textbox/textbox';
@@ -44,7 +43,7 @@ export class MapList extends React.Component<Props> {
                 <RouteLink
                     to={{
                       pathname: routeFor([RoutePath.MAP, m.id]),
-                      state: serializeMap(serializationDeps, m),
+                      state: serializeMap(m),
                     }}
                 >
                   <div className={styles.map}>

@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-import { serializationDeps } from 'pages/paradb/base/helpers';
 import {
   deserializeFindMapsResponse,
   deserializeGetMapResponse,
@@ -43,20 +41,20 @@ export class HttpApi implements Api {
   private apiBase = '/api';
 
   async login(req: LoginRequest): Promise<LoginResponse> {
-    const bsonReq = serializeLoginRequest(serializationDeps, req);
+    const bsonReq = serializeLoginRequest(req);
     const resp = await post(path(this.apiBase, 'users', 'login'), bsonReq);
-    return deserializeLoginResponse(serializationDeps, resp);
+    return deserializeLoginResponse(resp);
   }
 
   async signup(req: SignupRequest): Promise<SignupResponse> {
-    const bsonReq = serializeSignupRequest(serializationDeps, req);
+    const bsonReq = serializeSignupRequest(req);
     const resp = await post(path(this.apiBase, 'users', 'signup'), bsonReq);
-    return deserializeSignupResponse(serializationDeps, resp);
+    return deserializeSignupResponse(resp);
   }
 
   async getMe(): Promise<User> {
     const bsonResp = await get(path(this.apiBase, 'users', 'me'));
-    const resp = deserializeGetUserResponse(serializationDeps, bsonResp);
+    const resp = deserializeGetUserResponse(bsonResp);
     if (!resp.success) {
       throw new Error();
     }
@@ -65,27 +63,33 @@ export class HttpApi implements Api {
 
   async findMaps(): Promise<FindMapsResponse> {
     const resp = await get(path(this.apiBase, 'maps'));
-    return deserializeFindMapsResponse(serializationDeps, resp);
+    return deserializeFindMapsResponse(resp);
   }
 
   async getMap(req: GetMapRequest): Promise<GetMapResponse> {
     const resp = await get(path(this.apiBase, 'maps', req.id));
-    return deserializeGetMapResponse(serializationDeps, resp);
+    return deserializeGetMapResponse(resp);
   }
 
   async submitMap(
       req: SubmitMapRequest,
       onProgress: (e: ProgressEvent) => void,
   ): Promise<SubmitMapResponse> {
-    return new Promise((res) => {
+    return new Promise((res, rej) => {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', path(this.apiBase, 'maps', 'submit'), true);
-      xhr.setRequestHeader('Content-Type', 'application/bson');
-      xhr.upload.onprogress = onProgress;
-      xhr.send(serializeSubmitMapRequest(serializationDeps, req));
+      xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+      xhr.responseType = 'arraybuffer';
+      xhr.upload.addEventListener('progress', onProgress);
       xhr.onload = () => {
-        res(deserializeSubmitMapResponse(serializationDeps, xhr.response));
+        const resp = new Uint8Array(xhr.response);
+        res(deserializeSubmitMapResponse(resp));
       };
+      xhr.onerror = () => {
+        rej();
+      };
+      const serialized = serializeSubmitMapRequest(req);
+      xhr.send(serialized);
     });
   }
 }
@@ -97,19 +101,19 @@ function path(...parts: string[]) {
   ].join('');
 }
 
-async function get(path: string): Promise<Buffer> {
+async function get(path: string): Promise<Uint8Array> {
   const resp = await fetch(path);
   const buf = await resp.arrayBuffer();
-  return Buffer.from(buf);
+  return new Uint8Array(buf);
 }
-async function post(path: string, body: Buffer): Promise<Buffer> {
+async function post(path: string, body: Uint8Array): Promise<Uint8Array> {
   const resp = await fetch(path, {
     method: 'POST',
     headers: {
-      ['Content-Type']: 'application/bson',
+      ['Content-Type']: 'application/octet-stream',
     },
     body,
   });
   const buf = await resp.arrayBuffer();
-  return Buffer.from(buf);
+  return new Uint8Array(buf);
 }

@@ -6,9 +6,7 @@ import './defaults.css';
 
 const App = createApp();
 configure({
-  computedRequiresReaction: true,
   reactionRequiresObservable: true,
-  observableRequiresReaction: true,
   enforceActions: 'observed',
 });
 
