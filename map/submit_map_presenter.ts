@@ -15,7 +15,7 @@ type UploadState = {
   progress: number,
 };
 
-const MAX_CONNECTIONS = 10;
+const MAX_CONNECTIONS = 4;
 export class ThrottledMapUploader {
   @observable.deep
   private readonly uploads = new Map<string, UploadState>();
