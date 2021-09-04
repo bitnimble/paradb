@@ -26,20 +26,32 @@ const colorMap: Record<TextColor, string> = {
   'white': styles.textColorWhite,
   'grey': styles.textColorGrey,
   'purple': styles.textColorPurple,
-}
+};
 
 export type TextProps = {
-  className?: string;
-  children: React.ReactNode;
-  color?: TextColor;
-  style?: TextStyle;
-  weight?: TextWeight;
-}
+  className?: string,
+  children: React.ReactNode,
+  color?: TextColor,
+  style?: TextStyle,
+  weight?: TextWeight,
+};
 
 function createTextClass(className: string) {
-  return ({ className: classNameProp, children, color = 'black', style = 'regular', weight = 'regular' }: TextProps) => (
-    <span className={classNames(classNameProp, styles.text, className, styleMap[style], weightMap[weight], colorMap[color])}>{children}</span>
-  );
+  return ({ className: classNameProp, color, children, style = 'regular', weight = 'regular' }:
+      TextProps) => (
+        <span
+            className={classNames(
+                classNameProp,
+                styles.text,
+                className,
+                styleMap[style],
+                weightMap[weight],
+                color && colorMap[color],
+            )}
+        >
+          {children}
+        </span>
+    );
 }
 
 export namespace T {

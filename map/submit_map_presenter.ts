@@ -229,9 +229,9 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     if (errors.length !== 0) {
       // TODO: show errors
     } else if (ids.length === 1) {
-      this.navigate([RoutePath.MAP, ids[0]]);
+      this.navigate([RoutePath.MAP, ids[0]], true);
     } else {
-      this.navigate([RoutePath.MAP_LIST]);
+      this.navigate([RoutePath.MAP_LIST], true);
     }
   };
 }

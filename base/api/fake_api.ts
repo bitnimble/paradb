@@ -1,6 +1,6 @@
 import {
+  DeleteMapResponse,
   FindMapsResponse,
-  GetMapRequest,
   GetMapResponse,
   LoginRequest,
   LoginResponse,
@@ -19,7 +19,7 @@ async function delay(ms: number = DELAY) {
   return new Promise<void>(res => {
     setTimeout(() => res(), ms);
   });
-};
+}
 
 export class FakeApi implements Api {
   async login(req: LoginRequest): Promise<LoginResponse> {
@@ -41,9 +41,9 @@ export class FakeApi implements Api {
       maps: fakeMaps,
     };
   }
-  async getMap(req: GetMapRequest): Promise<GetMapResponse> {
+  async getMap(id: string): Promise<GetMapResponse> {
     await delay(1000);
-    const map = fakeMaps.find(m => m.id === req.id);
+    const map = fakeMaps.find(m => m.id === id);
     if (map) {
       return {
         success: true,
@@ -51,8 +51,22 @@ export class FakeApi implements Api {
       };
     }
     // TODO: fake http errors
-    throw new Error(`Could not find map with ID ${req.id}`);
+    throw new Error(`Could not find map with ID ${id}`);
   }
+  async deleteMap(id: string): Promise<DeleteMapResponse> {
+    await delay(1000);
+    const index = fakeMaps.findIndex(m => m.id === id);
+    if (index === -1) {
+      return {
+        success: false,
+        errorMessage: 'Missing map',
+        statusCode: 404,
+      };
+    }
+    fakeMaps.splice(index, 1);
+    return { success: true };
+  }
+
   async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
     await delay();
     return { success: true, id: allStar.id };
@@ -70,8 +84,8 @@ const allStar: PDMap = {
   complexities: [
     { complexity: 1, complexityName: undefined },
     { complexity: 2, complexityName: undefined },
-    { complexity: 3, complexityName: undefined  },
-    { complexity: 5, complexityName: undefined  },
+    { complexity: 3, complexityName: undefined },
+    { complexity: 5, complexityName: undefined },
   ],
   description: 'Test description',
 };

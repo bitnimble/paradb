@@ -1,8 +1,12 @@
-@value colorWhite, colorPurple, colorGrey from "pages/paradb/base/colors/colors.css";
+@value colorWhite, colorPurple, colorGrey, colorRed from "pages/paradb/base/colors/colors.css";
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
+
+@value regularColor: colorPurple;
+@value errorColor: colorRed;
 
 .a {
     text-decoration: none;
+    color: inherit;
 }
 
 .button {
@@ -10,9 +14,7 @@
     align-items: center;
     justify-content: center;
 
-    font-family: inherit;
     color: inherit;
-    border: 1px solid colorPurple;
     padding: gridBaseline calc(gridBaseline * 2);
     text-decoration: none;
     background: colorWhite;
@@ -21,8 +23,23 @@
 }
 
 .button:hover:not(.disabled) {
-    background: colorPurple;
     color: colorWhite;
+}
+
+.regular.button {
+    border: 1px solid regularColor;
+    color: regularColor;
+}
+.regular.button:hover:not(.disabled) {
+    background: regularColor;
+}
+
+.error.button {
+    border: 1px solid errorColor;
+    color: errorColor;
+}
+.error.button:hover:not(.disabled) {
+    background: errorColor;
 }
 
 .button.disabled {

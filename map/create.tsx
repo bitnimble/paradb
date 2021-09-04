@@ -11,12 +11,13 @@ import {
   ThrottledMapUploader,
 } from 'pages/paradb/map/submit_map_presenter';
 import { Navigate } from 'pages/paradb/router/install';
+import { SessionStore } from 'pages/paradb/session/session_presenter';
 import { PDMap } from 'paradb-api-schema';
 import React from 'react';
 
-export function createMapPage(api: Api) {
+export function createMapPage(api: Api, navigate: Navigate, sessionStore: SessionStore) {
   const store = new MapPageStore();
-  const presenter = new MapPagePresenter(api, store);
+  const presenter = new MapPagePresenter(api, navigate, store);
 
   return observer(({ id, map }: { id: string, map: PDMap | undefined }) => {
     useComponentDidMount(() => {
@@ -27,9 +28,15 @@ export function createMapPage(api: Api) {
       }
     });
 
+    const deleteMap = () => presenter.deleteMap(id);
+
     return (
         <MapPage
             map={store.map}
+            canDelete={map && sessionStore.user && map.uploader === sessionStore.user.id
+                ? true
+                : false}
+            deleteMap={deleteMap}
         />
     );
   });

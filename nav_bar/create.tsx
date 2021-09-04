@@ -1,18 +1,14 @@
 import { observer } from 'mobx-react';
-import { Api } from 'pages/paradb/base/api/api';
 import { useComponentDidMount } from 'pages/paradb/base/helpers';
 import { NavBar } from 'pages/paradb/nav_bar/nav_bar';
-import { NavBarPresenter, NavBarStore } from 'pages/paradb/nav_bar/nav_bar_presenter';
+import { SessionStore } from 'pages/paradb/session/session_presenter';
 import React from 'react';
 
-export function createNavBar(api: Api) {
-  const store = new NavBarStore();
-  const presenter = new NavBarPresenter(api, store);
-
+export function createNavBar(sessionStore: SessionStore, maybeLoadSession: () => void) {
   return observer(() => {
     useComponentDidMount(() => {
-      presenter.getUserInfo();
+      maybeLoadSession();
     });
-    return <NavBar user={store.user}/>
+    return <NavBar user={sessionStore.user}/>;
   });
 }

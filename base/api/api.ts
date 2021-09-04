@@ -1,4 +1,6 @@
 import {
+  DeleteMapResponse,
+  deserializeDeleteMapResponse,
   deserializeFindMapsResponse,
   deserializeGetMapResponse,
   deserializeGetUserResponse,
@@ -6,7 +8,6 @@ import {
   deserializeSignupResponse,
   deserializeSubmitMapResponse,
   FindMapsResponse,
-  GetMapRequest,
   GetMapResponse,
   LoginRequest,
   LoginResponse,
@@ -30,7 +31,8 @@ export interface Api {
 
   /* Maps */
   findMaps(): Promise<FindMapsResponse>;
-  getMap(req: GetMapRequest): Promise<GetMapResponse>;
+  getMap(id: string): Promise<GetMapResponse>;
+  deleteMap(id: string): Promise<DeleteMapResponse>;
   submitMap(
       req: SubmitMapRequest,
       onProgress: (e: ProgressEvent) => void,
@@ -66,9 +68,14 @@ export class HttpApi implements Api {
     return deserializeFindMapsResponse(resp);
   }
 
-  async getMap(req: GetMapRequest): Promise<GetMapResponse> {
-    const resp = await get(path(this.apiBase, 'maps', req.id));
+  async getMap(id: string): Promise<GetMapResponse> {
+    const resp = await get(path(this.apiBase, 'maps', id));
     return deserializeGetMapResponse(resp);
+  }
+
+  async deleteMap(id: string): Promise<DeleteMapResponse> {
+    const resp = await post(path(this.apiBase, 'maps', id, 'delete'));
+    return deserializeDeleteMapResponse(resp);
   }
 
   async submitMap(
@@ -106,7 +113,7 @@ async function get(path: string): Promise<Uint8Array> {
   const buf = await resp.arrayBuffer();
   return new Uint8Array(buf);
 }
-async function post(path: string, body: Uint8Array): Promise<Uint8Array> {
+async function post(path: string, body?: Uint8Array): Promise<Uint8Array> {
   const resp = await fetch(path, {
     method: 'POST',
     headers: {

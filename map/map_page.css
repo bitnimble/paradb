@@ -45,6 +45,14 @@
     margin: calc(gridBaseline * 2) 0;
 }
 
+.actions {
+    margin-top: calc(gridBaseline * 2);
+    display: grid;
+    gap: gridBaseline;
+    grid-auto-flow: column;
+    width: min-content;
+}
+
 @media screen and (min-width: breakpoint) {
     .mapPage {
         flex-direction: row;
