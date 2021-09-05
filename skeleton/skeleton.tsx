@@ -38,7 +38,7 @@ export class Skeleton extends React.Component<SkeletonProps> {
                       match && match.params.id != null
                       && <MapPage
                           id={match.params.id}
-                          map={location.state != null
+                          map={location.state != null && location.state instanceof Uint8Array
                               ? deserializeMap(location.state)
                               : undefined}
                       />
