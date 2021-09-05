@@ -10,7 +10,8 @@ import styles from './submit_map.css';
 type SubmitMapPageProps = {
   filenames: string[],
   uploadProgress: ({ name: string, progress: number | undefined })[],
-  isSubmitting: boolean,
+  isUploading: boolean,
+  showProgressScreen: boolean,
   onChangeData(files: FileList): void,
   onSubmit(): void,
 };
@@ -91,6 +92,8 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
       return <div className={styles.progressContainer}>Pending</div>;
     } else if (progress === 1) {
       return <div className={styles.progressContainer}>Done</div>;
+    } else if (progress === -1) {
+      return <div className={styles.progressContainer}>Error</div>;
     }
     return (
         <div className={classNames(styles.progressContainer, styles.progressBar)}>
@@ -104,15 +107,15 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
   }
 
   render() {
-    const { uploadProgress, isSubmitting, onSubmit } = this.props;
+    const { uploadProgress, isUploading, showProgressScreen, onSubmit } = this.props;
     return (
         <div className={styles.submitMap}>
-          {isSubmitting
+          {showProgressScreen
               ? (
                   <div className={classNames(styles.fileContainer, styles.hasMapData)}>
                     <div className={styles.filenames}>
-                      {uploadProgress.map(p => (
-                          <T.Small className={styles.uploadProgress}>
+                      {uploadProgress.map((p, i) => (
+                          <T.Small key={i} className={styles.uploadProgress}>
                             <span>{p.name}</span>
                             {this.renderProgressBar(p.progress)}
                           </T.Small>
@@ -122,7 +125,9 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
               )
               : this.renderDropInput()}
           <br/>
-          <Button loading={isSubmitting} onClick={onSubmit}>Submit</Button>
+          <Button disabled={showProgressScreen} loading={isUploading} onClick={onSubmit}>
+            Submit
+          </Button>
         </div>
     );
   }

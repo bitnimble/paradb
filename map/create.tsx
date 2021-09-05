@@ -46,23 +46,20 @@ export function createSubmitMapPage(api: Api, navigate: Navigate) {
   const store: SubmitMapStore = new SubmitMapStore();
   const uploader = new ThrottledMapUploader(api);
   const presenter = new SubmitMapPresenter(uploader, navigate, store);
-  let mounted = false;
 
   return observer(() => {
     useComponentDidMount(() => {
-      if (!mounted) {
-        mounted = true;
-      } else {
-        store.reset();
-        uploader.reset();
-      }
+      // Reset the store state whenever we visit the page
+      store.reset();
+      uploader.reset();
     });
 
     return (
         <SubmitMapPage
             filenames={store.filenames}
             uploadProgress={uploader.uploadProgress}
-            isSubmitting={uploader.isUploading}
+            isUploading={uploader.isUploading}
+            showProgressScreen={uploader.isUploading || uploader.hasErrors}
             onChangeData={presenter.onChangeData}
             onSubmit={presenter.submit}
         />

@@ -37,6 +37,11 @@ export class ThrottledMapUploader {
   }
 
   @computed
+  get hasErrors() {
+    return this.errors.size > 0;
+  }
+
+  @computed
   private get queuedDoneErrorProgress() {
     const queued = [...this.queue.values()].map(f => ({
       name: f.name,
