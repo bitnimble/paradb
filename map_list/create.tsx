@@ -85,6 +85,8 @@ export function createMapList(api: Api) {
     fetchData: presenter.loadAllMaps,
     tableClassname: styles.mapListTable,
     rowClassname: styles.mapListRow,
+    defaultSortColumn: 3,
+    defaultSortDirection: 'desc',
   });
 
   return observer(() => (
