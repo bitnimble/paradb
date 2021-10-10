@@ -1,15 +1,32 @@
-@value gridBaseline from 'pages/paradb/base/metrics/metrics.css';
+@value gridBaseline from "pages/paradb/base/metrics/metrics.css";
+@value colorLightGrey, colorPurple from "pages/paradb/base/colors/colors.css";
 
-.mapList {
+@value gutter: calc(gridBaseline * 2);
+
+.filter {
+    padding: gridBaseline gutter;
+}
+
+.mapListTable {
+    padding: 0 gutter;
     color: #666;
 }
 
-.filter {
-    padding: gridBaseline calc(gridBaseline * 2);
+.mapListRow {
+    box-shadow: 0 0 0 1px colorLightGrey;
+    transition: box-shadow 0.05s linear;
 }
 
-.map {
-    border: 1px solid #666;
-    padding: calc(gridBaseline * 2);
-    margin: calc(gridBaseline * 2);
+.mapListRow:hover {
+    box-shadow: 0 0 0 1px colorPurple;
+}
+
+.mapListCell {
+    display: block;
+    padding: calc(gridBaseline * 1.5) gridBaseline;
+}
+
+.uploadDateCell {
+    display: flex;
+    justify-content: center;
 }

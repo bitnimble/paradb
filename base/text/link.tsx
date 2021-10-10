@@ -5,10 +5,15 @@ import { Link, LinkProps } from 'react-router-dom';
 import styles from './link.css';
 
 type RouteLinkProps = {
-  force?: boolean;
-}
+  additionalClassName?: string,
+  force?: boolean,
+};
 
-export const RouteLink = <S extends H.LocationState>(props: LinkProps<S> & React.RefAttributes<HTMLAnchorElement> & RouteLinkProps) =>
-  props.force && typeof props.to === 'string'
-  ? <a href={props.to} className={classNames(props.className, styles.link)}>{props.children}</a>
-  : <Link className={classNames(props.className, styles.link)} {...props}></Link>
+export const RouteLink = <
+    S extends H.LocationState,
+>(props: LinkProps<S> & React.RefAttributes<HTMLAnchorElement> & RouteLinkProps) => {
+  const className = classNames(props.additionalClassName, styles.link);
+  return props.force && typeof props.to === 'string'
+      ? <a href={props.to} className={className}>{props.children}</a>
+      : <Link className={className} {...props}></Link>;
+};

@@ -40,7 +40,7 @@ export class MapListPresenter {
     this.store.filterQuery = val;
   }
 
-  async fetchInitialMaps() {
+  async loadAllMaps() {
     if (this.store.maps != null) {
       return;
     }
