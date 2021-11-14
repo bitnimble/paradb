@@ -19,16 +19,25 @@ export class NavBar extends React.Component<NavBarProps> {
           </RouteLink>
         </T.Large>
         <div className={styles.userStatus}>
+          <span className={styles.menuItem}>
+            <T.Small color="white">
+              <RouteLink to={routeFor([RoutePath.INSTRUCTIONS])}>Install instructions</RouteLink>
+            </T.Small>
+          </span>
           {this.props.user == null
             ? (
-              <T.Small color="white">
-                <RouteLink to={routeFor([RoutePath.LOGIN])}>Login</RouteLink>
-              </T.Small>
+              <span className={styles.menuItem}>
+                <T.Small color="white">
+                  <RouteLink to={routeFor([RoutePath.LOGIN])}>Login</RouteLink>
+                </T.Small>
+              </span>
             )
             : (
-              <T.Small color="white">
-                <RouteLink to={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>Submit map</RouteLink> | Logged in as {this.props.user.username} ({this.props.user.email}) | <RouteLink to={routeFor([RoutePath.LOGOUT])} force={true}>Logout</RouteLink>
-              </T.Small>
+              <span className={styles.menuItem}>
+                <T.Small color="white">
+                  <RouteLink to={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>Submit map</RouteLink> | Logged in as {this.props.user.username} ({this.props.user.email}) | <RouteLink to={routeFor([RoutePath.LOGOUT])} force={true}>Logout</RouteLink>
+                </T.Small>
+              </span>
             )
           }
         </div>

@@ -1,5 +1,6 @@
 import { createLoginSignupPage } from 'pages/paradb/auth/create';
 import { HttpApi } from 'pages/paradb/base/api/api';
+import { createInstructionsPage } from 'pages/paradb/instructions/create';
 import { createMapPage, createSubmitMapPage } from 'pages/paradb/map/create';
 import { createMapList } from 'pages/paradb/map_list/create';
 import { createNavBar } from 'pages/paradb/nav_bar/create';
@@ -20,6 +21,7 @@ export function createApp() {
   const MapList = createMapList(api);
   const LoginSignupPage = createLoginSignupPage(api, navigate);
   const SubmitMapPage = createSubmitMapPage(api, navigate);
+  const InstructionsPage = createInstructionsPage();
 
   return () => (
       <Skeleton
@@ -29,6 +31,7 @@ export function createApp() {
           MapList={MapList}
           LoginSignupPage={LoginSignupPage}
           SubmitMapPage={SubmitMapPage}
+          InstructionsPage={InstructionsPage}
       />
   );
 }
