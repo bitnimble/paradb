@@ -21,3 +21,7 @@
 .userStatus {
     margin-right: calc(gridBaseline * 3);
 }
+
+.menuItem {
+    margin: 0 gridBaseline;
+}

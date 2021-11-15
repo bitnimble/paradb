@@ -5,6 +5,7 @@ export const enum RoutePath {
   LOGOUT = 'logout',
   SIGNUP = 'signup',
   SUBMIT = 'submit',
+  INSTRUCTIONS = 'instructions',
 };
 
 export type RouteSegments =
@@ -14,6 +15,7 @@ export type RouteSegments =
   | [RoutePath.LOGIN]
   | [RoutePath.LOGOUT]
   | [RoutePath.SIGNUP]
+  | [RoutePath.INSTRUCTIONS]
 ;
 
 export const routeFor = (segments: RouteSegments) => {

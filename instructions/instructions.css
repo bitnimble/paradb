@@ -1,0 +1,37 @@
+@value gridBaseline from "pages/paradb/base/metrics/metrics.css";
+@value colorPurple, colorGreyA5 from "pages/paradb/base/colors/colors.css";
+
+.instructions {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: calc(gridBaseline * 120);
+}
+
+.section {
+    margin: calc(gridBaseline * 2) 0;
+}
+
+.inlineCode {
+    font-family: monospace;
+    background-color: colorGreyA5;
+    border: 1px solid colorPurple;
+    padding: calc(gridBaseline / 6) calc(gridBaseline);
+    border-radius: calc(gridBaseline / 2);
+}
+
+.code {
+    font-family: monospace;
+    white-space: pre;
+    background-color: colorGreyA5;
+    border: 1px solid colorPurple;
+    padding: calc(gridBaseline);
+    margin: calc(gridBaseline) 0;
+    border-radius: calc(gridBaseline / 2);
+}
+
+.instructionList li::marker {
+    line-height: 2;
+    font-weight: bold;
+}

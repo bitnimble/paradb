@@ -1,5 +1,5 @@
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
-@value colorPurple, colorRed, colorLightGrey, colorUltraLightGrey from "pages/paradb/base/colors/colors.css";
+@value colorPurple, colorRed, colorGreyA30, colorGreyA5 from "pages/paradb/base/colors/colors.css";
 
 .submitMap {
     height: 100%;
@@ -19,8 +19,8 @@
     padding: calc(gridBaseline * 2);
     border-width: 2px;
     border-style: dashed;
-    border-color: colorLightGrey;
-    background: colorUltraLightGrey;
+    border-color: colorGreyA30;
+    background: colorGreyA5;
     cursor: pointer;
 }
 
@@ -65,7 +65,7 @@
 .progressBar {
     border-radius: calc(gridBaseline / 2);
     overflow: hidden;
-    background: colorLightGrey;
+    background: colorGreyA30;
 }
 
 .progressInner {
