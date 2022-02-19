@@ -47,7 +47,7 @@ export class MapListPresenter {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  toggleMapSelection(tableStore: TableStore<PDMap, 4>, id: string, shiftKeyHeld: boolean) {
+  toggleMapSelection(tableStore: TableStore<PDMap, number>, id: string, shiftKeyHeld: boolean) {
     // Take into account table filtering + sorting, when doing index lookups
     const exists = this.store.selectedMaps.has(id);
     const index = checkExists(tableStore.sortedData).findIndex(m => m.id === id);
