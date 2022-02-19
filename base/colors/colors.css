@@ -4,6 +4,7 @@
 @value colorDarkGrey: #292929;
 @value colorGrey: #666;
 @value colorGreyA30: color(colorGrey a(30%));
+@value colorGreyA15: color(colorGrey a(15%));
 @value colorGreyA5: color(colorGrey a(5%));
 
 @value colorRed: #f00;

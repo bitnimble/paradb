@@ -1,9 +1,13 @@
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
+import { computedFn } from 'mobx-utils';
 import { Api } from 'pages/paradb/base/api/api';
+import { getMapFileLink } from 'pages/paradb/utils/maps';
 import { PDMap } from 'paradb-api-schema';
 
 export class MapListStore {
+  enableBulkSelect = false;
   filterQuery: string = '';
+  selectedMaps = new Set<string>();
 
   /** Private, debounced version of `filterQuery` */
   private filter: string = this.filterQuery;
@@ -29,12 +33,55 @@ export class MapListStore {
         || m.title.toLowerCase().includes(this.filter),
     );
   }
+
+  get allMaps() {
+    return this._maps;
+  }
 }
 
 export class MapListPresenter {
   constructor(private readonly api: Api, private readonly store: MapListStore) {
     makeAutoObservable(this, {}, { autoBind: true });
   }
+
+  toggleMapSelection(id: string) {
+    const exists = this.store.selectedMaps.has(id);
+    if (exists) {
+      this.store.selectedMaps.delete(id);
+    } else {
+      this.store.selectedMaps.add(id);
+    }
+  }
+
+  onClickBulkSelect() {
+    this.store.enableBulkSelect = true;
+  }
+
+  onClickBulkDownload() {
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    document.body.appendChild(a);
+
+    this.store.selectedMaps.forEach(id => {
+      // It's probably faster to just loop and find in the event that they bulk download,
+      // rather than have a cache for ID -> Map.
+      const title = this.store.allMaps?.find(map => map.id === id)?.title;
+      a.setAttribute('href', getMapFileLink(id));
+      a.setAttribute('download', title ? `${title}.zip` : '');
+      a.click();
+    });
+
+    a.remove();
+  }
+
+  onClickCancelBulkSelect() {
+    this.store.enableBulkSelect = false;
+    this.store.selectedMaps.clear();
+  }
+
+  readonly isSelected = computedFn((id: string) => {
+    return this.store.enableBulkSelect && this.store.selectedMaps.has(id)
+  });
 
   onChangeFilterQuery(val: string) {
     this.store.filterQuery = val;

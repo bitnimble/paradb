@@ -1,5 +1,6 @@
 import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
+import { getMapFileLink } from 'pages/paradb/utils/maps';
 import { Complexity, PDMap } from 'paradb-api-schema';
 import React from 'react';
 import styles from './map_page.css';
@@ -48,7 +49,7 @@ export class MapPage extends React.Component<Props> {
 
   private get downloadLink() {
     return this.props.map
-        ? `/static/map_data/${this.props.map.id}.zip`
+        ? getMapFileLink(this.props.map.id)
         : undefined;
   }
 

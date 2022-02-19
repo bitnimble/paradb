@@ -2,6 +2,7 @@
 
 .loginSignup {
     display: flex;
+    gap: gridBaseline;
     margin: auto;
     flex-direction: column;
     justify-content: center;

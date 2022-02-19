@@ -1,7 +1,7 @@
 import { createTable } from 'base/table/create';
 import { Row } from 'base/table/table';
 import classNames from 'classnames';
-import { computed } from 'mobx';
+import { action, computed } from 'mobx';
 import { observer } from 'mobx-react';
 import { Api } from 'pages/paradb/base/api/api';
 import { RouteLink } from 'pages/paradb/base/text/link';
@@ -35,6 +35,14 @@ export function createMapList(api: Api) {
   const presenter = new MapListPresenter(api, store);
 
   const getRow = (map: PDMap): Row<4> => {
+    const onSelect = action((e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!store.enableBulkSelect) {
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      presenter.toggleMapSelection(map.id);
+    });
     const wrapWithMapRoute = (contents: React.ReactNode, additionalClassName?: string) => (
         <RouteLink
             additionalClassName={classNames(styles.mapListCell, additionalClassName)}
@@ -42,11 +50,15 @@ export function createMapList(api: Api) {
               pathname: routeFor([RoutePath.MAP, map.id]),
               state: serializeMap(map),
             }}
+            onClick={onSelect}
         >
           {contents}
         </RouteLink>
     );
     return {
+      className: classNames({
+        [styles.mapListRowSelected]: presenter.isSelected(map.id),
+      }),
       Cells: [
         React.memo(() => wrapWithMapRoute(<T.Small>{map.title}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.artist}</T.Small>)),
@@ -92,8 +104,13 @@ export function createMapList(api: Api) {
   return observer(() => (
       <MapList
           Table={Table}
+          bulkSelectEnabled={store.enableBulkSelect}
+          selectionCount={store.selectedMaps.size}
           filterQuery={store.filterQuery}
           onMount={presenter.loadAllMaps}
+          onClickBulkSelect={presenter.onClickBulkSelect}
+          onClickBulkDownload={presenter.onClickBulkDownload}
+          onClickCancelBulkSelect={presenter.onClickCancelBulkSelect}
           onChangeFilterQuery={presenter.onChangeFilterQuery}
       />
   ));
