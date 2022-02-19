@@ -41,7 +41,7 @@ export function createMapList(api: Api) {
       }
       e.preventDefault();
       e.stopPropagation();
-      presenter.toggleMapSelection(map.id);
+      presenter.toggleMapSelection(tableStore, map.id, e.shiftKey);
     });
     const wrapWithMapRoute = (contents: React.ReactNode, additionalClassName?: string) => (
         <RouteLink
@@ -73,7 +73,7 @@ export function createMapList(api: Api) {
     };
   };
 
-  const Table = createTable({
+  const { store: tableStore, Component: Table } = createTable({
     data: computed(() => store.maps),
     columns: [
       {
@@ -95,6 +95,7 @@ export function createMapList(api: Api) {
     ],
     rowMapper: getRow,
     fetchData: presenter.loadAllMaps,
+    onSortChange: presenter.onTableSortChange,
     tableClassname: styles.mapListTable,
     rowClassname: styles.mapListRow,
     defaultSortColumn: 3,

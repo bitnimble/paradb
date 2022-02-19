@@ -1,3 +1,5 @@
+import { checkExists } from 'base/preconditions';
+import { TableStore } from 'base/table/table_presenter';
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
 import { computedFn } from 'mobx-utils';
 import { Api } from 'pages/paradb/base/api/api';
@@ -8,6 +10,7 @@ export class MapListStore {
   enableBulkSelect = false;
   filterQuery: string = '';
   selectedMaps = new Set<string>();
+  lastSelectedMapIndex: number | undefined;
 
   /** Private, debounced version of `filterQuery` */
   private filter: string = this.filterQuery;
@@ -44,12 +47,24 @@ export class MapListPresenter {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  toggleMapSelection(id: string) {
+  toggleMapSelection(tableStore: TableStore<PDMap, 4>, id: string, shiftKeyHeld: boolean) {
+    // Take into account table filtering + sorting, when doing index lookups
     const exists = this.store.selectedMaps.has(id);
-    if (exists) {
-      this.store.selectedMaps.delete(id);
+    const index = checkExists(tableStore.sortedData).findIndex(m => m.id === id);
+
+    if (shiftKeyHeld && this.store.lastSelectedMapIndex != null && index > this.store.lastSelectedMapIndex) {
+      for (let i = this.store.lastSelectedMapIndex + 1; i <= index; i++) {
+        this.store.selectedMaps.add(checkExists(tableStore.sortedData)[i].id);
+      }
+      this.store.lastSelectedMapIndex = index;
     } else {
-      this.store.selectedMaps.add(id);
+      if (exists) {
+        this.store.selectedMaps.delete(id);
+        this.store.lastSelectedMapIndex = undefined;
+      } else {
+        this.store.selectedMaps.add(id);
+        this.store.lastSelectedMapIndex = index;
+      }
     }
   }
 
@@ -85,6 +100,11 @@ export class MapListPresenter {
 
   onChangeFilterQuery(val: string) {
     this.store.filterQuery = val;
+    this.store.lastSelectedMapIndex = undefined;
+  }
+
+  onTableSortChange() {
+    this.store.lastSelectedMapIndex = undefined;
   }
 
   async loadAllMaps() {
