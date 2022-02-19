@@ -2,7 +2,6 @@
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
 
 .container {
-    margin-top: gridBaseline;
     display: flex;
     flex-direction: column;
 }

@@ -31,7 +31,6 @@ export const Button = (props: ButtonProps) => {
   } = props;
 
   const _onClick = () => onClick?.();
-  const textColor = style === 'error' ? 'red' : 'purple';
   return link
       ? (
           <div
@@ -70,6 +69,7 @@ export const Button = (props: ButtonProps) => {
                               styles.loadingSpinner,
                           )}
                       >
+                        {/* These divs are styled via 'loading.css'. */}
                         <div></div>
                         <div></div>
                         <div></div>

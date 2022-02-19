@@ -1,9 +1,19 @@
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
-@value colorLightGrey, colorPurple from "pages/paradb/base/colors/colors.css";
+@value colorGreyA15, colorPurple from "pages/paradb/base/colors/colors.css";
 
 @value gutter: calc(gridBaseline * 2);
 
 .filter {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+    border-bottom: 1px solid colorGreyA15;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-flow: column;
+    gap: gridBaseline;
     padding: gridBaseline gutter;
 }
 
@@ -13,12 +23,44 @@
 }
 
 .mapListRow {
-    box-shadow: 0 0 0 1px colorLightGrey;
+    position: relative;
+    box-shadow: 0 0 0 1px transparent;
     transition: box-shadow 0.05s linear;
 }
 
-.mapListRow:hover {
+.mapListRow:hover, .bulkSelectEnabled .mapListRow:hover {
     box-shadow: 0 0 0 1px colorPurple;
+}
+
+.bulkSelectEnabled .mapListRow {
+    box-shadow: 0 0 0 1px colorGreyA15;
+}
+
+.bulkSelectEnabled .mapListRow::after {
+    content: '';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    right: gridBaseline;
+    transform: translateY(-50%);
+    width: calc(gridBaseline * 3);
+    height: calc(gridBaseline * 3);
+    border: 1px solid colorGreyA15;
+    pointer-events: none;
+}
+
+.bulkSelectEnabled .mapListRow.mapListRowSelected::after {
+    content: '✔';
+    color: colorPurple;
+    font-weight: bolder;
+    font-size: 20px;
+    border: 2px solid colorPurple;
+}
+
+.bulkSelectEnabled .mapListRowSelected, .bulkSelectEnabled .mapListRowSelected:hover {
+    box-shadow: 0 0 0 2px colorPurple;
 }
 
 .mapListCell {
