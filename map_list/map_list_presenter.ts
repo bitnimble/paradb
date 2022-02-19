@@ -49,7 +49,6 @@ export class MapListPresenter {
 
   toggleMapSelection(tableStore: TableStore<PDMap, number>, id: string, shiftKeyHeld: boolean) {
     // Take into account table filtering + sorting, when doing index lookups
-    const exists = this.store.selectedMaps.has(id);
     const index = checkExists(tableStore.sortedData).findIndex(m => m.id === id);
 
     if (shiftKeyHeld && this.store.lastSelectedMapIndex != null && index > this.store.lastSelectedMapIndex) {
@@ -58,7 +57,7 @@ export class MapListPresenter {
       }
       this.store.lastSelectedMapIndex = index;
     } else {
-      if (exists) {
+      if (this.store.selectedMaps.has(id)) {
         this.store.selectedMaps.delete(id);
         this.store.lastSelectedMapIndex = undefined;
       } else {
