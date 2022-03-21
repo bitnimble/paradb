@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import { Button } from 'pages/paradb/base/ui/button/button';
 import { Textbox } from 'pages/paradb/base/ui/textbox/textbox';
+import { Complexity } from 'paradb-api-schema';
 import React from 'react';
 import styles from './map_list.css';
 
@@ -16,6 +17,31 @@ type Props = {
   onClickCancelBulkSelect(): void,
   onChangeFilterQuery(val: string): void,
 };
+
+function getComplexityColor(complexity: number) {
+  switch (complexity) {
+    case 1:
+      return 'green';
+    case 2:
+      return 'yellow';
+    case 3:
+      return 'orange';
+    case 4:
+      return 'red';
+    case 5:
+      return 'black';
+    default:
+      throw new Error(`Did not expect complexity level ${complexity}`);
+  }
+}
+
+export const ComplexityColorPills = (props: { complexities: Complexity[] }) => (
+  <div className={styles.complexities}>
+    {props.complexities.map((c, i) => (
+        <div key={i} className={styles.complexityColorPill} style={{ backgroundColor: getComplexityColor(c.complexity)}}></div>
+    ))}
+  </div>
+);
 
 @observer
 export class MapList extends React.Component<Props> {
