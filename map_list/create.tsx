@@ -105,7 +105,7 @@ export function createMapList(api: Api) {
     onSortChange: presenter.onTableSortChange,
     tableClassname: styles.mapListTable,
     rowClassname: styles.mapListRow,
-    defaultSortColumn: 3,
+    defaultSortColumn: 4,
     defaultSortDirection: 'desc',
   });
 
