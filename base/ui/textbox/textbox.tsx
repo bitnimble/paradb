@@ -34,7 +34,7 @@ export const Textbox = (props: TextboxProps) => {
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) =>
       props.onSubmit != null && e.key === 'Enter' && props.onSubmit();
   const inputProps = {
-    className: classNames(styles.textbox),
+    className: styles.textbox,
     type: props.inputType || 'text',
     readOnly: props.readOnly,
     value: props.value,
