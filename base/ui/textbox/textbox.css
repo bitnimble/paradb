@@ -1,4 +1,4 @@
-@value colorRed, colorGrey, colorPurple from "pages/paradb/base/colors/colors.css";
+@value colorRed, colorGrey, colorGreyA15, colorPurple from "pages/paradb/base/colors/colors.css";
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
 
 .container {
@@ -20,6 +20,10 @@
     border-color: colorPurple;
 }
 
+.readOnly {
+    background-color: colorGreyA15;
+}
+
 .textbox {
     flex: 1;
     border: none;
@@ -31,6 +35,9 @@
 
     height: 100%;
     resize: vertical;
+}
+.readOnly .textbox {
+    background: transparent;
 }
 
 .errorContainer .textboxBorder {

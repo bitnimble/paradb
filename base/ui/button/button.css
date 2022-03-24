@@ -47,7 +47,7 @@
     position: relative;
     border: 1px solid successColor;
     background: successColor;
-    color: white;
+    color: colorWhite;
 }
 .success.button:hover:not(.disabled) {
     margin: -1px;

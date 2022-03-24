@@ -33,16 +33,14 @@ export const Textbox = (props: TextboxProps) => {
       props.onChange(target.value);
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) =>
       props.onSubmit != null && e.key === 'Enter' && props.onSubmit();
-  const backgroundColor = props.readOnly ? 'lightgrey' : undefined;
   const inputProps = {
-    className: styles.textbox,
+    className: classNames(styles.textbox),
     type: props.inputType || 'text',
     readOnly: props.readOnly,
     value: props.value,
     placeholder: props.placeholder,
     title: props.tooltip,
     style: {
-      backgroundColor,
       cursor: props.readOnly ? 'not-allowed' : undefined,
     },
     onChange,
@@ -61,11 +59,8 @@ export const Textbox = (props: TextboxProps) => {
             </span>
         )}
         <div
-            className={classNames(styles.textboxBorder, borderColors[props.borderColor || 'grey'])}
-            style={{
-              borderWidth: `${props.borderWidth || 1}px`,
-              backgroundColor,
-            }}
+            className={classNames(styles.textboxBorder, borderColors[props.borderColor || 'grey'], props.readOnly && styles.readOnly)}
+            style={{ borderWidth: `${props.borderWidth || 1}px` }}
         >
           {props.search && searchIcon}
           {props.inputType === 'area'
