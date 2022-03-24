@@ -9,6 +9,6 @@ export function createNavBar(sessionStore: SessionStore, maybeLoadSession: () =>
     useComponentDidMount(() => {
       maybeLoadSession();
     });
-    return <NavBar user={sessionStore.user} />;
+    return <NavBar user={sessionStore.user}/>;
   });
 }

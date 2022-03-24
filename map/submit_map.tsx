@@ -126,7 +126,7 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
             </div>
           )
           : this.renderDropInput()}
-        <br />
+        <br/>
         <Button disabled={showProgressScreen} loading={isUploading} onClick={onSubmit}>
           Submit
         </Button>

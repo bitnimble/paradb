@@ -35,14 +35,14 @@ export class Skeleton extends React.Component<SkeletonProps> {
     return (
       <Router history={history}>
         <div className={styles.skeleton}>
-          <NavBar />
+          <NavBar/>
           <div className={styles.content}>
             <Switch>
               <Route path={routeFor([RoutePath.MAP_LIST])} exact={true}>
-                <MapList />
+                <MapList/>
               </Route>
               <Route path={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>
-                <SubmitMapPage />
+                <SubmitMapPage/>
               </Route>
               <Route path={routeFor([RoutePath.MAP, ':id'])}>
                 {({ match, location }) => (match && match
@@ -59,19 +59,19 @@ export class Skeleton extends React.Component<SkeletonProps> {
                 ))}
               </Route>
               <Route path={routeFor([RoutePath.LOGIN])}>
-                <LoginSignupPage mode="login" />
+                <LoginSignupPage mode="login"/>
               </Route>
               <Route path={routeFor([RoutePath.SETTINGS])}>
-                <SettingsPage />
+                <SettingsPage/>
               </Route>
               <Route path={routeFor([RoutePath.SIGNUP])}>
-                <LoginSignupPage mode="signup" />
+                <LoginSignupPage mode="signup"/>
               </Route>
               <Route path={routeFor([RoutePath.INSTRUCTIONS])}>
-                <InstructionsPage />
+                <InstructionsPage/>
               </Route>
               <Route>
-                <NotFound />
+                <NotFound/>
               </Route>
             </Switch>
           </div>

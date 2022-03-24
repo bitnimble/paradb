@@ -7,4 +7,4 @@ import './defaults.css';
 const App = createApp();
 configure({ reactionRequiresObservable: true, enforceActions: 'observed' });
 
-ReactDOM.render(<App />, document.getElementById('app'));
+ReactDOM.render(<App/>, document.getElementById('app'));

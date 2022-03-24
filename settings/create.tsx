@@ -13,7 +13,7 @@ export function createSettingsPage(api: Api, navigate: Navigate, sessionStore: S
 
   return observer(() =>
     sessionStore.user
-      ? <Settings user={sessionStore.user} store={store} presenter={presenter} />
+      ? <Settings user={sessionStore.user} store={store} presenter={presenter}/>
       : null
   );
 }
