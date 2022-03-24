@@ -9,7 +9,9 @@ type TextboxBorderColor = 'grey' | 'purple';
 export type TextboxProps = {
   className?: string,
   required?: boolean,
+  readOnly?: boolean,
   label?: string,
+  tooltip?: string,
   search?: boolean,
   placeholder?: string,
   borderColor?: TextboxBorderColor,
@@ -34,8 +36,13 @@ export const Textbox = (props: TextboxProps) => {
   const inputProps = {
     className: styles.textbox,
     type: props.inputType || 'text',
+    readOnly: props.readOnly,
     value: props.value,
     placeholder: props.placeholder,
+    title: props.tooltip,
+    style: {
+      cursor: props.readOnly ? 'not-allowed' : undefined,
+    },
     onChange,
     onKeyDown,
   };
@@ -52,10 +59,8 @@ export const Textbox = (props: TextboxProps) => {
             </span>
         )}
         <div
-            className={classNames(styles.textboxBorder, borderColors[props.borderColor || 'grey'])}
-            style={{
-              borderWidth: `${props.borderWidth || 1}px`,
-            }}
+            className={classNames(styles.textboxBorder, borderColors[props.borderColor || 'grey'], props.readOnly && styles.readOnly)}
+            style={{ borderWidth: `${props.borderWidth || 1}px` }}
         >
           {props.search && searchIcon}
           {props.inputType === 'area'

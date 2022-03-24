@@ -71,6 +71,11 @@ export class FormPresenter<Field extends string> {
   }
 
   @action
+  protected clearErrors() {
+    this._store.errors.clear();
+  }
+
+  @action
   protected pushErrors(fields: Field[], error: string) {
     fields.forEach(f => this._store.errors.set(f, error));
   }

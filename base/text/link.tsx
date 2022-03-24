@@ -13,7 +13,8 @@ export const RouteLink = <
     S extends H.LocationState,
 >(props: LinkProps<S> & React.RefAttributes<HTMLAnchorElement> & RouteLinkProps) => {
   const className = classNames(props.additionalClassName, styles.link);
+  const { additionalClassName, ...htmlProps } = props;
   return props.force && typeof props.to === 'string'
       ? <a href={props.to} className={className}>{props.children}</a>
-      : <Link className={className} {...props}></Link>;
+      : <Link className={className} {...htmlProps}></Link>;
 };

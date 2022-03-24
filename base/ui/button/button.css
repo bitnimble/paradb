@@ -1,8 +1,9 @@
-@value colorWhite, colorPurple, colorGrey, colorRed from "pages/paradb/base/colors/colors.css";
+@value colorWhite, colorPurple, colorGreen, colorGrey, colorRed from "pages/paradb/base/colors/colors.css";
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
 
 @value regularColor: colorPurple;
 @value errorColor: colorRed;
+@value successColor: colorGreen;
 
 .a {
     text-decoration: none;
@@ -40,6 +41,17 @@
 }
 .error.button:hover:not(.disabled) {
     background: errorColor;
+}
+
+.success.button {
+    position: relative;
+    border: 1px solid successColor;
+    background: successColor;
+    color: colorWhite;
+}
+.success.button:hover:not(.disabled) {
+    margin: -1px;
+    border-width: 2px;
 }
 
 .button.disabled {

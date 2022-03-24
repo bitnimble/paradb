@@ -1,0 +1,5 @@
+@value gridBaseline from "pages/paradb/base/metrics/metrics.css";
+
+.formError {
+    margin-top: calc(gridBaseline * 2);
+}
