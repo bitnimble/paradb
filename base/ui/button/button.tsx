@@ -21,64 +21,54 @@ const styleClassname: Record<'regular' | 'error' | 'success', string> = {
 };
 
 export const Button = (props: ButtonProps) => {
-  const {
-    className,
-    style = 'regular',
-    link,
-    loading,
-    disabled,
-    onClick,
-    children,
-  } = props;
+  const { className, style = 'regular', link, loading, disabled, onClick, children } = props;
 
   const _onClick = () => onClick?.();
   return link
-      ? (
-          <div
-              className={classNames(className, styles.button, styleClassname[style], {
-                [styles.disabled]: disabled || loading,
-              })}
-          >
-            <a
-                className={styles.a}
-                href={(disabled || loading) ? '' : link}
-                referrerPolicy="no-referrer"
-                target="_blank"
-            >
-              <T.Medium>
-                {style === 'success' ? '✔' : null}{children}
-              </T.Medium>
-            </a>
-          </div>
-      )
-      : (
-          <button
-              disabled={disabled || loading || false}
-              className={classNames(className, styleClassname[style], styles.button, {
-                [styles.disabled]: disabled || loading,
-              })}
-              onClick={_onClick}
-          >
-            <T.Medium>
-              {children}
-              {style === 'success' ? ' ✔' : null}
-              {loading
-                  ? (
-                      <div
-                          className={classNames(
-                              loadingStyles.laBallPulse,
-                              loadingStyles.laSm,
-                              styles.loadingSpinner,
-                          )}
-                      >
-                        {/* These divs are styled via 'loading.css'. */}
-                        <div></div>
-                        <div></div>
-                        <div></div>
-                      </div>
-                  )
-                  : undefined}
-            </T.Medium>
-          </button>
-      );
+    ? (
+      <div
+        className={classNames(className, styles.button, styleClassname[style], {
+          [styles.disabled]: disabled || loading,
+        })}
+      >
+        <a
+          className={styles.a}
+          href={(disabled || loading) ? '' : link}
+          referrerPolicy="no-referrer"
+          target="_blank"
+        >
+          <T.Medium>{style === 'success' ? '✔' : null} {children}</T.Medium>
+        </a>
+      </div>
+    )
+    : (
+      <button
+        disabled={disabled || loading || false}
+        className={classNames(className, styleClassname[style], styles.button, {
+          [styles.disabled]: disabled || loading,
+        })}
+        onClick={_onClick}
+      >
+        <T.Medium>
+          {children}
+          {style === 'success' ? ' ✔' : null}
+          {loading
+            ? (
+              <div
+                className={classNames(
+                  loadingStyles.laBallPulse,
+                  loadingStyles.laSm,
+                  styles.loadingSpinner,
+                )}
+              >
+                {/* These divs are styled via 'loading.css'. */}
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
+            )
+            : undefined}
+        </T.Medium>
+      </button>
+    );
 };

@@ -23,9 +23,7 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
 
   constructor(props: SubmitMapPageProps) {
     super(props);
-    makeObservable<SubmitMapPage, 'draggingOver'>(this, {
-      draggingOver: observable,
-    });
+    makeObservable<SubmitMapPage, 'draggingOver'>(this, { draggingOver: observable });
   }
 
   private readonly onFileChange = (files: FileList | null) => {
@@ -58,32 +56,30 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
     const { filenames } = this.props;
 
     return (
-        <button
-            className={classNames(
-                styles.fileContainer,
-                (filenames.length || this.draggingOver) && styles.hasMapData,
-            )}
-        >
-          <input
-              type="file"
-              accept={['zip', ...zipTypes].join(',')}
-              multiple={true}
-              onChange={this.onChange}
-              onDrop={this.onDrop}
-              onDragOver={preventDefault}
-              onDragEnter={this.onDragEnter}
-              onDragLeave={this.onDragLeave}
-          />
-          <div className={styles.filenames}>
-            <T.Small>
-              {filenames.length
-                  ? filenames.map((f, i) => (
-                      <p key={i}>{f}</p>
-                  ))
-                  : 'Click or drag to upload your zipped map.'}
-            </T.Small>
-          </div>
-        </button>
+      <button
+        className={classNames(
+          styles.fileContainer,
+          (filenames.length || this.draggingOver) && styles.hasMapData,
+        )}
+      >
+        <input
+          type="file"
+          accept={['zip', ...zipTypes].join(',')}
+          multiple={true}
+          onChange={this.onChange}
+          onDrop={this.onDrop}
+          onDragOver={preventDefault}
+          onDragEnter={this.onDragEnter}
+          onDragLeave={this.onDragLeave}
+        />
+        <div className={styles.filenames}>
+          <T.Small>
+            {filenames.length
+              ? filenames.map((f, i) => <p key={i}>{f}</p>)
+              : 'Click or drag to upload your zipped map.'}
+          </T.Small>
+        </div>
+      </button>
     );
   }
 
@@ -96,39 +92,45 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
       return <div className={styles.progressContainer}>Error</div>;
     }
     return (
-        <div className={classNames(styles.progressContainer, styles.progressBar)}>
-          <div
-              className={classNames(styles.progressInner, progress === -1 && styles.progressError)}
-              style={{ width: `${progress * 100}%` }}
-          >
-          </div>
+      <div className={classNames(styles.progressContainer, styles.progressBar)}>
+        <div
+          className={classNames(styles.progressInner, progress === -1 && styles.progressError)}
+          style={{ width: `${progress * 100}%` }}
+        >
         </div>
+      </div>
     );
   }
 
   render() {
     const { uploadProgress, isUploading, showProgressScreen, onSubmit } = this.props;
     return (
-        <div className={styles.submitMap}>
-          {showProgressScreen
-              ? (
-                  <div className={classNames(styles.fileContainer, styles.hasMapData)}>
-                    <div className={styles.filenames}>
-                      {uploadProgress.map((p, i) => (
-                          <T.Small key={i} className={styles.uploadProgress}>
-                            <span>{p.name}</span>
-                            {this.renderProgressBar(p.progress)}
-                          </T.Small>
-                      ))}
-                    </div>
-                  </div>
-              )
-              : this.renderDropInput()}
-          <br/>
-          <Button disabled={showProgressScreen} loading={isUploading} onClick={onSubmit}>
-            Submit
-          </Button>
-        </div>
+      <div className={styles.submitMap}>
+        {showProgressScreen
+          ? (
+            <div className={classNames(styles.fileContainer, styles.hasMapData)}>
+              <div className={styles.filenames}>
+                {uploadProgress.map((p, i) => (
+                  <T.Small
+                    key={i}
+                    className={styles.uploadProgress}
+                  >
+                    <span>{p.name}</span>
+                    {this
+                      .renderProgressBar(
+                        p.progress,
+                      )}
+                  </T.Small>
+                ))}
+              </div>
+            </div>
+          )
+          : this.renderDropInput()}
+        <br />
+        <Button disabled={showProgressScreen} loading={isUploading} onClick={onSubmit}>
+          Submit
+        </Button>
+      </div>
     );
   }
 }

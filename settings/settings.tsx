@@ -8,11 +8,7 @@ import { User } from 'paradb-api-schema';
 import React from 'react';
 import styles from './settings.css';
 
-type SettingsProps = {
-  user: User,
-  store: SettingsStore,
-  presenter: SettingsPresenter,
-};
+type SettingsProps = { user: User, store: SettingsStore, presenter: SettingsPresenter };
 
 const noop = () => void 0;
 
@@ -24,16 +20,43 @@ export class Settings extends React.Component<SettingsProps> {
     return (
       <div className={styles.settings}>
         <T.Large>Profile settings</T.Large>
-        <Textbox label="Username" readOnly={true} value={user.username} error={undefined} onChange={noop} tooltip="Changing your username is not currently implemented."/>
+        <Textbox
+          label="Username"
+          readOnly={true}
+          value={user.username}
+          error={undefined}
+          onChange={noop}
+          tooltip="Changing your username is not currently implemented."
+        />
 
         <T.Large>Change password</T.Large>
-        <Textbox label="Current password" required={true} value={oldPassword} error={errors.get('oldPassword')} inputType="password" onChange={presenter.onChangeOldPassword} onSubmit={presenter.changePassword}/>
-        <Textbox label="New password" required={true} value={newPassword} error={errors.get('newPassword')} inputType="password" onChange={presenter.onChangeNewPassword} onSubmit={presenter.changePassword}/>
-        <Button loading={submitting} style={success ? 'success' : undefined} onClick={presenter.changePassword}>
+        <Textbox
+          label="Current password"
+          required={true}
+          value={oldPassword}
+          error={errors.get('oldPassword')}
+          inputType="password"
+          onChange={presenter.onChangeOldPassword}
+          onSubmit={presenter.changePassword}
+        />
+        <Textbox
+          label="New password"
+          required={true}
+          value={newPassword}
+          error={errors.get('newPassword')}
+          inputType="password"
+          onChange={presenter.onChangeNewPassword}
+          onSubmit={presenter.changePassword}
+        />
+        <Button
+          loading={submitting}
+          style={success ? 'success' : undefined}
+          onClick={presenter.changePassword}
+        >
           {success ? 'Password changed' : 'Change password'}
         </Button>
-        <FormError error={errors.get('form')}/>
+        <FormError error={errors.get('form')} />
       </div>
-    )
+    );
   }
 }

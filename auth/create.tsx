@@ -11,19 +11,19 @@ export function createLoginSignupPage(api: Api, navigate: Navigate) {
 
   return observer(({ mode }: { mode: 'signup' | 'login' }) => {
     return (
-        <LoginSignup
-            mode={mode}
-            username={store.username}
-            email={store.email}
-            password={store.password}
-            errors={store.errors}
-            onChangeUsername={presenter.onChangeUsername}
-            onChangeEmail={presenter.onChangeEmail}
-            onChangePassword={presenter.onChangePassword}
-            login={presenter.login}
-            signup={presenter.signup}
-            onNavigateClick={store.reset}
-        />
+      <LoginSignup
+        mode={mode}
+        username={store.username}
+        email={store.email}
+        password={store.password}
+        errors={store.errors}
+        onChangeUsername={presenter.onChangeUsername}
+        onChangeEmail={presenter.onChangeEmail}
+        onChangePassword={presenter.onChangePassword}
+        login={presenter.login}
+        signup={presenter.signup}
+        onNavigateClick={store.reset}
+      />
     );
   });
 }

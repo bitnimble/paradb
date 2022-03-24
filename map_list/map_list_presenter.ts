@@ -20,9 +20,9 @@ export class MapListStore {
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
     reaction(
-        () => this.filterQuery, //
-        q => this.filter = q.toLowerCase(), //
-        { delay: 100 },
+      () => this.filterQuery, //
+      q => this.filter = q.toLowerCase(), //
+      { delay: 100 },
     );
   }
 
@@ -32,8 +32,7 @@ export class MapListStore {
 
   get maps() {
     return this._maps?.filter(m =>
-        m.artist.toLowerCase().includes(this.filter)
-        || m.title.toLowerCase().includes(this.filter),
+      m.artist.toLowerCase().includes(this.filter) || m.title.toLowerCase().includes(this.filter)
     );
   }
 
@@ -51,7 +50,10 @@ export class MapListPresenter {
     // Take into account table filtering + sorting, when doing index lookups
     const index = checkExists(tableStore.sortedData).findIndex(m => m.id === id);
 
-    if (shiftKeyHeld && this.store.lastSelectedMapIndex != null && index > this.store.lastSelectedMapIndex) {
+    if (
+      shiftKeyHeld && this.store.lastSelectedMapIndex != null
+      && index > this.store.lastSelectedMapIndex
+    ) {
       for (let i = this.store.lastSelectedMapIndex + 1; i <= index; i++) {
         this.store.selectedMaps.add(checkExists(tableStore.sortedData)[i].id);
       }
@@ -94,7 +96,7 @@ export class MapListPresenter {
   }
 
   readonly isSelected = computedFn((id: string) => {
-    return this.store.enableBulkSelect && this.store.selectedMaps.has(id)
+    return this.store.enableBulkSelect && this.store.selectedMaps.has(id);
   });
 
   onChangeFilterQuery(val: string) {

@@ -14,9 +14,9 @@ export class MapPageStore {
 
 export class MapPagePresenter {
   constructor(
-      private readonly api: Api,
-      private readonly navigate: Navigate,
-      private readonly store: MapPageStore,
+    private readonly api: Api,
+    private readonly navigate: Navigate,
+    private readonly store: MapPageStore,
   ) {}
 
   async getMap(id: string) {

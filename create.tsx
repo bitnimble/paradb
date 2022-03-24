@@ -26,15 +26,15 @@ export function createApp() {
   const InstructionsPage = createInstructionsPage();
 
   return () => (
-      <Skeleton
-          history={history}
-          NavBar={NavBar}
-          MapPage={MapPage}
-          MapList={MapList}
-          LoginSignupPage={LoginSignupPage}
-          SettingsPage={SettingsPage}
-          SubmitMapPage={SubmitMapPage}
-          InstructionsPage={InstructionsPage}
-      />
+    <Skeleton
+      history={history}
+      NavBar={NavBar}
+      MapPage={MapPage}
+      MapList={MapList}
+      LoginSignupPage={LoginSignupPage}
+      SettingsPage={SettingsPage}
+      SubmitMapPage={SubmitMapPage}
+      InstructionsPage={InstructionsPage}
+    />
   );
 }

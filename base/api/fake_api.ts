@@ -41,19 +41,13 @@ export class FakeApi implements Api {
 
   async findMaps(): Promise<FindMapsResponse> {
     await delay();
-    return {
-      success: true,
-      maps: fakeMaps,
-    };
+    return { success: true, maps: fakeMaps };
   }
   async getMap(id: string): Promise<GetMapResponse> {
     await delay(1000);
     const map = fakeMaps.find(m => m.id === id);
     if (map) {
-      return {
-        success: true,
-        map,
-      };
+      return { success: true, map };
     }
     // TODO: fake http errors
     throw new Error(`Could not find map with ID ${id}`);
@@ -62,11 +56,7 @@ export class FakeApi implements Api {
     await delay(1000);
     const index = fakeMaps.findIndex(m => m.id === id);
     if (index === -1) {
-      return {
-        success: false,
-        errorMessage: 'Missing map',
-        statusCode: 404,
-      };
+      return { success: false, errorMessage: 'Missing map', statusCode: 404 };
     }
     fakeMaps.splice(index, 1);
     return { success: true };
@@ -104,7 +94,7 @@ const californication: PDMap = {
   uploader: 'Nobody',
   albumArt: 'https://upload.wikimedia.org/wikipedia/en/d/df/RedHotChiliPeppersCalifornication.jpg',
   complexities: [
-    { complexity: 1, complexityName: 'anon\'s Easy' },
+    { complexity: 1, complexityName: "anon's Easy" },
     { complexity: 2, complexityName: 'Medium' },
     { complexity: 3, complexityName: 'West Coast' },
     { complexity: 5, complexityName: 'Sacramento' },

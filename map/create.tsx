@@ -31,13 +31,13 @@ export function createMapPage(api: Api, navigate: Navigate, sessionStore: Sessio
     const deleteMap = () => presenter.deleteMap(id);
 
     return (
-        <MapPage
-            map={store.map}
-            canDelete={map && sessionStore.user && map.uploader === sessionStore.user.id
-                ? true
-                : false}
-            deleteMap={deleteMap}
-        />
+      <MapPage
+        map={store.map}
+        canDelete={map && sessionStore.user && map.uploader === sessionStore.user.id
+          ? true
+          : false}
+        deleteMap={deleteMap}
+      />
     );
   });
 }
@@ -55,14 +55,14 @@ export function createSubmitMapPage(api: Api, navigate: Navigate) {
     });
 
     return (
-        <SubmitMapPage
-            filenames={store.filenames}
-            uploadProgress={uploader.uploadProgress}
-            isUploading={uploader.isUploading}
-            showProgressScreen={uploader.isUploading || uploader.hasErrors}
-            onChangeData={presenter.onChangeData}
-            onSubmit={presenter.submit}
-        />
+      <SubmitMapPage
+        filenames={store.filenames}
+        uploadProgress={uploader.uploadProgress}
+        isUploading={uploader.isUploading}
+        showProgressScreen={uploader.isUploading || uploader.hasErrors}
+        onChangeData={presenter.onChangeData}
+        onSubmit={presenter.submit}
+      />
     );
   });
 }

@@ -39,8 +39,8 @@ export interface Api {
   getMap(id: string): Promise<GetMapResponse>;
   deleteMap(id: string): Promise<DeleteMapResponse>;
   submitMap(
-      req: SubmitMapRequest,
-      onProgress: (e: ProgressEvent) => void,
+    req: SubmitMapRequest,
+    onProgress: (e: ProgressEvent) => void,
   ): Promise<SubmitMapResponse>;
 }
 
@@ -90,8 +90,8 @@ export class HttpApi implements Api {
   }
 
   async submitMap(
-      req: SubmitMapRequest,
-      onProgress: (e: ProgressEvent) => void,
+    req: SubmitMapRequest,
+    onProgress: (e: ProgressEvent) => void,
   ): Promise<SubmitMapResponse> {
     return new Promise((res, rej) => {
       const xhr = new XMLHttpRequest();
@@ -116,7 +116,8 @@ function path(...parts: string[]) {
   return [
     ...parts.slice(0, parts.length - 1).map((part, i) => part.endsWith('/') ? part : `${part}/`),
     parts[parts.length - 1],
-  ].join('');
+  ]
+    .join('');
 }
 
 async function get(path: string): Promise<Uint8Array> {
@@ -127,9 +128,7 @@ async function get(path: string): Promise<Uint8Array> {
 async function post(path: string, body?: Uint8Array): Promise<Uint8Array> {
   const resp = await fetch(path, {
     method: 'POST',
-    headers: {
-      ['Content-Type']: 'application/octet-stream',
-    },
+    headers: { ['Content-Type']: 'application/octet-stream' },
     body,
   });
   const buf = await resp.arrayBuffer();

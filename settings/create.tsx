@@ -11,10 +11,9 @@ export function createSettingsPage(api: Api, navigate: Navigate, sessionStore: S
   const store = new SettingsStore();
   const presenter = new SettingsPresenter(api, store, sessionStore);
 
-  return observer(() => sessionStore.user
-    ? (
-      <Settings user={sessionStore.user} store={store} presenter={presenter}/>
-    )
-    : null
+  return observer(() =>
+    sessionStore.user
+      ? <Settings user={sessionStore.user} store={store} presenter={presenter} />
+      : null
   );
 }
