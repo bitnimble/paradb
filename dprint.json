@@ -10,7 +10,8 @@
     "jsx.multiLineParens": "always",
     "memberExpression.preferSingleLine": "false",
     "memberExpression.linePerExpression": "true",
-    "typeLiteral.separatorKind": "comma"
+    "typeLiteral.separatorKind": "comma",
+    "jsxElement.spaceBeforeSelfClosingTagSlash": false
   },
   "json": {
   },

@@ -68,7 +68,7 @@ export const Textbox = (props: TextboxProps) => {
         style={{ borderWidth: `${props.borderWidth || 1}px` }}
       >
         {props.search && searchIcon}
-        {props.inputType === 'area' ? <textarea {...inputProps} /> : <input {...inputProps} />}
+        {props.inputType === 'area' ? <textarea {...inputProps}/> : <input {...inputProps}/>}
       </div>
 
       {props.error != null && props.error.trim() !== ''

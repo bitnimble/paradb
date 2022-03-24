@@ -55,7 +55,7 @@ export class Settings extends React.Component<SettingsProps> {
         >
           {success ? 'Password changed' : 'Change password'}
         </Button>
-        <FormError error={errors.get('form')} />
+        <FormError error={errors.get('form')}/>
       </div>
     );
   }

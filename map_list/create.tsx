@@ -59,9 +59,7 @@ export function createMapList(api: Api) {
         React.memo(() => wrapWithMapRoute(<T.Small>{map.title}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.artist}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.author}</T.Small>)),
-        React.memo(() =>
-          wrapWithMapRoute(<ComplexityColorPills complexities={map.complexities} />)
-        ),
+        React.memo(() => wrapWithMapRoute(<ComplexityColorPills complexities={map.complexities}/>)),
         React.memo(() =>
           wrapWithMapRoute(
             <T.Small>{formatDate(map.submissionDate)}</T.Small>,

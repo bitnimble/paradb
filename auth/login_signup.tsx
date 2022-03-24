@@ -64,7 +64,7 @@ export const LoginSignup = observer(
             </RouteLink>
             <Button onClick={login}>Login</Button>
           </div>
-          <FormError error={errors.get('form')} />
+          <FormError error={errors.get('form')}/>
         </div>
       )
       : (
@@ -100,7 +100,7 @@ export const LoginSignup = observer(
             </RouteLink>
             <Button onClick={signup}>Signup</Button>
           </div>
-          <FormError error={errors.get('form')} />
+          <FormError error={errors.get('form')}/>
         </div>
       );
   },

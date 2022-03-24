@@ -88,10 +88,10 @@ export class MapList extends React.Component<Props> {
             placeholder="Search for a song or artist..."
             onChange={onChangeFilterQuery}
           />
-          <this.BulkSelectActions />
+          <this.BulkSelectActions/>
         </div>
         <div className={classNames(bulkSelectEnabled && styles.bulkSelectEnabled)}>
-          <Table />
+          <Table/>
         </div>
       </div>
     );
