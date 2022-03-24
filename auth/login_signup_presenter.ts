@@ -30,9 +30,9 @@ export class LoginSignupStore extends FormStore<LoginSignupField> {
 
 export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
   constructor(
-      private readonly api: Api,
-      private readonly navigate: Navigate,
-      private readonly store: LoginSignupStore,
+    private readonly api: Api,
+    private readonly navigate: Navigate,
+    private readonly store: LoginSignupStore,
   ) {
     super(store);
     makeObservable(this, {

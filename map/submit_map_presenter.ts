@@ -9,11 +9,7 @@ import { SubmitMapSuccess } from 'paradb-api-schema';
 
 export const zipTypes = ['application/zip', 'application/x-zip', 'application/x-zip-compressed'];
 
-type UploadState = {
-  file: File,
-  isSubmitting: boolean,
-  progress: number,
-};
+type UploadState = { file: File, isSubmitting: boolean, progress: number };
 
 const MAX_CONNECTIONS = 4;
 export class ThrottledMapUploader {
@@ -43,23 +39,10 @@ export class ThrottledMapUploader {
 
   @computed
   private get queuedDoneErrorProgress() {
-    const queued = [...this.queue.values()].map(f => ({
-      name: f.name,
-      progress: undefined,
-    }));
-    const done = [...this.successes.keys()].map(filename => ({
-      name: filename,
-      progress: 1,
-    }));
-    const errors = [...this.errors.keys()].map(filename => ({
-      name: filename,
-      progress: -1,
-    }));
-    return [
-      ...queued,
-      ...done,
-      ...errors,
-    ];
+    const queued = [...this.queue.values()].map(f => ({ name: f.name, progress: undefined }));
+    const done = [...this.successes.keys()].map(filename => ({ name: filename, progress: 1 }));
+    const errors = [...this.errors.keys()].map(filename => ({ name: filename, progress: -1 }));
+    return [...queued, ...done, ...errors];
   }
 
   @computed
@@ -68,10 +51,9 @@ export class ThrottledMapUploader {
       name: s.file.name,
       progress: s.progress,
     }));
-    return [
-      ...uploading,
-      ...this.queuedDoneErrorProgress,
-    ].sort((a, b) => a.name.localeCompare(b.name));
+    return [...uploading, ...this.queuedDoneErrorProgress].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
   }
 
   @action.bound
@@ -92,11 +74,7 @@ export class ThrottledMapUploader {
     }
     const [id, file] = next;
     runInAction(() => {
-      this.uploads.set(id, {
-        file,
-        isSubmitting: true,
-        progress: 0,
-      });
+      this.uploads.set(id, { file, isSubmitting: true, progress: 0 });
     });
     // Re-retrieve the observable wrapped version
     const state = checkExists(this.uploads.get(id));
@@ -129,15 +107,12 @@ export class ThrottledMapUploader {
   async start() {
     // Kick off initial uploads
     Array(MAX_CONNECTIONS).fill(0).map((_, i) => this.processQueue());
-    return new Promise<[string[], string[]]>((res) => {
+    return new Promise<[string[], string[]]>(res => {
       const intervalHandler = setInterval(() => {
         // Work on the next queue item
         if (this.queue.size === 0 && this.uploads.size === 0) {
           clearInterval(intervalHandler);
-          res([
-            [...this.successes.values()].map(r => r.id),
-            [...this.errors.values()],
-          ]);
+          res([[...this.successes.values()].map(r => r.id), [...this.errors.values()]]);
         } else if (this.queue.size && this.uploads.size < MAX_CONNECTIONS) {
           this.processQueue();
         }
@@ -165,10 +140,7 @@ export class ThrottledMapUploader {
   }
 }
 
-export type FileState = {
-  file: File,
-  error?: string,
-};
+export type FileState = { file: File, error?: string };
 export type SubmitMapField = 'files';
 export class SubmitMapStore extends FormStore<SubmitMapField> {
   files = new Map<string, FileState>();
@@ -179,11 +151,7 @@ export class SubmitMapStore extends FormStore<SubmitMapField> {
 
   constructor() {
     super();
-    makeObservable(this, {
-      files: observable.shallow,
-      filenames: computed,
-      reset: action.bound,
-    });
+    makeObservable(this, { files: observable.shallow, filenames: computed, reset: action.bound });
   }
 
   reset() {
@@ -193,21 +161,17 @@ export class SubmitMapStore extends FormStore<SubmitMapField> {
 
 export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
   constructor(
-      private readonly uploader: ThrottledMapUploader,
-      private readonly navigate: Navigate,
-      private readonly store: SubmitMapStore,
+    private readonly uploader: ThrottledMapUploader,
+    private readonly navigate: Navigate,
+    private readonly store: SubmitMapStore,
   ) {
     super(store);
-    makeObservable(this, {
-      onChangeData: action.bound,
-    });
+    makeObservable(this, { onChangeData: action.bound });
   }
 
   onChangeData(files: FileList) {
     for (const file of files) {
-      const fileState: FileState = {
-        file,
-      };
+      const fileState: FileState = { file };
       if (!zipTypes.includes(file.type)) {
         fileState.error = 'File is not a zip';
         this.pushErrors(['files'], `${file.name} was not a zip file`);
@@ -220,9 +184,7 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
 
   submit = async () => {
     runInAction(() => this.store.errors.clear());
-    const fieldValues = {
-      files: this.store.files,
-    };
+    const fieldValues = { files: this.store.files };
     this.checkRequiredFields(['files', fieldValues.files]);
     if (this.store.hasErrors) {
       return;

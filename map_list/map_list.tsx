@@ -37,9 +37,16 @@ function getComplexityColor(complexity: number) {
 
 export const ComplexityColorPills = (props: { complexities: Complexity[] }) => (
   <div className={styles.complexities}>
-    {props.complexities.map((c, i) => (
-        <div key={i} className={styles.complexityColorPill} style={{ backgroundColor: getComplexityColor(c.complexity)}}></div>
-    ))}
+    {props
+      .complexities
+      .map((c, i) => (
+        <div
+          key={i}
+          className={styles.complexityColorPill}
+          style={{ backgroundColor: getComplexityColor(c.complexity) }}
+        >
+        </div>
+      ))}
   </div>
 );
 
@@ -50,7 +57,13 @@ export class MapList extends React.Component<Props> {
   }
 
   private readonly BulkSelectActions = () => {
-    const { bulkSelectEnabled, selectionCount, onClickBulkSelect, onClickBulkDownload, onClickCancelBulkSelect } = this.props;
+    const {
+      bulkSelectEnabled,
+      selectionCount,
+      onClickBulkSelect,
+      onClickBulkDownload,
+      onClickCancelBulkSelect,
+    } = this.props;
     return bulkSelectEnabled
       ? (
         <>
@@ -58,31 +71,29 @@ export class MapList extends React.Component<Props> {
           <Button onClick={onClickCancelBulkSelect}>Cancel</Button>
         </>
       )
-      : (
-        <Button onClick={onClickBulkSelect}>Bulk select</Button>
-      );
+      : <Button onClick={onClickBulkSelect}>Bulk select</Button>;
   };
 
   render() {
     const { bulkSelectEnabled, Table, filterQuery, onChangeFilterQuery } = this.props;
     return (
-        <div className={styles.mapList}>
-          <div className={styles.filter}>
-            <Textbox
-                error={undefined}
-                search={true}
-                value={filterQuery}
-                borderColor="purple"
-                borderWidth={2}
-                placeholder="Search for a song or artist..."
-                onChange={onChangeFilterQuery}
-            />
-            <this.BulkSelectActions/>
-          </div>
-          <div className={classNames(bulkSelectEnabled && styles.bulkSelectEnabled)}>
-            <Table/>
-          </div>
+      <div className={styles.mapList}>
+        <div className={styles.filter}>
+          <Textbox
+            error={undefined}
+            search={true}
+            value={filterQuery}
+            borderColor="purple"
+            borderWidth={2}
+            placeholder="Search for a song or artist..."
+            onChange={onChangeFilterQuery}
+          />
+          <this.BulkSelectActions />
         </div>
+        <div className={classNames(bulkSelectEnabled && styles.bulkSelectEnabled)}>
+          <Table />
+        </div>
+      </div>
     );
   }
 }

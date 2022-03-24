@@ -24,7 +24,11 @@ export class SettingsStore extends FormStore<SettingsFields> {
 }
 
 export class SettingsPresenter extends FormPresenter<SettingsFields> {
-  constructor(private readonly api: Api, private readonly store: SettingsStore, private readonly sessionStore: SessionStore) {
+  constructor(
+    private readonly api: Api,
+    private readonly store: SettingsStore,
+    private readonly sessionStore: SessionStore,
+  ) {
     super(store);
     makeObservable(this, {
       onChangeOldPassword: action.bound,

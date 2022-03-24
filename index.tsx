@@ -5,9 +5,6 @@ import { createApp } from './create';
 import './defaults.css';
 
 const App = createApp();
-configure({
-  reactionRequiresObservable: true,
-  enforceActions: 'observed',
-});
+configure({ reactionRequiresObservable: true, enforceActions: 'observed' });
 
-ReactDOM.render(<App/>, document.getElementById('app'));
+ReactDOM.render(<App />, document.getElementById('app'));

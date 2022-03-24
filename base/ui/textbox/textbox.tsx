@@ -30,9 +30,9 @@ const borderColors: Record<TextboxBorderColor, string> = {
 
 export const Textbox = (props: TextboxProps) => {
   const onChange = ({ target }: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      props.onChange(target.value);
-  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) =>
-      props.onSubmit != null && e.key === 'Enter' && props.onSubmit();
+    props.onChange(target.value);
+  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement | HTMLTextAreaElement> = e =>
+    props.onSubmit != null && e.key === 'Enter' && props.onSubmit();
   const inputProps = {
     className: styles.textbox,
     type: props.inputType || 'text',
@@ -40,39 +40,40 @@ export const Textbox = (props: TextboxProps) => {
     value: props.value,
     placeholder: props.placeholder,
     title: props.tooltip,
-    style: {
-      cursor: props.readOnly ? 'not-allowed' : undefined,
-    },
+    style: { cursor: props.readOnly ? 'not-allowed' : undefined },
     onChange,
     onKeyDown,
   };
   return (
-      <div
-          className={classNames(props.className, styles.container, {
-            [styles.errorContainer]: props.error != null,
-          })}
-      >
-        {props.label && (
-            <span>
-              <T.Small color="grey">{props.label}</T.Small>
-              {props.required ? <T.Small color="red">&nbsp;*</T.Small> : undefined}
-            </span>
-        )}
-        <div
-            className={classNames(styles.textboxBorder, borderColors[props.borderColor || 'grey'], props.readOnly && styles.readOnly)}
-            style={{ borderWidth: `${props.borderWidth || 1}px` }}
-        >
-          {props.search && searchIcon}
-          {props.inputType === 'area'
-              ? <textarea {...inputProps}/>
-              : <input {...inputProps}/>}
-        </div>
-
-        {props.error != null && props.error.trim() !== ''
-            ? (
-                <T.Tiny color="red">{props.error}</T.Tiny>
-            )
+    <div
+      className={classNames(props.className, styles.container, {
+        [styles.errorContainer]: props.error != null,
+      })}
+    >
+      {props.label && (
+        <span>
+          <T.Small color="grey">{props.label}</T.Small>
+          {props
+              .required
+            ? <T.Small color="red">&nbsp;*</T.Small>
             : undefined}
+        </span>
+      )}
+      <div
+        className={classNames(
+          styles.textboxBorder,
+          borderColors[props.borderColor || 'grey'],
+          props.readOnly && styles.readOnly,
+        )}
+        style={{ borderWidth: `${props.borderWidth || 1}px` }}
+      >
+        {props.search && searchIcon}
+        {props.inputType === 'area' ? <textarea {...inputProps} /> : <input {...inputProps} />}
       </div>
+
+      {props.error != null && props.error.trim() !== ''
+        ? <T.Tiny color="red">{props.error}</T.Tiny>
+        : undefined}
+    </div>
   );
 };

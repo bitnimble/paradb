@@ -21,50 +21,62 @@ export type SkeletonProps = {
 @observer
 export class Skeleton extends React.Component<SkeletonProps> {
   render() {
-    const { history, NavBar, MapPage, MapList, LoginSignupPage, SettingsPage, SubmitMapPage, InstructionsPage } = this.props;
+    const {
+      history,
+      NavBar,
+      MapPage,
+      MapList,
+      LoginSignupPage,
+      SettingsPage,
+      SubmitMapPage,
+      InstructionsPage,
+    } = this.props;
 
     return (
-        <Router history={history}>
-          <div className={styles.skeleton}>
-            <NavBar/>
-            <div className={styles.content}>
-              <Switch>
-                <Route path={routeFor([RoutePath.MAP_LIST])} exact={true}>
-                  <MapList/>
-                </Route>
-                <Route path={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>
-                  <SubmitMapPage/>
-                </Route>
-                <Route path={routeFor([RoutePath.MAP, ':id'])}>
-                  {({ match, location }) => (
-                      match && match.params.id != null
-                      && <MapPage
-                          id={match.params.id}
-                          map={location.state != null && location.state instanceof Uint8Array
-                              ? deserializeMap(location.state)
-                              : undefined}
-                      />
-                  )}
-                </Route>
-                <Route path={routeFor([RoutePath.LOGIN])}>
-                  <LoginSignupPage mode="login"/>
-                </Route>
-                <Route path={routeFor([RoutePath.SETTINGS])}>
-                  <SettingsPage/>
-                </Route>
-                <Route path={routeFor([RoutePath.SIGNUP])}>
-                  <LoginSignupPage mode="signup"/>
-                </Route>
-                <Route path={routeFor([RoutePath.INSTRUCTIONS])}>
-                  <InstructionsPage/>
-                </Route>
-                <Route>
-                  <NotFound/>
-                </Route>
-              </Switch>
-            </div>
+      <Router history={history}>
+        <div className={styles.skeleton}>
+          <NavBar />
+          <div className={styles.content}>
+            <Switch>
+              <Route path={routeFor([RoutePath.MAP_LIST])} exact={true}>
+                <MapList />
+              </Route>
+              <Route path={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>
+                <SubmitMapPage />
+              </Route>
+              <Route path={routeFor([RoutePath.MAP, ':id'])}>
+                {({ match, location }) => (match && match
+                      .params
+                      .id != null && (
+                  <MapPage
+                    id={match
+                      .params
+                      .id}
+                    map={location.state != null && location.state instanceof Uint8Array
+                      ? deserializeMap(location.state)
+                      : undefined}
+                  />
+                ))}
+              </Route>
+              <Route path={routeFor([RoutePath.LOGIN])}>
+                <LoginSignupPage mode="login" />
+              </Route>
+              <Route path={routeFor([RoutePath.SETTINGS])}>
+                <SettingsPage />
+              </Route>
+              <Route path={routeFor([RoutePath.SIGNUP])}>
+                <LoginSignupPage mode="signup" />
+              </Route>
+              <Route path={routeFor([RoutePath.INSTRUCTIONS])}>
+                <InstructionsPage />
+              </Route>
+              <Route>
+                <NotFound />
+              </Route>
+            </Switch>
           </div>
-        </Router>
+        </div>
+      </Router>
     );
   }
 }

@@ -37,21 +37,22 @@ export type TextProps = {
 };
 
 function createTextClass(className: string) {
-  return ({ className: classNameProp, color, children, style = 'regular', weight = 'regular' }:
-      TextProps) => (
-        <span
-            className={classNames(
-                classNameProp,
-                styles.text,
-                className,
-                styleMap[style],
-                weightMap[weight],
-                color && colorMap[color],
-            )}
-        >
-          {children}
-        </span>
-    );
+  return (
+    { className: classNameProp, color, children, style = 'regular', weight = 'regular' }: TextProps,
+  ) => (
+    <span
+      className={classNames(
+        classNameProp,
+        styles.text,
+        className,
+        styleMap[style],
+        weightMap[weight],
+        color && colorMap[color],
+      )}
+    >
+      {children}
+    </span>
+  );
 }
 
 export namespace T {

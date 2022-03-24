@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { action, computed } from 'mobx';
 import { observer } from 'mobx-react';
 import { Api } from 'pages/paradb/base/api/api';
+import metrics from 'pages/paradb/base/metrics/metrics.css';
 import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
 import { ComplexityColorPills, MapList } from 'pages/paradb/map_list/map_list';
@@ -12,7 +13,6 @@ import { routeFor, RoutePath } from 'pages/paradb/router/routes';
 import { PDMap, serializeMap } from 'paradb-api-schema';
 import React from 'react';
 import styles from './map_list.css';
-import metrics from 'pages/paradb/base/metrics/metrics.css';
 
 const naturalSort = (getProp: (map: PDMap) => string | undefined) => {
   return (a: PDMap, b: PDMap) => {
@@ -26,8 +26,8 @@ const formatDate = (isoString: string) => {
   const date = new Date(isoString);
   const shortMonth = months[date.getMonth()];
   const maybeYear = date.getFullYear() !== new Date().getFullYear()
-      ? `, ${date.getFullYear()}`
-      : '';
+    ? `, ${date.getFullYear()}`
+    : '';
   return `${shortMonth} ${date.getDate()}${maybeYear}`;
 };
 
@@ -45,31 +45,28 @@ export function createMapList(api: Api) {
       presenter.toggleMapSelection(tableStore, map.id, e.shiftKey);
     });
     const wrapWithMapRoute = (contents: React.ReactNode, additionalClassName?: string) => (
-        <RouteLink
-            additionalClassName={classNames(styles.mapListCell, additionalClassName)}
-            to={{
-              pathname: routeFor([RoutePath.MAP, map.id]),
-              state: serializeMap(map),
-            }}
-            onClick={onSelect}
-        >
-          {contents}
-        </RouteLink>
+      <RouteLink
+        additionalClassName={classNames(styles.mapListCell, additionalClassName)}
+        to={{ pathname: routeFor([RoutePath.MAP, map.id]), state: serializeMap(map) }}
+        onClick={onSelect}
+      >
+        {contents}
+      </RouteLink>
     );
     return {
-      className: classNames({
-        [styles.mapListRowSelected]: presenter.isSelected(map.id),
-      }),
+      className: classNames({ [styles.mapListRowSelected]: presenter.isSelected(map.id) }),
       Cells: [
         React.memo(() => wrapWithMapRoute(<T.Small>{map.title}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.artist}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.author}</T.Small>)),
-        React.memo(() => wrapWithMapRoute(<ComplexityColorPills complexities={map.complexities}/>)),
         React.memo(() =>
-            wrapWithMapRoute(
-                <T.Small>{formatDate(map.submissionDate)}</T.Small>,
-                styles.uploadDateCell,
-            ),
+          wrapWithMapRoute(<ComplexityColorPills complexities={map.complexities} />)
+        ),
+        React.memo(() =>
+          wrapWithMapRoute(
+            <T.Small>{formatDate(map.submissionDate)}</T.Small>,
+            styles.uploadDateCell,
+          )
         ),
       ],
     };
@@ -82,14 +79,8 @@ export function createMapList(api: Api) {
         content: <T.Small weight="bold">Song title</T.Small>,
         sort: naturalSort(m => m.title),
       },
-      {
-        content: <T.Small weight="bold">Artist</T.Small>,
-        sort: naturalSort(m => m.artist),
-      },
-      {
-        content: <T.Small weight="bold">Mapper</T.Small>,
-        sort: naturalSort(m => m.author),
-      },
+      { content: <T.Small weight="bold">Artist</T.Small>, sort: naturalSort(m => m.artist) },
+      { content: <T.Small weight="bold">Mapper</T.Small>, sort: naturalSort(m => m.author) },
       {
         content: <T.Small weight="bold">Difficulties</T.Small>,
         sort: naturalSort(m => m.complexities.map(c => c.complexityName).join()),
@@ -110,16 +101,16 @@ export function createMapList(api: Api) {
   });
 
   return observer(() => (
-      <MapList
-          Table={Table}
-          bulkSelectEnabled={store.enableBulkSelect}
-          selectionCount={store.selectedMaps.size}
-          filterQuery={store.filterQuery}
-          onMount={presenter.loadAllMaps}
-          onClickBulkSelect={presenter.onClickBulkSelect}
-          onClickBulkDownload={presenter.onClickBulkDownload}
-          onClickCancelBulkSelect={presenter.onClickCancelBulkSelect}
-          onChangeFilterQuery={presenter.onChangeFilterQuery}
-      />
+    <MapList
+      Table={Table}
+      bulkSelectEnabled={store.enableBulkSelect}
+      selectionCount={store.selectedMaps.size}
+      filterQuery={store.filterQuery}
+      onMount={presenter.loadAllMaps}
+      onClickBulkSelect={presenter.onClickBulkSelect}
+      onClickBulkDownload={presenter.onClickBulkDownload}
+      onClickCancelBulkSelect={presenter.onClickCancelBulkSelect}
+      onChangeFilterQuery={presenter.onChangeFilterQuery}
+    />
   ));
 }
