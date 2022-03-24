@@ -18,7 +18,3 @@
     align-items: center;
     justify-content: space-between;
 }
-
-.formError {
-    margin-top: calc(gridBaseline * 2);
-}

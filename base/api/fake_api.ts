@@ -1,4 +1,6 @@
 import {
+  ChangePasswordRequest,
+  ChangePasswordResponse,
   DeleteMapResponse,
   FindMapsResponse,
   GetMapResponse,
@@ -22,6 +24,9 @@ async function delay(ms: number = DELAY) {
 }
 
 export class FakeApi implements Api {
+  async changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
+    return { success: true };
+  }
   async login(req: LoginRequest): Promise<LoginResponse> {
     return { success: true };
   }

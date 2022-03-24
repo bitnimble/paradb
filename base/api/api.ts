@@ -1,5 +1,8 @@
 import {
+  ChangePasswordRequest,
+  ChangePasswordResponse,
   DeleteMapResponse,
+  deserializeChangePasswordResponse,
   deserializeDeleteMapResponse,
   deserializeFindMapsResponse,
   deserializeGetMapResponse,
@@ -11,6 +14,7 @@ import {
   GetMapResponse,
   LoginRequest,
   LoginResponse,
+  serializeChangePasswordRequest,
   serializeLoginRequest,
   serializeSignupRequest,
   serializeSubmitMapRequest,
@@ -28,6 +32,7 @@ export interface Api {
 
   /* User */
   getMe(): Promise<User>;
+  changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse>;
 
   /* Maps */
   findMaps(): Promise<FindMapsResponse>;
@@ -61,6 +66,12 @@ export class HttpApi implements Api {
       throw new Error();
     }
     return resp.user;
+  }
+
+  async changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
+    const bsonReq = serializeChangePasswordRequest(req);
+    const bsonResp = await post(path(this.apiBase, 'users', 'changePassword'), bsonReq);
+    return deserializeChangePasswordResponse(bsonResp);
   }
 
   async findMaps(): Promise<FindMapsResponse> {

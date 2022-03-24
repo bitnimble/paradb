@@ -9,7 +9,9 @@ type TextboxBorderColor = 'grey' | 'purple';
 export type TextboxProps = {
   className?: string,
   required?: boolean,
+  readOnly?: boolean,
   label?: string,
+  tooltip?: string,
   search?: boolean,
   placeholder?: string,
   borderColor?: TextboxBorderColor,
@@ -31,11 +33,18 @@ export const Textbox = (props: TextboxProps) => {
       props.onChange(target.value);
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) =>
       props.onSubmit != null && e.key === 'Enter' && props.onSubmit();
+  const backgroundColor = props.readOnly ? 'lightgrey' : undefined;
   const inputProps = {
     className: styles.textbox,
     type: props.inputType || 'text',
+    readOnly: props.readOnly,
     value: props.value,
     placeholder: props.placeholder,
+    title: props.tooltip,
+    style: {
+      backgroundColor,
+      cursor: props.readOnly ? 'not-allowed' : undefined,
+    },
     onChange,
     onKeyDown,
   };
@@ -55,6 +64,7 @@ export const Textbox = (props: TextboxProps) => {
             className={classNames(styles.textboxBorder, borderColors[props.borderColor || 'grey'])}
             style={{
               borderWidth: `${props.borderWidth || 1}px`,
+              backgroundColor,
             }}
         >
           {props.search && searchIcon}

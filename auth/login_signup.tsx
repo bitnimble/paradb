@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { LoginSignupField } from 'pages/paradb/auth/login_signup_presenter';
+import { FormError } from 'pages/paradb/base/form/form_error';
 import { RouteLink } from 'pages/paradb/base/text/link';
-import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
 import { Textbox } from 'pages/paradb/base/ui/textbox/textbox';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
@@ -44,11 +44,7 @@ export const LoginSignup = observer(({
           <RouteLink to={routeFor([RoutePath.SIGNUP])} onClick={onNavigateClick}>Signup instead</RouteLink>
           <Button onClick={login}>Login</Button>
         </div>
-        {errors.get('form') && (
-          <div className={styles.formError}>
-            <T.Tiny color="red">{errors.get('form')}</T.Tiny>
-          </div>
-        )}
+        <FormError error={errors.get('form')}/>
       </div>
     )
     : (
@@ -60,6 +56,7 @@ export const LoginSignup = observer(({
           <RouteLink to={routeFor([RoutePath.LOGIN])} onClick={onNavigateClick}>Login instead</RouteLink>
           <Button onClick={signup}>Signup</Button>
         </div>
+        <FormError error={errors.get('form')}/>
       </div>
     );
 });

@@ -47,7 +47,7 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
   onChangePassword = (value: string) => this.store.password = value;
 
   login = async () => {
-    runInAction(() => this.store.errors.clear());
+    runInAction(() => this.clearErrors());
     const username = this.store.username;
     const password = this.store.password;
     const errors = this.checkRequiredFields(['username', username], ['password', password]);
@@ -64,7 +64,7 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
   };
 
   signup = async () => {
-    runInAction(() => this.store.errors.clear());
+    runInAction(() => this.clearErrors());
     const username = this.store.username;
     const email = this.store.email;
     const password = this.store.password;

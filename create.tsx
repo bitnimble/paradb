@@ -6,6 +6,7 @@ import { createMapList } from 'pages/paradb/map_list/create';
 import { createNavBar } from 'pages/paradb/nav_bar/create';
 import { installRouter } from 'pages/paradb/router/install';
 import { SessionPresenter, SessionStore } from 'pages/paradb/session/session_presenter';
+import { createSettingsPage } from 'pages/paradb/settings/create';
 import { Skeleton } from 'pages/paradb/skeleton/skeleton';
 import * as React from 'react';
 
@@ -20,6 +21,7 @@ export function createApp() {
   const MapPage = createMapPage(api, navigate, sessionStore);
   const MapList = createMapList(api);
   const LoginSignupPage = createLoginSignupPage(api, navigate);
+  const SettingsPage = createSettingsPage(api, navigate, sessionStore);
   const SubmitMapPage = createSubmitMapPage(api, navigate);
   const InstructionsPage = createInstructionsPage();
 
@@ -30,6 +32,7 @@ export function createApp() {
           MapPage={MapPage}
           MapList={MapList}
           LoginSignupPage={LoginSignupPage}
+          SettingsPage={SettingsPage}
           SubmitMapPage={SubmitMapPage}
           InstructionsPage={InstructionsPage}
       />

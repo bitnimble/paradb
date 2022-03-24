@@ -7,5 +7,6 @@
 @value colorGreyA15: color(colorGrey a(15%));
 @value colorGreyA5: color(colorGrey a(5%));
 
+@value colorGreen: #4c4;
 @value colorRed: #f00;
 @value colorPurple: #9b15f1;

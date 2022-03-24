@@ -6,7 +6,7 @@ import loadingStyles from './loading.css';
 
 export type ButtonProps = {
   className?: string,
-  style?: 'regular' | 'error',
+  style?: 'regular' | 'error' | 'success',
   link?: string,
   loading?: boolean,
   disabled?: boolean,
@@ -14,9 +14,10 @@ export type ButtonProps = {
   children: React.ReactNode,
 };
 
-const styleClassname: Record<'regular' | 'error', string> = {
+const styleClassname: Record<'regular' | 'error' | 'success', string> = {
   ['regular']: styles.regular,
   ['error']: styles.error,
+  ['success']: styles.success,
 };
 
 export const Button = (props: ButtonProps) => {
@@ -45,7 +46,7 @@ export const Button = (props: ButtonProps) => {
                 target="_blank"
             >
               <T.Medium>
-                {children}
+                {style === 'success' ? '✔' : null}{children}
               </T.Medium>
             </a>
           </div>
@@ -60,6 +61,7 @@ export const Button = (props: ButtonProps) => {
           >
             <T.Medium>
               {children}
+              {style === 'success' ? ' ✔' : null}
               {loading
                   ? (
                       <div
