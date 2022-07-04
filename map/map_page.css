@@ -30,11 +30,11 @@
     width: min(100%, calc(gridBaseline * 100));
 }
 
-.complexities {
+.difficulties {
     display: flex;
     margin: gridBaseline calc(-1 * gridBaseline);
 }
-.complexityPill {
+.difficultyPill {
     background: colorGrey;
     margin: 0 gridBaseline;
     padding: calc(gridBaseline * 0.5) calc(gridBaseline * 2);
