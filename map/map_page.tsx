@@ -1,41 +1,43 @@
 import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
 import { getMapFileLink } from 'pages/paradb/utils/maps';
-import { Complexity, PDMap } from 'paradb-api-schema';
+import { Difficulty, PDMap } from 'paradb-api-schema';
 import React from 'react';
 import styles from './map_page.css';
 
 type Props = { map: PDMap | undefined, canDelete: boolean, deleteMap(): void };
 
-function getComplexityNameDefault(complexity: number) {
-  switch (complexity) {
-    case 1:
-      return 'Easy';
-    case 2:
-      return 'Medium';
-    case 3:
-      return 'Hard';
-    case 4:
-      return 'Expert';
-    case 5:
-      return 'Expert+';
+export function getDifficultyColor(difficultyName: string | undefined) {
+  if (difficultyName == null) {
+    return 'black';
+  }
+  switch (difficultyName.toLowerCase()) {
+    case 'easy':
+      return 'green';
+    case 'medium':
+      return 'yellow';
+    case 'hard':
+      return 'orange';
+    case 'expert':
+      return 'red';
     default:
-      throw new Error(`Did not expect complexity level ${complexity}`);
+      // Custom difficulty name -- we don't know the difficulty level.
+      // TODO: could do some difficulty name parsing to see if it has easy / medium / hard in the name.
+      return 'black';
   }
 }
 
-const ComplexityPills = (props: { complexities: Complexity[] }) => (
-  <div className={styles.complexities}>
+const DifficultyPills = (props: { difficulties: Difficulty[] }) => (
+  <div className={styles.difficulties}>
     {props
-      .complexities
-      .map((c, i) => (
+      .difficulties
+      .map((d, i) => (
         <div
           key={i}
-          className={styles.complexityPill}
+          className={styles.difficultyPill}
+          style={{ backgroundColor: getDifficultyColor(d.difficultyName) }}
         >
-          <T.Small color="white">
-            {c.complexityName || getComplexityNameDefault(c.complexity)}
-          </T.Small>
+          <T.Small color="white">{d.difficultyName || 'Unknown'}</T.Small>
         </div>
       ))}
   </div>
@@ -73,7 +75,7 @@ export class MapPage extends React.Component<Props> {
               ? <>| mapped by {map.author}</>
               : undefined}
           </T.Medium>
-          <ComplexityPills complexities={map.complexities}/>
+          <DifficultyPills difficulties={map.difficulties}/>
           {map.description != null
             ? (
               <div className={styles.description}>

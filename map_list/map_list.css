@@ -73,12 +73,12 @@
     justify-content: center;
 }
 
-.complexities {
+.difficulties {
     display: flex;
     gap: gridBaseline;
 }
 
-.complexityColorPill {
+.difficultyColorPill {
     width: calc(gridBaseline * 2);
     height: calc(gridBaseline * 2);
     border-radius: 50%;

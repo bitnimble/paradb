@@ -2,7 +2,8 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import { Button } from 'pages/paradb/base/ui/button/button';
 import { Textbox } from 'pages/paradb/base/ui/textbox/textbox';
-import { Complexity } from 'paradb-api-schema';
+import { getDifficultyColor } from 'pages/paradb/map/map_page';
+import { Difficulty } from 'paradb-api-schema';
 import React from 'react';
 import styles from './map_list.css';
 
@@ -18,32 +19,15 @@ type Props = {
   onChangeFilterQuery(val: string): void,
 };
 
-function getComplexityColor(complexity: number) {
-  switch (complexity) {
-    case 1:
-      return 'green';
-    case 2:
-      return 'yellow';
-    case 3:
-      return 'orange';
-    case 4:
-      return 'red';
-    case 5:
-      return 'black';
-    default:
-      throw new Error(`Did not expect complexity level ${complexity}`);
-  }
-}
-
-export const ComplexityColorPills = (props: { complexities: Complexity[] }) => (
-  <div className={styles.complexities}>
+export const DifficultyColorPills = (props: { difficulties: Difficulty[] }) => (
+  <div className={styles.difficulties}>
     {props
-      .complexities
-      .map((c, i) => (
+      .difficulties
+      .map((d, i) => (
         <div
           key={i}
-          className={styles.complexityColorPill}
-          style={{ backgroundColor: getComplexityColor(c.complexity) }}
+          className={styles.difficultyColorPill}
+          style={{ backgroundColor: getDifficultyColor(d.difficultyName) }}
         >
         </div>
       ))}

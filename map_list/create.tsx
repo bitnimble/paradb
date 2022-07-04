@@ -7,7 +7,7 @@ import { Api } from 'pages/paradb/base/api/api';
 import metrics from 'pages/paradb/base/metrics/metrics.css';
 import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
-import { ComplexityColorPills, MapList } from 'pages/paradb/map_list/map_list';
+import { DifficultyColorPills, MapList } from 'pages/paradb/map_list/map_list';
 import { MapListPresenter, MapListStore } from 'pages/paradb/map_list/map_list_presenter';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
 import { PDMap, serializeMap } from 'paradb-api-schema';
@@ -59,7 +59,7 @@ export function createMapList(api: Api) {
         React.memo(() => wrapWithMapRoute(<T.Small>{map.title}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.artist}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.author}</T.Small>)),
-        React.memo(() => wrapWithMapRoute(<ComplexityColorPills complexities={map.complexities}/>)),
+        React.memo(() => wrapWithMapRoute(<DifficultyColorPills difficulties={map.difficulties}/>)),
         React.memo(() =>
           wrapWithMapRoute(
             <T.Small>{formatDate(map.submissionDate)}</T.Small>,
@@ -81,7 +81,7 @@ export function createMapList(api: Api) {
       { content: <T.Small weight="bold">Mapper</T.Small>, sort: naturalSort(m => m.author) },
       {
         content: <T.Small weight="bold">Difficulties</T.Small>,
-        sort: naturalSort(m => m.complexities.map(c => c.complexityName).join()),
+        sort: naturalSort(m => m.difficulties.map(c => c.difficultyName).join()),
         width: `calc(${metrics.gridBaseline} * 13)`,
       },
       {
