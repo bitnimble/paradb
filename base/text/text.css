@@ -2,6 +2,8 @@
 @value weightValueSemibold: 600;
 
 .text {
+    margin: 0;
+    margin-bottom: 0.1em;
 }
 
 .styleRegular {
@@ -48,7 +50,7 @@
     line-height: 1.3;
 }
 .extraLarge {
-    font-size: 96px;
+    font-size: 36px;
     line-height: 1.3;
 }
 

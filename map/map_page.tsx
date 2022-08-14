@@ -67,14 +67,16 @@ export class MapPage extends React.Component<Props> {
           </div>
         )}
         <div className={styles.mapContent}>
-          <T.Large style="title">{map.title}</T.Large>
+          <T.ExtraLarge display="block" style="title">{map.title}</T.ExtraLarge>
+          <T.Large display="block" color="grey">{map.artist}</T.Large>
           <br/>
-          <T.Medium color="grey">
-            {map.artist}
-            {map.author != null
-              ? <>| mapped by {map.author}</>
-              : undefined}
-          </T.Medium>
+          <T.Small display="block" color="grey">
+            {map.author != null ? `Mapped by ${map.author}` : undefined}
+          </T.Small>
+          <T.Small display="block" color="grey">
+            Submitted {new Date(map.submissionDate).toDateString()}
+          </T.Small>
+
           <DifficultyPills difficulties={map.difficulties}/>
           {map.description != null
             ? (

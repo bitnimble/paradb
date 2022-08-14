@@ -5,6 +5,7 @@ import styles from './text.css';
 type TextStyle = 'regular' | 'title' | 'monospace';
 type TextWeight = 'regular' | 'semibold' | 'bold' | 'extrabold' | 'black';
 type TextColor = 'black' | 'red' | 'white' | 'grey' | 'purple';
+type TextDisplay = 'inline' | 'block';
 
 const styleMap: Record<TextStyle, string> = {
   'regular': styles.styleRegular,
@@ -34,25 +35,32 @@ export type TextProps = {
   color?: TextColor,
   style?: TextStyle,
   weight?: TextWeight,
+  display?: TextDisplay,
 };
 
 function createTextClass(className: string) {
   return (
-    { className: classNameProp, color, children, style = 'regular', weight = 'regular' }: TextProps,
-  ) => (
-    <span
-      className={classNames(
-        classNameProp,
-        styles.text,
-        className,
-        styleMap[style],
-        weightMap[weight],
-        color && colorMap[color],
-      )}
-    >
-      {children}
-    </span>
-  );
+    {
+      className: classNameProp,
+      color,
+      children,
+      style = 'regular',
+      weight = 'regular',
+      display = 'inline',
+    }: TextProps,
+  ) => {
+    const classname = classNames(
+      classNameProp,
+      styles.text,
+      className,
+      styleMap[style],
+      weightMap[weight],
+      color && colorMap[color],
+    );
+    return display === 'inline'
+      ? <span className={classname}>{children}</span>
+      : <p className={classname}>{children}</p>;
+  };
 }
 
 export namespace T {
