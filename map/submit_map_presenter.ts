@@ -1,27 +1,23 @@
-import { checkExists } from 'base/preconditions';
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
-import * as nanoid from 'nanoid';
 import { Api } from 'pages/paradb/base/api/api';
 import { FormPresenter, FormStore } from 'pages/paradb/base/form/form_presenter';
 import { Navigate } from 'pages/paradb/router/install';
 import { RoutePath } from 'pages/paradb/router/routes';
-import { SubmitMapSuccess } from 'paradb-api-schema';
 
 export const zipTypes = ['application/zip', 'application/x-zip', 'application/x-zip-compressed'];
 
-type UploadState = { file: File, isSubmitting: boolean, progress: number };
+type UploadStateBase = { file: File };
+type PendingUpload = UploadStateBase & { state: 'pending' };
+type ActiveUpload = UploadStateBase & { state: 'uploading', progress: number };
+type UploadSuccess = UploadStateBase & { state: 'success', id: string };
+type UploadError = UploadStateBase & { state: 'error', errorMessage: string };
+
+export type UploadState = PendingUpload | ActiveUpload | UploadSuccess | UploadError;
 
 const MAX_CONNECTIONS = 4;
 export class ThrottledMapUploader {
   @observable.deep
-  private readonly uploads = new Map<string, UploadState>();
-
-  @observable.shallow
-  private readonly queue = new Map<string, File>();
-  @observable.shallow
-  private readonly successes = new Map<string, SubmitMapSuccess>();
-  @observable.shallow
-  private readonly errors = new Map<string, string>();
+  private uploads: UploadState[] = [];
 
   constructor(private readonly api: Api) {
     makeObservable(this);
@@ -29,77 +25,61 @@ export class ThrottledMapUploader {
 
   @computed
   get isUploading() {
-    return [...this.uploads.values()].some(s => s.isSubmitting);
+    return this.uploads.some(s => s.state === 'uploading');
   }
 
   @computed
   get hasErrors() {
-    return this.errors.size > 0;
-  }
-
-  @computed
-  private get queuedDoneErrorProgress() {
-    const queued = [...this.queue.values()].map(f => ({ name: f.name, progress: undefined }));
-    const done = [...this.successes.keys()].map(filename => ({ name: filename, progress: 1 }));
-    const errors = [...this.errors.keys()].map(filename => ({ name: filename, progress: -1 }));
-    return [...queued, ...done, ...errors];
+    return this.uploads.some(u => u.state === 'error');
   }
 
   @computed
   get uploadProgress() {
-    const uploading = [...this.uploads.values()].map(s => ({
-      name: s.file.name,
-      progress: s.progress,
-    }));
-    return [...uploading, ...this.queuedDoneErrorProgress].sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
+    return this
+      .uploads
+      .slice()
+      .sort((a, b) => a.file.name.localeCompare(b.file.name));
   }
 
-  @action.bound
-  private getNextInQueue(): [string, File] | undefined {
-    const entry: [string, File] = this.queue.entries().next().value;
+  private getNextInQueue(): UploadState | undefined {
+    const entry = this.uploads.find(u => u.state === 'pending');
     if (!entry) {
       return;
     }
-    const [id, file] = entry;
-    this.queue.delete(id);
-    return [id, file];
+    return entry;
   }
 
   private async processQueue() {
-    const next = this.getNextInQueue();
-    if (!next) {
+    const pendingUpload = this.getNextInQueue();
+    if (!pendingUpload) {
       return;
     }
-    const [id, file] = next;
     runInAction(() => {
-      this.uploads.set(id, { file, isSubmitting: true, progress: 0 });
+      pendingUpload.state = 'uploading';
     });
-    // Re-retrieve the observable wrapped version
-    const state = checkExists(this.uploads.get(id));
+    // Force the type to be state: 'uploading' + progress
+    const upload: { file: File, state: 'uploading', progress: number } = pendingUpload as any;
     const onProgress = action((e: ProgressEvent) => {
-      state.progress = e.loaded / e.total;
+      upload.progress = e.loaded / e.total;
     });
-    const mapData = new Uint8Array(await file.arrayBuffer());
+    const mapData = new Uint8Array(await upload.file.arrayBuffer());
     try {
       const resp = await this.api.submitMap({ mapData }, onProgress);
       runInAction(() => {
         if (resp.success) {
-          this.successes.set(file.name, resp);
+          // TODO: fix type safety here
+          (upload as any).state = 'success';
+          (upload as any).id = resp.id;
         } else {
-          this.errors.set(file.name, resp.errorMessage);
+          (upload as any).state = 'error';
+          (upload as any).errorMessage = resp.errorMessage;
         }
       });
     } catch (e) {
       runInAction(() => {
-        this.errors.set(file.name, 'Unknown error');
+        (upload as any).state = 'error';
+        (upload as any).errorMessage = 'Unknown error';
         console.error(JSON.stringify(e));
-      });
-    } finally {
-      runInAction(() => {
-        state.isSubmitting = false;
-        this.uploads.delete(id);
       });
     }
   }
@@ -110,10 +90,18 @@ export class ThrottledMapUploader {
     return new Promise<[string[], string[]]>(res => {
       const intervalHandler = setInterval(() => {
         // Work on the next queue item
-        if (this.queue.size === 0 && this.uploads.size === 0) {
+        if (!this.uploads.some(u => u.state === 'pending' || u.state === 'uploading')) {
           clearInterval(intervalHandler);
-          res([[...this.successes.values()].map(r => r.id), [...this.errors.values()]]);
-        } else if (this.queue.size && this.uploads.size < MAX_CONNECTIONS) {
+          res([
+            this.uploads.filter((u): u is UploadSuccess => u.state === 'success').map(u => u.id),
+            this.uploads.filter((u): u is UploadError => u.state === 'error').map(u =>
+              u.errorMessage
+            ),
+          ]);
+        } else if (
+          this.uploads.some(u => u.state === 'pending')
+          && this.uploads.filter(u => u.state === 'uploading').length < MAX_CONNECTIONS
+        ) {
           this.processQueue();
         }
       }, 500);
@@ -122,8 +110,7 @@ export class ThrottledMapUploader {
 
   @action.bound
   addFile(file: File) {
-    const id = nanoid.nanoid();
-    this.queue.set(id, file);
+    this.uploads.push({ state: 'pending', file });
   }
 
   @action.bound
@@ -133,10 +120,7 @@ export class ThrottledMapUploader {
 
   @action.bound
   reset() {
-    this.uploads.clear();
-    this.queue.clear();
-    this.successes.clear();
-    this.errors.clear();
+    this.uploads = [];
   }
 }
 

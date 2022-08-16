@@ -77,5 +77,6 @@
 }
 
 .progressError {
-    background: colorRed;
+    height: auto;
+    border: 1px solid colorRed;
 }

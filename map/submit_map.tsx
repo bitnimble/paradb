@@ -3,13 +3,13 @@ import { action, makeObservable, observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
-import { zipTypes } from 'pages/paradb/map/submit_map_presenter';
+import { UploadState, zipTypes } from 'pages/paradb/map/submit_map_presenter';
 import React from 'react';
 import styles from './submit_map.css';
 
 type SubmitMapPageProps = {
   filenames: string[],
-  uploadProgress: ({ name: string, progress: number | undefined })[],
+  uploadProgress: UploadState[],
   isUploading: boolean,
   showProgressScreen: boolean,
   onChangeData(files: FileList): void,
@@ -83,19 +83,23 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
     );
   }
 
-  private renderProgressBar(progress: number | undefined) {
-    if (progress == null) {
+  private renderProgressBar(uploadState: UploadState) {
+    if (uploadState.state === 'pending') {
       return <div className={styles.progressContainer}>Pending</div>;
-    } else if (progress === 1) {
+    } else if (uploadState.state === 'success') {
       return <div className={styles.progressContainer}>Done</div>;
-    } else if (progress === -1) {
-      return <div className={styles.progressContainer}>Error</div>;
+    } else if (uploadState.state === 'error') {
+      return (
+        <div className={classNames(styles.progressContainer, styles.progressError)}>
+          Error: {uploadState.errorMessage}
+        </div>
+      );
     }
     return (
       <div className={classNames(styles.progressContainer, styles.progressBar)}>
         <div
-          className={classNames(styles.progressInner, progress === -1 && styles.progressError)}
-          style={{ width: `${progress * 100}%` }}
+          className={classNames(styles.progressInner)}
+          style={{ width: `${uploadState.progress * 100}%` }}
         >
         </div>
       </div>
@@ -115,11 +119,12 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
                     key={i}
                     className={styles.uploadProgress}
                   >
-                    <span>{p.name}</span>
-                    {this
-                      .renderProgressBar(
-                        p.progress,
-                      )}
+                    <span>
+                      {p
+                        .file
+                        .name}
+                    </span>
+                    {this.renderProgressBar(p)}
                   </T.Small>
                 ))}
               </div>
