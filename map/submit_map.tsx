@@ -110,6 +110,20 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
     const { uploadProgress, isUploading, showProgressScreen, onSubmit } = this.props;
     return (
       <div className={styles.submitMap}>
+        <T.Medium>
+          Maps need to be in the .zip format, and need to have the following folder structure:
+        </T.Medium>
+        <T.Medium style="code" display="block">
+          {`YourSongName.zip
+├─ YourSongName/
+│  ├─ YourSongName_Easy.rlrr
+│  ├─ YourSongName_Medium.rlrr
+│  ├─ YourSongName_Hard.rlrr
+│  ├─ YourSongName_Expert.rlrr
+│  ├─ drums.ogg
+│  ├─ ...`}
+        </T.Medium>
+        <br/>
         {showProgressScreen
           ? (
             <div className={classNames(styles.fileContainer, styles.hasMapData)}>
