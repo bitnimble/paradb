@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import React from 'react';
 import styles from './text.css';
 
-type TextStyle = 'regular' | 'title' | 'monospace';
+type TextStyle = 'regular' | 'title' | 'monospace' | 'code';
 type TextWeight = 'regular' | 'semibold' | 'bold' | 'extrabold' | 'black';
 type TextColor = 'black' | 'red' | 'white' | 'grey' | 'purple';
 type TextDisplay = 'inline' | 'block';
@@ -11,6 +11,7 @@ const styleMap: Record<TextStyle, string> = {
   'regular': styles.styleRegular,
   'title': styles.styleTitle,
   'monospace': styles.styleMonospace,
+  'code': styles.styleCode,
 };
 
 const weightMap: Record<TextWeight, string> = {
@@ -27,6 +28,11 @@ const colorMap: Record<TextColor, string> = {
   'white': styles.textColorWhite,
   'grey': styles.textColorGrey,
   'purple': styles.textColorPurple,
+};
+
+const displayMap: Record<TextDisplay, string> = {
+  'block': styles.displayBlock,
+  'inline': styles.displayInline,
 };
 
 export type TextProps = {
@@ -56,6 +62,7 @@ function createTextClass(className: string) {
       styleMap[style],
       weightMap[weight],
       color && colorMap[color],
+      displayMap[display],
     );
     return display === 'inline'
       ? <span className={classname}>{children}</span>

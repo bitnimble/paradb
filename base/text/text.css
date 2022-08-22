@@ -1,5 +1,6 @@
-@value colorBlack, colorRed, colorWhite, colorGrey, colorPurple from "pages/paradb/base/colors/colors.css";
+@value colorBlack, colorGreyA5, colorRed, colorWhite, colorGrey, colorPurple from "pages/paradb/base/colors/colors.css";
 @value weightValueSemibold: 600;
+@value gridBaseline from "pages/paradb/base/metrics/metrics.css";
 
 .text {
     margin: 0;
@@ -15,6 +16,13 @@
 .styleMonospace {
     font-family: 'Courier Prime', monospace;
     letter-spacing: -0.03em;
+}
+.styleCode {
+    font-family: 'Courier Prime', monospace;
+    letter-spacing: -0.03em;
+    background-color: colorGreyA5;
+    border: 1px solid colorPurple;
+    border-radius: calc(gridBaseline / 2);
 }
 
 .weightRegular {
@@ -68,6 +76,15 @@
 }
 .textColorPurple {
     color: colorPurple;
+}
+
+.displayInline.styleCode {
+    padding: calc(gridBaseline / 6) calc(gridBaseline);
+}
+.displayBlock.styleCode {
+    white-space: pre;
+    padding: calc(gridBaseline);
+    margin: calc(gridBaseline) 0;
 }
 
 .custom { }
