@@ -50,7 +50,7 @@ export class MapPagePresenter {
     const newVal = !(this.store.map.userProjection.isFavorited);
     const resp = await this.api.setFavorites({ mapIds: [id], isFavorite: newVal });
     if (resp.success) {
-      this.store.map.userProjection.isFavorited = newVal;
+      runInAction(() => this.store.map!.userProjection!.isFavorited = newVal);
     }
   }
 }
