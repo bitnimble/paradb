@@ -109,13 +109,10 @@ export class ThrottledMapUploader {
   }
 
   @action.bound
-  addFile(file: File) {
-    this.uploads.push({ state: 'pending', file });
-  }
-
-  @action.bound
-  addFiles(files: File[]) {
-    files.forEach(f => this.addFile(f));
+  addFiles(files: UploadState[]) {
+    files.forEach(f => {
+      this.uploads.push(f);
+    });
   }
 
   @action.bound
@@ -124,10 +121,9 @@ export class ThrottledMapUploader {
   }
 }
 
-export type FileState = { file: File, error?: string };
 export type SubmitMapField = 'files';
 export class SubmitMapStore extends FormStore<SubmitMapField> {
-  files = new Map<string, FileState>();
+  files = new Map<string, UploadState>();
 
   get filenames() {
     return [...this.files.values()].map(f => f.file.name).sort((a, b) => a.localeCompare(b));
@@ -154,29 +150,24 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
   }
 
   onChangeData(files: FileList) {
+    runInAction(() => this.store.errors.clear());
     for (const file of files) {
-      const fileState: FileState = { file };
+      let f: UploadState;
       if (!zipTypes.includes(file.type)) {
-        fileState.error = 'File is not a zip';
-        this.pushErrors(['files'], `${file.name} was not a zip file`);
+        f = { state: 'error', file, errorMessage: 'File is not a zip' };
       } else if (file.size > 1000 * 1000 * 100) { // 100 MB
-        fileState.error = 'File is over 100MB';
-        this.pushErrors(['files'], `${file.name} is over the file size limit of 100MB`);
+        f = { state: 'error', file, errorMessage: 'File is over 100MB' };
+      } else {
+        f = { state: 'pending', file };
       }
       // Deduplicate by both filename and byte size
       const key = `${file.name}-${file.size}`;
-      this.store.files.set(key, fileState);
+      this.store.files.set(key, f);
     }
   }
 
   submit = async () => {
-    runInAction(() => this.store.errors.clear());
-    const fieldValues = { files: this.store.files };
-    this.checkRequiredFields(['files', fieldValues.files]);
-    if (this.store.hasErrors) {
-      return;
-    }
-    this.uploader.addFiles([...fieldValues.files.values()].map(s => s.file));
+    this.uploader.addFiles([...this.store.files.values()]);
     this.store.reset();
     const [ids, errors] = await this.uploader.start();
 

@@ -126,7 +126,9 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
         <br/>
         {showProgressScreen
           ? (
-            <div className={classNames(styles.fileContainer, styles.hasMapData)}>
+            <div
+              className={classNames(styles.fileContainer, styles.hasMapData, styles.isSubmitting)}
+            >
               <div className={styles.filenames}>
                 {uploadProgress.map((p, i) => (
                   <T.Small

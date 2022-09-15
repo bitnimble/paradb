@@ -28,6 +28,10 @@
     border-color: colorPurple;
 }
 
+.fileContainer.isSubmitting {
+    cursor: inherit;
+}
+
 
 .fileContainer > input {
     position: absolute;
@@ -57,9 +61,11 @@
 .progressContainer {
     margin-left: calc(gridBaseline * 2);
     position: relative;
-    height: gridBaseline;
+    min-height: gridBaseline;
     width: calc(gridBaseline * 40);
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .progressBar {
@@ -77,6 +83,6 @@
 }
 
 .progressError {
-    height: auto;
+    min-height: calc(gridBaseline * 4);
     border: 1px solid colorRed;
 }
