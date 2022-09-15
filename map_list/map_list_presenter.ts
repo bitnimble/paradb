@@ -83,7 +83,7 @@ export class MapListPresenter {
       // rather than have a cache for ID -> Map.
       const title = this.store.allMaps?.find(map => map.id === id)?.title;
       a.setAttribute('href', getMapFileLink(id));
-      a.setAttribute('download', title ? `${title}.zip` : '');
+      a.setAttribute('download', '');
       a.click();
     });
 
