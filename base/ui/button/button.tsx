@@ -4,9 +4,11 @@ import React from 'react';
 import styles from './button.css';
 import loadingStyles from './loading.css';
 
+type ButtonStyle = 'regular' | 'active' | 'error' | 'success';
+
 export type ButtonProps = {
   className?: string,
-  style?: 'regular' | 'error' | 'success',
+  style?: ButtonStyle,
   link?: string,
   loading?: boolean,
   disabled?: boolean,
@@ -14,8 +16,9 @@ export type ButtonProps = {
   children: React.ReactNode,
 };
 
-const styleClassname: Record<'regular' | 'error' | 'success', string> = {
+const styleClassname: Record<ButtonStyle, string> = {
   ['regular']: styles.regular,
+  ['active']: styles.active,
   ['error']: styles.error,
   ['success']: styles.success,
 };

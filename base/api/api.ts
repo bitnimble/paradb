@@ -1,4 +1,6 @@
 import {
+  ApiResponse,
+  apiResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
   DeleteMapResponse,
@@ -16,8 +18,10 @@ import {
   LoginResponse,
   serializeChangePasswordRequest,
   serializeLoginRequest,
+  serializeSetFavoriteMapsRequest,
   serializeSignupRequest,
   serializeSubmitMapRequest,
+  SetFavoriteMapsRequest,
   SignupRequest,
   SignupResponse,
   SubmitMapRequest,
@@ -33,6 +37,7 @@ export interface Api {
   /* User */
   getMe(): Promise<User>;
   changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse>;
+  setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse>;
 
   /* Maps */
   findMaps(): Promise<FindMapsResponse>;
@@ -72,6 +77,12 @@ export class HttpApi implements Api {
     const bsonReq = serializeChangePasswordRequest(req);
     const bsonResp = await post(path(this.apiBase, 'users', 'changePassword'), bsonReq);
     return deserializeChangePasswordResponse(bsonResp);
+  }
+
+  async setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse> {
+    const bsonReq = serializeSetFavoriteMapsRequest(req);
+    const bsonResp = await post(path(this.apiBase, 'favorites', 'set'), bsonReq);
+    return apiResponse.deserialize(bsonResp);
   }
 
   async findMaps(): Promise<FindMapsResponse> {

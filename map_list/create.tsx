@@ -35,7 +35,7 @@ export function createMapList(api: Api) {
   const store = new MapListStore();
   const presenter = new MapListPresenter(api, store);
 
-  const getRow = (map: PDMap): Row<5> => {
+  const getRow = (map: PDMap): Row<6> => {
     const onSelect = action((e: React.MouseEvent<HTMLAnchorElement>) => {
       if (!store.enableBulkSelect) {
         return;
@@ -60,6 +60,7 @@ export function createMapList(api: Api) {
         React.memo(() => wrapWithMapRoute(<T.Small>{map.artist}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.author}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<DifficultyColorPills difficulties={map.difficulties}/>)),
+        React.memo(() => wrapWithMapRoute(<T.Small>{map.favorites}</T.Small>)),
         React.memo(() =>
           wrapWithMapRoute(
             <T.Small>{formatDate(map.submissionDate)}</T.Small>,
@@ -85,6 +86,10 @@ export function createMapList(api: Api) {
         width: `calc(${metrics.gridBaseline} * 13)`,
       },
       {
+        content: <T.Small weight="bold">Favorites</T.Small>,
+        sort: (a, b) => a.favorites - b.favorites,
+      },
+      {
         content: <T.Small weight="bold">Upload date</T.Small>,
         sort: (a, b) => a.submissionDate.localeCompare(b.submissionDate),
       },
@@ -94,7 +99,7 @@ export function createMapList(api: Api) {
     onSortChange: presenter.onTableSortChange,
     tableClassname: styles.mapListTable,
     rowClassname: styles.mapListRow,
-    defaultSortColumn: 4,
+    defaultSortColumn: 5,
     defaultSortDirection: 'desc',
   });
 

@@ -5,7 +5,13 @@ import { Difficulty, PDMap } from 'paradb-api-schema';
 import React from 'react';
 import styles from './map_page.css';
 
-type Props = { map: PDMap | undefined, canDelete: boolean, deleteMap(): void };
+type Props = {
+  map: PDMap | undefined,
+  canDelete: boolean,
+  isFavorited: boolean | undefined,
+  deleteMap(): void,
+  toggleFavorite(): void,
+};
 
 export function getDifficultyColor(difficultyName: string | undefined) {
   if (difficultyName == null) {
@@ -55,7 +61,7 @@ export class MapPage extends React.Component<Props> {
   }
 
   render() {
-    const { map, canDelete, deleteMap } = this.props;
+    const { map, canDelete, isFavorited, deleteMap, toggleFavorite } = this.props;
     if (!map) {
       return <div className={styles.mapPage}>Loading...</div>;
     }
@@ -86,7 +92,16 @@ export class MapPage extends React.Component<Props> {
             )
             : undefined}
           <div className={styles.actions}>
-            {this.downloadLink && <Button link={this.downloadLink}>Download</Button>}
+            {isFavorited != null && (
+              <Button
+                onClick={toggleFavorite}
+                style={isFavorited ? 'active' : 'regular'}
+              >
+                ❤
+              </Button>
+            )}
+            {this
+              .downloadLink && <Button link={this.downloadLink}>Download</Button>}
             {canDelete && <Button style="error" onClick={deleteMap}>Delete</Button>}
           </div>
         </div>

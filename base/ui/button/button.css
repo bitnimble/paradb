@@ -21,6 +21,7 @@
     background: colorWhite;
     transition: background 0.15s ease, color 0.15s ease;
     cursor: pointer;
+    border: 1px solid regularColor;
 }
 
 .button:hover:not(.disabled) {
@@ -28,15 +29,19 @@
 }
 
 .regular.button {
-    border: 1px solid regularColor;
     color: regularColor;
 }
 .regular.button:hover:not(.disabled) {
     background: regularColor;
 }
 
+.active {
+    background: regularColor;
+    color: white;
+}
+
 .error.button {
-    border: 1px solid errorColor;
+    border-color: errorColor;
     color: errorColor;
 }
 .error.button:hover:not(.disabled) {
@@ -45,7 +50,7 @@
 
 .success.button {
     position: relative;
-    border: 1px solid successColor;
+    border-color: successColor;
     background: successColor;
     color: colorWhite;
 }
@@ -55,7 +60,7 @@
 }
 
 .button.disabled {
-    border: 1px solid colorGrey;
+    border-color: colorGrey;
     color: colorGrey;
     cursor: not-allowed;
 }

@@ -23,20 +23,26 @@ export function createMapPage(api: Api, navigate: Navigate, sessionStore: Sessio
     useComponentDidMount(() => {
       if (map) {
         runInAction(() => store.map = map);
+        window.history.replaceState({}, '');
       } else {
+        store.map = undefined;
         presenter.getMap(id);
       }
     });
 
     const deleteMap = () => presenter.deleteMap(id);
+    const toggleFavorite = () => presenter.toggleFavorite(id);
 
     return (
       <MapPage
         map={store.map}
-        canDelete={map && sessionStore.user && map.uploader === sessionStore.user.id
-          ? true
-          : false}
+        canDelete={!!(map && sessionStore.user && map.uploader === sessionStore.user.id)}
+        isFavorited={store
+          .map
+          ?.userProjection
+          ?.isFavorited}
         deleteMap={deleteMap}
+        toggleFavorite={toggleFavorite}
       />
     );
   });

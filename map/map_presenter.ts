@@ -42,4 +42,15 @@ export class MapPagePresenter {
 
     this.navigate([RoutePath.MAP_LIST], true);
   }
+
+  async toggleFavorite(id: string) {
+    if (!this.store.map || !this.store.map.userProjection) {
+      return;
+    }
+    const newVal = !(this.store.map.userProjection.isFavorited);
+    const resp = await this.api.setFavorites({ mapIds: [id], isFavorite: newVal });
+    if (resp.success) {
+      runInAction(() => this.store.map!.userProjection!.isFavorited = newVal);
+    }
+  }
 }
