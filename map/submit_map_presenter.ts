@@ -159,6 +159,9 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
       if (!zipTypes.includes(file.type)) {
         fileState.error = 'File is not a zip';
         this.pushErrors(['files'], `${file.name} was not a zip file`);
+      } else if (file.size > 1000 * 1000 * 100) { // 100 MB
+        fileState.error = 'File is over 100MB';
+        this.pushErrors(['files'], `${file.name} is over the file size limit of 100MB`);
       }
       // Deduplicate by both filename and byte size
       const key = `${file.name}-${file.size}`;
