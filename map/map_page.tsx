@@ -58,6 +58,12 @@ export class MapPage extends React.Component<Props> {
     return this.props.map ? getMapFileLink(this.props.map.id) : undefined;
   }
 
+  private renderRichText(content: string) {
+    // TODO: replace with an actual richtext / markup renderer
+    const paragraphs = content.replaceAll('\r', '').split('\n');
+    return paragraphs.map(p => <T.Small display="block" color="grey">{p}</T.Small>);
+  }
+
   render() {
     const { map, canDelete, isFavorited, deleteMap, toggleFavorite } = this.props;
     if (!map) {
@@ -83,11 +89,7 @@ export class MapPage extends React.Component<Props> {
 
           <DifficultyPills difficulties={map.difficulties}/>
           {map.description != null
-            ? (
-              <div className={styles.description}>
-                <T.Small color="grey">{map.description}</T.Small>
-              </div>
-            )
+            ? <div className={styles.description}>{this.renderRichText(map.description)}</div>
             : undefined}
           <div className={styles.actions}>
             {isFavorited != null && (
