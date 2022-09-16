@@ -51,9 +51,7 @@ const DifficultyPills = (props: { difficulties: Difficulty[] }) => (
 
 export class MapPage extends React.Component<Props> {
   private get albumArtLink() {
-    return this.props.map
-      ? `/static/map_data/${this.props.map.id}/${this.props.map.albumArt}`
-      : undefined;
+    return this.props.map ? `/covers/${this.props.map.id}/${this.props.map.albumArt}` : undefined;
   }
 
   private get downloadLink() {
