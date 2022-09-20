@@ -21,7 +21,7 @@ export function getDifficultyColor(difficultyName: string | undefined) {
     case 'easy':
       return 'green';
     case 'medium':
-      return 'yellow';
+      return 'gold';
     case 'hard':
       return 'orange';
     case 'expert':
