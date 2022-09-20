@@ -94,6 +94,8 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
           Error: {uploadState.errorMessage}
         </div>
       );
+    } else if (uploadState.progress === 1) {
+      return <div className={styles.progressContainer}>Processing map...</div>;
     }
     return (
       <div className={classNames(styles.progressContainer, styles.progressBar)}>

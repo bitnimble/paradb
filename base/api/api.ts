@@ -46,6 +46,7 @@ export interface Api {
   submitMap(
     req: SubmitMapRequest,
     onProgress: (e: ProgressEvent) => void,
+    onUploadFinish: () => void,
   ): Promise<SubmitMapResponse>;
 }
 
@@ -103,6 +104,7 @@ export class HttpApi implements Api {
   async submitMap(
     req: SubmitMapRequest,
     onProgress: (e: ProgressEvent) => void,
+    onUploadFinish: () => void,
   ): Promise<SubmitMapResponse> {
     return new Promise((res, rej) => {
       const xhr = new XMLHttpRequest();
@@ -110,6 +112,7 @@ export class HttpApi implements Api {
       xhr.setRequestHeader('Content-Type', contentType);
       xhr.responseType = 'arraybuffer';
       xhr.upload.addEventListener('progress', onProgress);
+      xhr.upload.addEventListener('load', onUploadFinish);
       xhr.onload = () => {
         const resp = new Uint8Array(xhr.response);
         res(deserializeSubmitMapResponse(resp));

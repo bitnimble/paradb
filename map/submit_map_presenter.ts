@@ -62,9 +62,12 @@ export class ThrottledMapUploader {
     const onProgress = action((e: ProgressEvent) => {
       upload.progress = e.loaded / e.total;
     });
+    const onUploadFinish = action(() => {
+      upload.progress = 1;
+    });
     const mapData = new Uint8Array(await upload.file.arrayBuffer());
     try {
-      const resp = await this.api.submitMap({ mapData }, onProgress);
+      const resp = await this.api.submitMap({ mapData }, onProgress, onUploadFinish);
       runInAction(() => {
         if (resp.success) {
           // TODO: fix type safety here
