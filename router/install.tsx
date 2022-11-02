@@ -1,15 +1,15 @@
-import { createBrowserHistory } from 'history';
 import { routeFor, RouteSegments } from 'pages/paradb/router/routes';
+import { useNavigate } from 'react-router-dom';
 
 export function installRouter() {
-  const history = createBrowserHistory();
   const navigate: Navigate = (route, force) => {
     const pathname = routeFor(route);
     if (force) {
       window.location.href = pathname;
     }
-    if (history.location.pathname !== pathname) {
-      history.push(pathname);
+    if (window.location.pathname !== pathname) {
+      const navigate = useNavigate();
+      navigate(pathname);
     }
   };
 
