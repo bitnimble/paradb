@@ -47,7 +47,8 @@ export function createMapList(api: Api) {
     const wrapWithMapRoute = (contents: React.ReactNode, additionalClassName?: string) => (
       <RouteLink
         additionalClassName={classNames(styles.mapListCell, additionalClassName)}
-        to={{ pathname: routeFor([RoutePath.MAP, map.id]), state: serializeMap(map) }}
+        to={routeFor([RoutePath.MAP, map.id])}
+        state={serializeMap(map)}
         onClick={onSelect}
       >
         {contents}

@@ -36,7 +36,7 @@ export function createMapPage(api: Api, navigate: Navigate, sessionStore: Sessio
     return (
       <MapPage
         map={store.map}
-        canDelete={!!(map && sessionStore.user && map.uploader === sessionStore.user.id)}
+        canDelete={!!(store.map && sessionStore.user && store.map.uploader === sessionStore.user.id)}
         isFavorited={store
           .map
           ?.userProjection
