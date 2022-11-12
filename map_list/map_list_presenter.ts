@@ -1,61 +1,47 @@
 import { checkExists } from 'base/preconditions';
 import { TableStore } from 'base/table/table_presenter';
-import { makeAutoObservable, reaction, runInAction } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { computedFn } from 'mobx-utils';
 import { Api } from 'pages/paradb/base/api/api';
 import { getMapFileLink } from 'pages/paradb/utils/maps';
-import { PDMap } from 'paradb-api-schema';
+import { MapSortableAttributes, mapSortableAttributes, PDMap } from 'paradb-api-schema';
 
 export class MapListStore {
   enableBulkSelect = false;
-  filterQuery: string = '';
+  query: string = '';
   selectedMaps = new Set<string>();
   lastSelectedMapIndex: number | undefined;
-
-  /** Private, debounced version of `filterQuery` */
-  private filter: string = this.filterQuery;
-
-  private _maps?: PDMap[];
+  maps?: PDMap[];
+  hasMore = true;
+  loadingMore = false;
+  isFirstSearch = true;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    reaction(
-      () => this.filterQuery, //
-      q => this.filter = q.toLowerCase(), //
-      { delay: 100 },
-    );
-  }
-
-  setMaps(maps: PDMap[]) {
-    this._maps = maps;
-  }
-
-  get maps() {
-    return this._maps?.filter(m =>
-      m.artist.toLowerCase().includes(this.filter) || m.title.toLowerCase().includes(this.filter)
-    );
-  }
-
-  get allMaps() {
-    return this._maps;
   }
 }
 
 export class MapListPresenter {
+  private tableStore?: TableStore<PDMap, 6>;
+  private searchLimit = 20;
+
   constructor(private readonly api: Api, private readonly store: MapListStore) {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  toggleMapSelection(tableStore: TableStore<PDMap, number>, id: string, shiftKeyHeld: boolean) {
-    // Take into account table filtering + sorting, when doing index lookups
-    const index = checkExists(tableStore.sortedData).findIndex(m => m.id === id);
+  setTableStore(tableStore: TableStore<PDMap, 6>) {
+    this.tableStore = tableStore;
+  }
+
+  toggleMapSelection(id: string, shiftKeyHeld: boolean) {
+    const index = checkExists(this.store.maps).findIndex(m => m.id === id);
 
     if (
       shiftKeyHeld && this.store.lastSelectedMapIndex != null
       && index > this.store.lastSelectedMapIndex
     ) {
       for (let i = this.store.lastSelectedMapIndex + 1; i <= index; i++) {
-        this.store.selectedMaps.add(checkExists(tableStore.sortedData)[i].id);
+        this.store.selectedMaps.add(checkExists(this.store.maps)[i].id);
       }
       this.store.lastSelectedMapIndex = index;
     } else {
@@ -79,9 +65,6 @@ export class MapListPresenter {
     document.body.appendChild(a);
 
     this.store.selectedMaps.forEach(id => {
-      // It's probably faster to just loop and find in the event that they bulk download,
-      // rather than have a cache for ID -> Map.
-      const title = this.store.allMaps?.find(map => map.id === id)?.title;
       a.setAttribute('href', getMapFileLink(id));
       a.setAttribute('download', '');
       a.click();
@@ -99,23 +82,84 @@ export class MapListPresenter {
     return this.store.enableBulkSelect && this.store.selectedMaps.has(id);
   });
 
-  onChangeFilterQuery(val: string) {
-    this.store.filterQuery = val;
+  onChangeQuery(val: string) {
+    this.store.query = val;
     this.store.lastSelectedMapIndex = undefined;
   }
 
-  onTableSortChange() {
-    this.store.lastSelectedMapIndex = undefined;
+  private getTableSortParams() {
+    const tableStore = checkExists(this.tableStore);
+    if (tableStore.sortColumn == null || tableStore.sortDirection == null) {
+      return null;
+    }
+    const label = tableStore.columns[tableStore.sortColumn].sortLabel as MapSortableAttributes;
+    if (label == null) {
+      return null;
+    }
+    // Double check that it's in the sortable attribute list
+    if (!mapSortableAttributes.includes(label)) {
+      return null;
+    }
+    return { sort: label, sortDirection: tableStore.sortDirection };
   }
 
-  async loadAllMaps() {
-    if (this.store.maps != null) {
+  async onSortChanged() {
+    const sort = this.getTableSortParams();
+    if (!sort) {
       return;
     }
-    const resp = await this.api.findMaps();
-    if (!resp.success) {
-      throw new Error();
+    return this.onSearch();
+  }
+
+  async onSearch() {
+    // The default sort on first load is by "new" to surface new maps, but when the user searches
+    // for something manually for the first time, we want to revert back to unsorted (i.e. sort
+    // the search results by relevance instead).
+    if (this.store.maps && this.store.isFirstSearch && this.tableStore != null) {
+      runInAction(() => {
+        this.store.isFirstSearch = false;
+        checkExists(this.tableStore).sortColumn = undefined;
+        checkExists(this.tableStore).sortDirection = undefined;
+      });
     }
-    runInAction(() => this.store.setMaps(resp.maps));
+    const sort = this.getTableSortParams();
+    runInAction(() => this.store.maps = undefined);
+    const resp = await this.api.searchMaps({
+      query: this.store.query,
+      limit: this.searchLimit,
+      offset: 0,
+      ...(sort || {}),
+    });
+    if (resp.success) {
+      runInAction(() => {
+        this.store.maps = resp.maps;
+        this.store.hasMore = resp.maps.length >= this.searchLimit;
+      });
+    }
+    this.store.lastSelectedMapIndex = undefined;
+  }
+
+  async onLoadMore() {
+    const sort = this.getTableSortParams();
+    runInAction(() => this.store.loadingMore = true);
+    const resp = await this.api.searchMaps({
+      query: this.store.query,
+      limit: this.searchLimit,
+      offset: this.store.maps?.length || 0,
+      ...(sort || {}),
+    });
+    runInAction(() => this.store.loadingMore = false);
+    if (resp.success) {
+      runInAction(() => {
+        if (this.store.maps) {
+          this.store.maps.push(...resp.maps);
+        } else {
+          this.store.maps = resp.maps;
+        }
+        if (resp.maps.length < this.searchLimit) {
+          this.store.hasMore = false;
+        }
+      });
+    }
   }
 }

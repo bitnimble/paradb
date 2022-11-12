@@ -1,4 +1,5 @@
 import {
+  ApiResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
   DeleteMapResponse,
@@ -7,6 +8,8 @@ import {
   LoginRequest,
   LoginResponse,
   PDMap,
+  SearchMapsRequest,
+  SetFavoriteMapsRequest,
   SignupRequest,
   SignupResponse,
   SubmitMapRequest,
@@ -30,6 +33,9 @@ export class FakeApi implements Api {
   async login(req: LoginRequest): Promise<LoginResponse> {
     return { success: true };
   }
+  async setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse> {
+    return { success: true };
+  }
 
   async signup(req: SignupRequest): Promise<SignupResponse> {
     return { success: true };
@@ -40,6 +46,10 @@ export class FakeApi implements Api {
   }
 
   async findMaps(): Promise<FindMapsResponse> {
+    await delay();
+    return { success: true, maps: fakeMaps };
+  }
+  async searchMaps(req: SearchMapsRequest): Promise<FindMapsResponse> {
     await delay();
     return { success: true, maps: fakeMaps };
   }
@@ -76,12 +86,15 @@ const allStar: PDMap = {
   author: 'Nobody',
   uploader: 'Nobody',
   albumArt: 'https://upload.wikimedia.org/wikipedia/en/1/16/All_star.jpg',
-  complexities: [
-    { complexity: 1, complexityName: undefined },
-    { complexity: 2, complexityName: undefined },
-    { complexity: 3, complexityName: undefined },
-    { complexity: 5, complexityName: undefined },
+  complexity: 1,
+  favorites: 3,
+  difficulties: [
+    { difficulty: 1, difficultyName: undefined },
+    { difficulty: 2, difficultyName: undefined },
+    { difficulty: 3, difficultyName: undefined },
+    { difficulty: 5, difficultyName: undefined },
   ],
+  userProjection: undefined,
   description: 'Test description',
 };
 
@@ -93,12 +106,15 @@ const californication: PDMap = {
   author: 'Nobody',
   uploader: 'Nobody',
   albumArt: 'https://upload.wikimedia.org/wikipedia/en/d/df/RedHotChiliPeppersCalifornication.jpg',
-  complexities: [
-    { complexity: 1, complexityName: "anon's Easy" },
-    { complexity: 2, complexityName: 'Medium' },
-    { complexity: 3, complexityName: 'West Coast' },
-    { complexity: 5, complexityName: 'Sacramento' },
+  complexity: 2,
+  favorites: 10,
+  difficulties: [
+    { difficulty: 1, difficultyName: "anon's Easy" },
+    { difficulty: 2, difficultyName: 'Medium' },
+    { difficulty: 3, difficultyName: 'West Coast' },
+    { difficulty: 5, difficultyName: 'Sacramento' },
   ],
+  userProjection: undefined,
   description: 'Test description',
 };
 

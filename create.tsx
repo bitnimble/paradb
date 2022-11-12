@@ -12,14 +12,14 @@ import * as React from 'react';
 
 export function createApp() {
   const api = new HttpApi();
-  const { history, navigate } = installRouter();
+  const { navigate } = installRouter();
 
   const sessionStore = new SessionStore();
   const sessionPresenter = new SessionPresenter(api, sessionStore);
 
   const NavBar = createNavBar(sessionStore, sessionPresenter.maybeLoadSession);
   const MapPage = createMapPage(api, navigate, sessionStore);
-  const MapList = createMapList(api);
+  const { MapList, setSkeletonRef } = createMapList(api);
   const LoginSignupPage = createLoginSignupPage(api, navigate);
   const SettingsPage = createSettingsPage(api, navigate, sessionStore);
   const SubmitMapPage = createSubmitMapPage(api, navigate);
@@ -27,7 +27,7 @@ export function createApp() {
 
   return () => (
     <Skeleton
-      history={history}
+      setSkeletonRef={setSkeletonRef}
       NavBar={NavBar}
       MapPage={MapPage}
       MapList={MapList}

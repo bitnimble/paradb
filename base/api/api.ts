@@ -16,6 +16,7 @@ import {
   GetMapResponse,
   LoginRequest,
   LoginResponse,
+  SearchMapsRequest,
   serializeChangePasswordRequest,
   serializeLoginRequest,
   serializeSetFavoriteMapsRequest,
@@ -28,6 +29,7 @@ import {
   SubmitMapResponse,
   User,
 } from 'paradb-api-schema';
+import * as qs from 'qs';
 
 export interface Api {
   /* Auth */
@@ -41,6 +43,7 @@ export interface Api {
 
   /* Maps */
   findMaps(): Promise<FindMapsResponse>;
+  searchMaps(req: SearchMapsRequest): Promise<FindMapsResponse>;
   getMap(id: string): Promise<GetMapResponse>;
   deleteMap(id: string): Promise<DeleteMapResponse>;
   submitMap(
@@ -91,6 +94,13 @@ export class HttpApi implements Api {
     return deserializeFindMapsResponse(resp);
   }
 
+  async searchMaps(
+    req: { query: string, offset: number, limit: number },
+  ): Promise<FindMapsResponse> {
+    const resp = await get(path(this.apiBase, 'maps'), qs.stringify(req));
+    return deserializeFindMapsResponse(resp);
+  }
+
   async getMap(id: string): Promise<GetMapResponse> {
     const resp = await get(path(this.apiBase, 'maps', id));
     return deserializeGetMapResponse(resp);
@@ -134,8 +144,9 @@ function path(...parts: string[]) {
     .join('');
 }
 
-async function get(path: string): Promise<Uint8Array> {
-  const resp = await fetch(path);
+async function get(path: string, queryParams?: string): Promise<Uint8Array> {
+  const search = queryParams ? `?${queryParams}` : '';
+  const resp = await fetch(path + search);
   const buf = await resp.arrayBuffer();
   return new Uint8Array(buf);
 }

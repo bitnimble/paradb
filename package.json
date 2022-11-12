@@ -9,6 +9,7 @@
     "mobx-utils": "^6.0.4",
     "msgpackr": "^1.4.2",
     "nanoid": "^3.1.25",
-    "paradb-api-schema": "file:../../../../paradb-api-schema"
+    "paradb-api-schema": "file:../../../../paradb-api-schema",
+    "qs": "^6.11.0"
   }
 }

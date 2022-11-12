@@ -1,6 +1,5 @@
 import classNames from 'classnames';
 import { T } from 'pages/paradb/base/text/text';
-import { searchIcon } from 'pages/paradb/base/ui/textbox/search_icon';
 import React from 'react';
 import styles from './textbox.css';
 
@@ -12,7 +11,6 @@ export type TextboxProps = {
   readOnly?: boolean,
   label?: string,
   tooltip?: string,
-  search?: boolean,
   placeholder?: string,
   borderColor?: TextboxBorderColor,
   borderWidth?: number,
@@ -67,7 +65,6 @@ export const Textbox = (props: TextboxProps) => {
         )}
         style={{ borderWidth: `${props.borderWidth || 1}px` }}
       >
-        {props.search && searchIcon}
         {props.inputType === 'area' ? <textarea {...inputProps}/> : <input {...inputProps}/>}
       </div>
 

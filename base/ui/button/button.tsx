@@ -10,6 +10,7 @@ export type ButtonProps = {
   className?: string,
   style?: ButtonStyle,
   link?: string,
+  /** `loading` implies `disabled` as well */
   loading?: boolean,
   disabled?: boolean,
   onClick?(): void,
