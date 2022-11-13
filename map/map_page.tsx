@@ -33,10 +33,28 @@ export function getDifficultyColor(difficultyName: string | undefined) {
   }
 }
 
+const difficultyMap = { 'easy': 1, 'medium': 2, 'hard': 3, 'expert': 4, 'expert+': 5 };
+const difficultyRegexKeys = [...Object.keys(difficultyMap)]
+  .reverse() // Reverse it so that 'expert+' as at the start, as the regex is greedy and we don't want 'expert+' to be matched as 'expert'
+  .map(s => s.replace('+', '\\+'))
+  .join('|');
+const difficultyRegex = new RegExp(`(${difficultyRegexKeys})`, 'gi');
+type KnownDifficulty = keyof typeof difficultyMap;
+// Best effort sorting of freeform difficulty names
+export const sortDifficulty = (a: Difficulty, b: Difficulty) => {
+  const aDifficultyMatch = (a.difficultyName?.match(difficultyRegex) || ['medium'])[0]
+    .toLowerCase() as KnownDifficulty;
+  const bDifficultyMatch = (b.difficultyName?.match(difficultyRegex) || ['medium'])[0]
+    .toLowerCase() as KnownDifficulty;
+
+  return difficultyMap[aDifficultyMatch] - difficultyMap[bDifficultyMatch];
+};
+
 const DifficultyPills = (props: { difficulties: Difficulty[] }) => (
   <div className={styles.difficulties}>
     {props
       .difficulties
+      .sort(sortDifficulty)
       .map((d, i) => (
         <div
           key={i}

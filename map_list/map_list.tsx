@@ -8,7 +8,7 @@ import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
 import { Textbox } from 'pages/paradb/base/ui/textbox/textbox';
-import { getDifficultyColor } from 'pages/paradb/map/map_page';
+import { getDifficultyColor, sortDifficulty } from 'pages/paradb/map/map_page';
 import { MapListPresenter, MapListStore } from 'pages/paradb/map_list/map_list_presenter';
 import { searchIcon } from 'pages/paradb/map_list/search_icon';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
@@ -123,6 +123,7 @@ export const DifficultyColorPills = (props: { difficulties: Difficulty[] }) => (
   <div className={styles.difficulties}>
     {props
       .difficulties
+      .sort(sortDifficulty)
       .map((d, i) => (
         <div
           key={i}
