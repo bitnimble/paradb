@@ -125,6 +125,7 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
 │  ├─ drums.ogg
 │  ├─ ...`}
         </T.Medium>
+        <T.Medium>The maximum file size is 40MB.</T.Medium>
         <br/>
         {showProgressScreen
           ? (
