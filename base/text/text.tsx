@@ -42,6 +42,7 @@ export type TextProps = {
   style?: TextStyle,
   weight?: TextWeight,
   display?: TextDisplay,
+  ComponentOverride?: React.ComponentType<{ className: string }>,
 };
 
 function createTextClass(className: string) {
@@ -53,6 +54,7 @@ function createTextClass(className: string) {
       style = 'regular',
       weight = 'regular',
       display = 'inline',
+      ComponentOverride,
     }: TextProps,
   ) => {
     const classname = classNames(
@@ -64,9 +66,12 @@ function createTextClass(className: string) {
       color && colorMap[color],
       displayMap[display],
     );
-    return display === 'inline'
-      ? <span className={classname}>{children}</span>
-      : <p className={classname}>{children}</p>;
+    if (ComponentOverride) {
+      return <ComponentOverride className={classname}>{children}</ComponentOverride>;
+    } else if (display === 'block') {
+      return <p className={classname}>{children}</p>;
+    }
+    return <span className={classname}>{children}</span>;
   };
 }
 

@@ -10,6 +10,10 @@
     "msgpackr": "^1.4.2",
     "nanoid": "^3.1.25",
     "paradb-api-schema": "file:../../../../paradb-api-schema",
-    "qs": "^6.11.0"
+    "qs": "^6.11.0",
+    "sanitize-html": "^2.7.3"
+  },
+  "devDependencies": {
+    "@types/sanitize-html": "^2.6.2"
   }
 }

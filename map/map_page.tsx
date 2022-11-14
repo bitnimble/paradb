@@ -3,6 +3,7 @@ import { Button } from 'pages/paradb/base/ui/button/button';
 import { getMapFileLink } from 'pages/paradb/utils/maps';
 import { Difficulty, PDMap } from 'paradb-api-schema';
 import React from 'react';
+import sanitizeHtml from 'sanitize-html';
 import styles from './map_page.css';
 
 type Props = {
@@ -76,10 +77,8 @@ export class MapPage extends React.Component<Props> {
     return this.props.map ? getMapFileLink(this.props.map.id) : undefined;
   }
 
-  private renderRichText(content: string) {
-    // TODO: replace with an actual richtext / markup renderer
-    const paragraphs = content.replaceAll('\r', '').split('\n');
-    return paragraphs.map(p => <T.Small display="block" color="grey">{p}</T.Small>);
+  private breakNewlines(content: string) {
+    return content.replaceAll('\r', '').replaceAll('\n', '<br/>');
   }
 
   render() {
@@ -107,7 +106,27 @@ export class MapPage extends React.Component<Props> {
 
           <DifficultyPills difficulties={map.difficulties}/>
           {map.description != null
-            ? <div className={styles.description}>{this.renderRichText(map.description)}</div>
+            ? (
+              <div className={styles.description}>
+                <T.Small
+                  color="grey"
+                  ComponentOverride={({ className, children }) => (
+                    <div className={className}>{children}</div>
+                  )}
+                >
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: sanitizeHtml(this.breakNewlines(map.description), {
+                        allowedTags: sanitizeHtml
+                          .defaults
+                          .allowedTags
+                          .concat(['br']),
+                      }),
+                    }}
+                  />
+                </T.Small>
+              </div>
+            )
             : undefined}
           <div className={styles.actions}>
             {isFavorited != null && (
