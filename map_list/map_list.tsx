@@ -95,17 +95,17 @@ export function createMapListTable(
       { content: <T.Small weight="bold">Mapper</T.Small>, sortLabel: 'author' },
       {
         content: <T.Small weight="bold">Difficulties</T.Small>,
-        width: `calc(${metrics.gridBaseline} * 30)`,
+        width: `calc(${metrics.gridBaseline} * 20)`,
       },
       {
         content: <T.Small weight="bold">Favorites</T.Small>,
         sortLabel: 'favorites',
-        width: `calc(${metrics.gridBaseline} * 30)`,
+        width: `calc(${metrics.gridBaseline} * 20)`,
       },
       {
         content: <T.Small weight="bold">Upload date</T.Small>,
         sortLabel: 'submissionDate',
-        width: `calc(${metrics.gridBaseline} * 30)`,
+        width: `calc(${metrics.gridBaseline} * 20)`,
       },
     ],
     rowMapper: getRow,
