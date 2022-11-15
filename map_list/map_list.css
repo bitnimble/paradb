@@ -1,5 +1,5 @@
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
-@value colorGreyA15, colorPurple from "pages/paradb/base/colors/colors.css";
+@value colorGreyA30, colorGreyA15, colorGreyA15, colorPurple from "pages/paradb/base/colors/colors.css";
 
 @value gutter: calc(gridBaseline * 2);
 
@@ -81,6 +81,10 @@
 }
 
 .mapListCell {
+    position: relative;
+}
+
+.routeLink {
     display: block;
     padding: calc(gridBaseline * 1.5) gridBaseline;
 }
@@ -91,14 +95,27 @@
 }
 
 .difficulties {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
     display: flex;
-    gap: gridBaseline;
+    flex-direction: column;
+    border-radius: calc(gridBaseline * 0.5);
+    overflow: hidden;
 }
 
 .difficultyColorPill {
-    width: calc(gridBaseline * 2);
-    height: calc(gridBaseline * 2);
-    border-radius: 50%;
+    width: 100%;
+    flex: 1;
+}
+
+.greyPill {
+    background-color: colorGreyA15;
+}
+.greyPill + .greyPill {
+    border-top: 1px solid colorGreyA30;
 }
 
 @media (max-width: 640px) {

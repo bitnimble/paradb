@@ -23,41 +23,27 @@ type Props = {
   toggleFavorite(): void,
 };
 
-export function getDifficultyColor(difficultyName: string | undefined) {
-  if (difficultyName == null) {
-    return 'black';
-  }
-  switch (difficultyName.toLowerCase()) {
-    case 'easy':
-      return 'green';
-    case 'medium':
-      return 'gold';
-    case 'hard':
-      return 'orange';
-    case 'expert':
-      return 'red';
-    default:
-      // Custom difficulty name -- we don't know the difficulty level.
-      // TODO: could do some difficulty name parsing to see if it has easy / medium / hard in the name.
-      return 'black';
-  }
-}
+export const difficultyColors: Record<KnownDifficulty, string> = {
+  'easy': 'green',
+  'medium': 'gold',
+  'hard': 'orange',
+  'expert': 'red',
+  'expert+': 'black',
+};
 
 const difficultyMap = { 'easy': 1, 'medium': 2, 'hard': 3, 'expert': 4, 'expert+': 5 };
 const difficultyRegexKeys = [...Object.keys(difficultyMap)]
   .reverse() // Reverse it so that 'expert+' as at the start, as the regex is greedy and we don't want 'expert+' to be matched as 'expert'
   .map(s => s.replace('+', '\\+'))
   .join('|');
-const difficultyRegex = new RegExp(`(${difficultyRegexKeys})`, 'gi');
-type KnownDifficulty = keyof typeof difficultyMap;
+export const difficultyRegex = new RegExp(`(${difficultyRegexKeys})`, 'gi');
+export type KnownDifficulty = keyof typeof difficultyMap;
 // Best effort sorting of freeform difficulty names
+export const parseDifficulty = (s?: string) =>
+  (s?.match(difficultyRegex) || ['medium'])[0].toLowerCase() as KnownDifficulty;
 export const sortDifficulty = (a: Difficulty, b: Difficulty) => {
-  const aDifficultyMatch = (a.difficultyName?.match(difficultyRegex) || ['medium'])[0]
-    .toLowerCase() as KnownDifficulty;
-  const bDifficultyMatch = (b.difficultyName?.match(difficultyRegex) || ['medium'])[0]
-    .toLowerCase() as KnownDifficulty;
-
-  return difficultyMap[aDifficultyMatch] - difficultyMap[bDifficultyMatch];
+  return difficultyMap[parseDifficulty(a.difficultyName)]
+    - difficultyMap[parseDifficulty(b.difficultyName)];
 };
 
 const DifficultyPills = (props: { difficulties: Difficulty[] }) => (
@@ -69,7 +55,7 @@ const DifficultyPills = (props: { difficulties: Difficulty[] }) => (
         <div
           key={i}
           className={styles.difficultyPill}
-          style={{ backgroundColor: getDifficultyColor(d.difficultyName) }}
+          style={{ backgroundColor: difficultyColors[parseDifficulty(d.difficultyName)] }}
         >
           <T.Small color="white">{d.difficultyName || 'Unknown'}</T.Small>
         </div>

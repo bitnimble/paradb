@@ -8,7 +8,7 @@ import { RouteLink } from 'pages/paradb/base/text/link';
 import { T } from 'pages/paradb/base/text/text';
 import { Button } from 'pages/paradb/base/ui/button/button';
 import { Textbox } from 'pages/paradb/base/ui/textbox/textbox';
-import { getDifficultyColor, sortDifficulty } from 'pages/paradb/map/map_page';
+import { difficultyColors, KnownDifficulty, parseDifficulty } from 'pages/paradb/map/map_page';
 import { MapListPresenter, MapListStore } from 'pages/paradb/map_list/map_list_presenter';
 import { searchIcon } from 'pages/paradb/map_list/search_icon';
 import { routeFor, RoutePath } from 'pages/paradb/router/routes';
@@ -59,7 +59,7 @@ export function createMapListTable(
     });
     const wrapWithMapRoute = (contents: React.ReactNode, additionalClassName?: string) => (
       <RouteLink
-        additionalClassName={classNames(styles.mapListCell, additionalClassName)}
+        additionalClassName={classNames(styles.routeLink, additionalClassName)}
         to={routeFor([RoutePath.MAP, map.id])}
         state={serializeMap(map)}
         onClick={onSelect}
@@ -70,15 +70,10 @@ export function createMapListTable(
     return {
       className: classNames({ [styles.mapListRowSelected]: presenter.isSelected(map.id) }),
       Cells: [
+        React.memo(() => <DifficultyColorPills difficulties={map.difficulties}/>),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.title}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.artist}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.author}</T.Small>)),
-        React.memo(() =>
-          wrapWithMapRoute(
-            <DifficultyColorPills difficulties={map.difficulties}/>,
-            styles.centeredCell,
-          )
-        ),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.favorites}</T.Small>, styles.centeredCell)),
         React.memo(() =>
           wrapWithMapRoute(<T.Small>{formatDate(map.submissionDate)}</T.Small>, styles.centeredCell)
@@ -90,28 +85,26 @@ export function createMapListTable(
   const { store: tableStore, Component } = createTable({
     data: computed(() => store.maps),
     columns: [
+      { content: <div></div>, style: { minWidth: '8px', width: '8px' } },
       { content: <T.Small weight="bold">Song title</T.Small>, sortLabel: 'title' },
       { content: <T.Small weight="bold">Artist</T.Small>, sortLabel: 'artist' },
       { content: <T.Small weight="bold">Mapper</T.Small>, sortLabel: 'author' },
       {
-        content: <T.Small weight="bold">Difficulties</T.Small>,
-        width: `calc(${metrics.gridBaseline} * 20)`,
-      },
-      {
         content: <T.Small weight="bold">Favorites</T.Small>,
         sortLabel: 'favorites',
-        width: `calc(${metrics.gridBaseline} * 20)`,
+        style: { width: `calc(${metrics.gridBaseline} * 20)` },
       },
       {
         content: <T.Small weight="bold">Upload date</T.Small>,
         sortLabel: 'submissionDate',
-        width: `calc(${metrics.gridBaseline} * 20)`,
+        style: { width: `calc(${metrics.gridBaseline} * 20)` },
       },
     ],
     rowMapper: getRow,
     onSortChange: presenter.onSortChanged,
     tableClassname: styles.mapListTable,
     rowClassname: styles.mapListRow,
+    cellClassname: styles.mapListCell,
     defaultSortColumn: 5,
     defaultSortDirection: 'desc',
   });
@@ -147,21 +140,37 @@ export function createMapListTable(
   };
 }
 
-export const DifficultyColorPills = (props: { difficulties: Difficulty[] }) => (
-  <div className={styles.difficulties}>
-    {props
-      .difficulties
-      .sort(sortDifficulty)
-      .map((d, i) => (
-        <div
-          key={i}
-          className={styles.difficultyColorPill}
-          style={{ backgroundColor: getDifficultyColor(d.difficultyName) }}
-        >
-        </div>
-      ))}
-  </div>
-);
+export const DifficultyColorPills = (props: { difficulties: Difficulty[] }) => {
+  const difficulties = new Set(props.difficulties.map(d => parseDifficulty(d.difficultyName)));
+  const color = (d: KnownDifficulty) => difficulties.has(d) ? difficultyColors[d] : undefined;
+  return (
+    <div className={styles.difficulties}>
+      <div
+        className={classNames(
+          styles.difficultyColorPill,
+          !color('expert') && !color('expert+') && styles.greyPill,
+        )}
+        style={{ backgroundColor: color('expert') || color('expert+') }}
+      >
+      </div>
+      <div
+        className={classNames(styles.difficultyColorPill, !color('hard') && styles.greyPill)}
+        style={{ backgroundColor: color('hard') }}
+      >
+      </div>
+      <div
+        className={classNames(styles.difficultyColorPill, !color('medium') && styles.greyPill)}
+        style={{ backgroundColor: color('medium') }}
+      >
+      </div>
+      <div
+        className={classNames(styles.difficultyColorPill, !color('easy') && styles.greyPill)}
+        style={{ backgroundColor: color('easy') }}
+      >
+      </div>
+    </div>
+  );
+};
 
 @observer
 export class MapList extends React.Component<Props> {
