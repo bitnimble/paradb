@@ -16,6 +16,7 @@
     position: relative;
     min-height: calc(gridBaseline * 30);
     min-width: calc(gridBaseline * 30);
+    max-width: 90%;
     padding: calc(gridBaseline * 2);
     border-width: 2px;
     border-style: dashed;

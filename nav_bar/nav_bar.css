@@ -4,7 +4,7 @@
 .navbar {
     flex-shrink: 0;
     display: flex;
-    height: calc(gridBaseline * 7);
+    min-height: calc(gridBaseline * 7);
     background: colorDarkGrey;
     color: colorWhite;
     align-items: center;

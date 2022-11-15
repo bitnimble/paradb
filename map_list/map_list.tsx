@@ -95,17 +95,17 @@ export function createMapListTable(
       { content: <T.Small weight="bold">Mapper</T.Small>, sortLabel: 'author' },
       {
         content: <T.Small weight="bold">Difficulties</T.Small>,
-        width: `calc(${metrics.gridBaseline} * 20)`,
+        width: `calc(${metrics.gridBaseline} * 30)`,
       },
       {
         content: <T.Small weight="bold">Favorites</T.Small>,
         sortLabel: 'favorites',
-        width: `calc(${metrics.gridBaseline} * 20)`,
+        width: `calc(${metrics.gridBaseline} * 30)`,
       },
       {
         content: <T.Small weight="bold">Upload date</T.Small>,
         sortLabel: 'submissionDate',
-        width: `calc(${metrics.gridBaseline} * 20)`,
+        width: `calc(${metrics.gridBaseline} * 30)`,
       },
     ],
     rowMapper: getRow,
@@ -193,7 +193,11 @@ export class MapList extends React.Component<Props> {
           )}
         >
           <Table/>
-          {hasMore && <Button onClick={onLoadMore} loading={loadingMore}>Load more</Button>}
+          {hasMore && (
+            <Button className={styles.loadMoreButton} onClick={onLoadMore} loading={loadingMore}>
+              Load more
+            </Button>
+          )}
         </div>
       </div>
     );

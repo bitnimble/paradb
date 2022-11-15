@@ -18,10 +18,13 @@
 }
 
 .tableContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     margin-bottom: calc(gridBaseline * 2);
+    overflow-x: auto;
+}
+
+.loadMoreButton {
+    display: block;
+    margin: auto;
 }
 
 .mapListTable {
@@ -89,4 +92,10 @@
     width: calc(gridBaseline * 2);
     height: calc(gridBaseline * 2);
     border-radius: 50%;
+}
+
+@media (max-width: 640px) {
+    .filter {
+        grid-auto-flow: row;
+    }
 }
