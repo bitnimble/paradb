@@ -18,8 +18,15 @@
 }
 
 .tableContainer {
-    margin-bottom: calc(gridBaseline * 2);
+    padding-bottom: calc(gridBaseline * 2);
+}
+
+.tableScrollContainer {
     overflow-x: auto;
+}
+
+.isScrollable .mapListRow {
+    box-shadow: 0 0 0 1px colorGreyA15;
 }
 
 .loadMoreButton {

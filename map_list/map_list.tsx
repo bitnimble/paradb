@@ -1,7 +1,7 @@
 import { createTable } from 'base/table/create';
 import { Row } from 'base/table/table';
 import classNames from 'classnames';
-import { action, computed } from 'mobx';
+import { action, computed, observable, reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import metrics from 'pages/paradb/base/metrics/metrics.css';
 import { RouteLink } from 'pages/paradb/base/text/link';
@@ -116,7 +116,35 @@ export function createMapListTable(
     defaultSortDirection: 'desc',
   });
 
-  return { tableStore, Table: Component };
+  const scrollableTable = observable.box(false);
+  const tableScrollContainerRef = React.createRef<HTMLDivElement>();
+  reaction(() => store.maps, () => {
+    requestAnimationFrame(() => {
+      if (
+        tableScrollContainerRef.current && tableScrollContainerRef
+            .current
+            .scrollWidth > tableScrollContainerRef
+            .current
+            .clientWidth
+      ) {
+        tableScrollContainerRef.current.classList.add(styles.isScrollable);
+      }
+    });
+  });
+
+  return {
+    tableStore,
+    Table: observer(() => (
+      <div
+        ref={tableScrollContainerRef}
+        className={scrollableTable.get()
+          ? styles.isScrollable
+          : undefined}
+      >
+        <Component/>
+      </div>
+    )),
+  };
 }
 
 export const DifficultyColorPills = (props: { difficulties: Difficulty[] }) => (
