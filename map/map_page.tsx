@@ -6,6 +6,15 @@ import React from 'react';
 import sanitizeHtml from 'sanitize-html';
 import styles from './map_page.css';
 
+const allowedTags: typeof sanitizeHtml.defaults.allowedTags = [
+  ...sanitizeHtml.defaults.allowedTags,
+];
+
+const allowedAttributes: typeof sanitizeHtml.defaults.allowedAttributes = {
+  '*': ['style'],
+  'table': ['border', 'cellpadding', 'cellspacing'],
+};
+
 type Props = {
   map: PDMap | undefined,
   canDelete: boolean,
@@ -78,7 +87,7 @@ export class MapPage extends React.Component<Props> {
   }
 
   private breakNewlines(content: string) {
-    return content.replaceAll('\r', '').replaceAll('\n', '<br/>');
+    return content.replaceAll('\r', '').replaceAll('\n\n', '<br/>');
   }
 
   render() {
@@ -117,10 +126,8 @@ export class MapPage extends React.Component<Props> {
                   <div
                     dangerouslySetInnerHTML={{
                       __html: sanitizeHtml(this.breakNewlines(map.description), {
-                        allowedTags: sanitizeHtml
-                          .defaults
-                          .allowedTags
-                          .concat(['br']),
+                        allowedTags,
+                        allowedAttributes,
                       }),
                     }}
                   />

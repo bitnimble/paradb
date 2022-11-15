@@ -43,6 +43,12 @@
 
 .description {
     margin: calc(gridBaseline * 2) 0;
+    max-height: calc(gridBaseline * 50);
+    overflow-y: auto;
+}
+
+.description br+br+br {
+    display: none;
 }
 
 .actions {
