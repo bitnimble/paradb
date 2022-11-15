@@ -21,6 +21,12 @@ export class MapListStore {
   }
 }
 
+async function delay(ms: number = 5) {
+  return new Promise<void>(res => {
+    setTimeout(() => res(), ms);
+  });
+}
+
 export class MapListPresenter {
   private tableStore?: TableStore<PDMap, 6>;
   private searchLimit = 20;
@@ -59,16 +65,17 @@ export class MapListPresenter {
     this.store.enableBulkSelect = true;
   }
 
-  onClickBulkDownload() {
+  async onClickBulkDownload() {
     const a = document.createElement('a');
     a.style.display = 'none';
     document.body.appendChild(a);
 
-    this.store.selectedMaps.forEach(id => {
+    for (const id of this.store.selectedMaps.keys()) {
       a.setAttribute('href', getMapFileLink(id));
-      a.setAttribute('download', '');
       a.click();
-    });
+      // If there's no delay between attempts, the browser will only download a single file.
+      await delay(1000);
+    }
 
     a.remove();
   }
