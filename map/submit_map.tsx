@@ -12,6 +12,7 @@ type SubmitMapPageProps = {
   uploadProgress: UploadState[],
   isUploading: boolean,
   showProgressScreen: boolean,
+  allowMultipleFileSelect: boolean,
   onChangeData(files: FileList): void,
   onSubmit(): void,
 };
@@ -53,7 +54,7 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
   });
 
   private renderDropInput() {
-    const { filenames } = this.props;
+    const { filenames, allowMultipleFileSelect } = this.props;
 
     return (
       <button
@@ -65,7 +66,7 @@ export class SubmitMapPage extends React.Component<SubmitMapPageProps> {
         <input
           type="file"
           accept={['zip', ...zipTypes].join(',')}
-          multiple={true}
+          multiple={allowMultipleFileSelect}
           onChange={this.onChange}
           onDrop={this.onDrop}
           onDragOver={preventDefault}

@@ -5,6 +5,7 @@ import { RoutePath } from 'pages/paradb/router/routes';
 import { PDMap } from 'paradb-api-schema';
 
 export class MapPageStore {
+  reuploadDialogVisible = false;
   map?: PDMap;
 
   constructor() {
@@ -17,7 +18,9 @@ export class MapPagePresenter {
     private readonly api: Api,
     private readonly navigate: Navigate,
     private readonly store: MapPageStore,
-  ) {}
+  ) {
+    makeAutoObservable(this);
+  }
 
   async getMap(id: string) {
     const resp = await this.api.getMap(id);
@@ -27,7 +30,7 @@ export class MapPagePresenter {
     runInAction(() => this.store.map = resp.map);
   }
 
-  async deleteMap(id: string) {
+  deleteMap = async () => {
     if (!this.store.map) {
       return;
     }
@@ -35,22 +38,30 @@ export class MapPagePresenter {
     if (!confirm(`Are you sure you want to delete the map '${mapName}'?`)) {
       return;
     }
-    const resp = await this.api.deleteMap(id);
+    const resp = await this.api.deleteMap(this.store.map.id);
     if (!resp.success) {
       throw new Error('Could not delete map');
     }
 
     this.navigate([RoutePath.MAP_LIST], true);
-  }
+  };
 
-  async toggleFavorite(id: string) {
+  toggleFavorite = async () => {
     if (!this.store.map || !this.store.map.userProjection) {
       return;
     }
     const newVal = !(this.store.map.userProjection.isFavorited);
-    const resp = await this.api.setFavorites({ mapIds: [id], isFavorite: newVal });
+    const resp = await this.api.setFavorites({ mapIds: [this.store.map.id], isFavorite: newVal });
     if (resp.success) {
       runInAction(() => this.store.map!.userProjection!.isFavorited = newVal);
     }
-  }
+  };
+
+  showReuploadDialog = () => {
+    this.store.reuploadDialogVisible = true;
+  };
+
+  hideReuploadDialog = () => {
+    this.store.reuploadDialogVisible = false;
+  };
 }

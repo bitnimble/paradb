@@ -17,8 +17,10 @@ const allowedAttributes: typeof sanitizeHtml.defaults.allowedAttributes = {
 
 type Props = {
   map: PDMap | undefined,
-  canDelete: boolean,
+  canModify: boolean,
   isFavorited: boolean | undefined,
+  ReuploadDialog?: React.ComponentType,
+  showReuploadDialog(): void,
   deleteMap(): void,
   toggleFavorite(): void,
 };
@@ -77,7 +79,15 @@ export class MapPage extends React.Component<Props> {
   }
 
   render() {
-    const { map, canDelete, isFavorited, deleteMap, toggleFavorite } = this.props;
+    const {
+      map,
+      canModify,
+      isFavorited,
+      ReuploadDialog,
+      showReuploadDialog,
+      deleteMap,
+      toggleFavorite,
+    } = this.props;
     if (!map) {
       return <div className={styles.mapPage}>Loading...</div>;
     }
@@ -132,7 +142,13 @@ export class MapPage extends React.Component<Props> {
             )}
             {this
               .downloadLink && <Button link={this.downloadLink}>Download</Button>}
-            {canDelete && <Button style="error" onClick={deleteMap}>Delete</Button>}
+            {canModify && (
+              <>
+                <Button onClick={showReuploadDialog}>Reupload</Button>
+                <Button style="error" onClick={deleteMap}>Delete</Button>
+              </>
+            )}
+            {ReuploadDialog && <ReuploadDialog/>}
           </div>
         </div>
       </div>

@@ -49,7 +49,7 @@ export class ThrottledMapUploader {
     return entry;
   }
 
-  private async processQueue() {
+  private async processQueue(reuploadMapId?: string) {
     const pendingUpload = this.getNextInQueue();
     if (!pendingUpload) {
       return;
@@ -67,7 +67,11 @@ export class ThrottledMapUploader {
     });
     const mapData = new Uint8Array(await upload.file.arrayBuffer());
     try {
-      const resp = await this.api.submitMap({ mapData }, onProgress, onUploadFinish);
+      const resp = await this.api.submitMap(
+        { id: reuploadMapId, mapData },
+        onProgress,
+        onUploadFinish,
+      );
       runInAction(() => {
         if (resp.success) {
           // TODO: fix type safety here
@@ -87,9 +91,14 @@ export class ThrottledMapUploader {
     }
   }
 
-  async start() {
+  async start(reuploadMapId?: string) {
+    if (reuploadMapId != null && this.uploads.length > 1) {
+      throw new Error(
+        'A reupload map ID was specified, but more than one file was selected to be uploaded.',
+      );
+    }
     // Kick off initial uploads
-    Array(MAX_CONNECTIONS).fill(0).map((_, i) => this.processQueue());
+    Array(MAX_CONNECTIONS).fill(0).map((_, i) => this.processQueue(reuploadMapId));
     return new Promise<[string[], string[]]>(res => {
       const intervalHandler = setInterval(() => {
         // Work on the next queue item
@@ -126,14 +135,16 @@ export class ThrottledMapUploader {
 
 export type SubmitMapField = 'files';
 export class SubmitMapStore extends FormStore<SubmitMapField> {
+  id?: string;
   files = new Map<string, UploadState>();
 
   get filenames() {
     return [...this.files.values()].map(f => f.file.name).sort((a, b) => a.localeCompare(b));
   }
 
-  constructor() {
+  constructor(id?: string) {
     super();
+    this.id = id;
     makeObservable(this, { files: observable.shallow, filenames: computed, reset: action.bound });
   }
 
@@ -154,6 +165,10 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
 
   onChangeData(files: FileList) {
     runInAction(() => this.store.errors.clear());
+    if (this.store.id != null && files.length > 1) {
+      this.pushErrors(['files'], 'When reuploading a map, you can only select a single file.');
+      return;
+    }
     for (const file of files) {
       let f: UploadState;
       if (!zipTypes.includes(file.type)) {
@@ -172,7 +187,7 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
   submit = async () => {
     this.uploader.addFiles([...this.store.files.values()]);
     this.store.reset();
-    const [ids, errors] = await this.uploader.start();
+    const [ids, errors] = await this.uploader.start(this.store.id);
 
     if (errors.length !== 0) {
       // TODO: show errors

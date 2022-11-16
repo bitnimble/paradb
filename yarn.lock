@@ -151,7 +151,7 @@ object-inspect@^1.9.0:
 "paradb-api-schema@file:../../../../paradb-api-schema":
   version "1.0.0"
   dependencies:
-    schema-bob "https://github.com/anonymousthing/schema-bob"
+    schema-bob "https://github.com/bitnimble/schema-bob"
 
 parse-srcset@^1.0.2:
   version "1.0.2"
@@ -191,9 +191,9 @@ sanitize-html@^2.7.3:
     parse-srcset "^1.0.2"
     postcss "^8.3.11"
 
-"schema-bob@https://github.com/anonymousthing/schema-bob":
+"schema-bob@https://github.com/bitnimble/schema-bob":
   version "1.0.0"
-  resolved "https://github.com/anonymousthing/schema-bob#2bba10a00d1912837593e8012bf061e48f670299"
+  resolved "https://github.com/bitnimble/schema-bob#0f5d6ad6eb5d648767f2375e45d1743de01734d1"
 
 side-channel@^1.0.4:
   version "1.0.4"
