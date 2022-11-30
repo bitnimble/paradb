@@ -17,25 +17,22 @@ export class Instructions extends React.Component {
                 </li>
                 <li>
                   Move the zip file from the downloaded location to{' '}
-                  <T.Medium style="code">
-                    {'<'}ParadiddleInstall{'>'}/Paradiddle/Saved/Songs/Hotel California.zip
-                  </T.Medium>.
+                  <T.Medium style="code">Documents/Paradiddle/Songs/Hotel California.zip</T.Medium>.
                 </li>
                 <li>
                   Unzip the zip file, creating a folder of the same name. For example, if the song
                   was "Hotel California", the folder structure should end up looking as follows:
                   <T.Medium style="code" display="block">
-                    {`ParadiddleInstall/
+                    {`Documents/
 ├─ Paradiddle/
-│  ├─ Saved/
-│  │  ├─ Songs/
-│  │  │  ├─ Hotel California/
-│  │  │  │  ├─ Hotel California_Easy.rlrr
-│  │  │  │  ├─ Hotel California_Medium.rlrr
-│  │  │  │  ├─ Hotel California_Hard.rlrr
-│  │  │  │  ├─ Hotel California_Expert.rlrr
-│  │  │  │  ├─ drums_1.ogg
-│  │  │  │  ├─ ...`}
+│  ├─ Songs/
+│  │  ├─ Hotel California/
+│  │  │  ├─ Hotel California_Easy.rlrr
+│  │  │  ├─ Hotel California_Medium.rlrr
+│  │  │  ├─ Hotel California_Hard.rlrr
+│  │  │  ├─ Hotel California_Expert.rlrr
+│  │  │  ├─ drums_1.ogg
+│  │  │  ├─ ...`}
                   </T.Medium>
                   Note: it is important that the folder name matches the song / rlrr filename --
                   otherwise, the song will appear in the game but won't be playable.
