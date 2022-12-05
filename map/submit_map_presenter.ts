@@ -173,7 +173,7 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
       let f: UploadState;
       if (!zipTypes.includes(file.type)) {
         f = { state: 'error', file, errorMessage: 'File is not a zip' };
-      } else if (file.size > 1000 * 1000 * 40) { // 40MB
+      } else if (file.size > 1024 * 1024 * 40) { // 40MiB. We use MiB because that's what Windows displays in Explorer and therefore what users will expect.
         f = { state: 'error', file, errorMessage: 'File is over 40MB' };
       } else {
         f = { state: 'pending', file };
