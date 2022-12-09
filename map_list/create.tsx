@@ -30,9 +30,10 @@ export function createMapList(api: Api) {
   const onMapListMount = () => {
     restoreSkeletonScroll();
     if (store.maps == null) {
-      presenter.onSearch();
+      presenter.onSearch('search');
     }
   };
+  const onSearch = () => presenter.onSearch('search');
 
   return {
     setSkeletonRef,
@@ -44,7 +45,7 @@ export function createMapList(api: Api) {
         filterQuery={store.query}
         hasMore={store.hasMore}
         loadingMore={store.loadingMore}
-        onSearch={presenter.onSearch}
+        onSearch={onSearch}
         onMount={() => onMapListMount()}
         onClickBulkSelect={presenter.onClickBulkSelect}
         onClickBulkDownload={presenter.onClickBulkDownload}

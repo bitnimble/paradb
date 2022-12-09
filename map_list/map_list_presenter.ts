@@ -28,14 +28,14 @@ async function delay(ms: number = 5) {
 }
 
 export class MapListPresenter {
-  private tableStore?: TableStore<PDMap, 6>;
+  private tableStore?: TableStore<PDMap, 7>;
   private searchLimit = 20;
 
   constructor(private readonly api: Api, private readonly store: MapListStore) {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  setTableStore(tableStore: TableStore<PDMap, 6>) {
+  setTableStore(tableStore: TableStore<PDMap, 7>) {
     this.tableStore = tableStore;
   }
 
@@ -115,14 +115,16 @@ export class MapListPresenter {
     if (!sort) {
       return;
     }
-    return this.onSearch();
+    return this.onSearch('sort');
   }
 
-  async onSearch() {
+  async onSearch(trigger: 'sort' | 'search') {
     // The default sort on first load is by "new" to surface new maps, but when the user searches
     // for something manually for the first time, we want to revert back to unsorted (i.e. sort
     // the search results by relevance instead).
-    if (this.store.maps && this.store.isFirstSearch && this.tableStore != null) {
+    if (
+      trigger === 'search' && this.store.maps && this.store.isFirstSearch && this.tableStore != null
+    ) {
       runInAction(() => {
         this.store.isFirstSearch = false;
         checkExists(this.tableStore).sortColumn = undefined;
