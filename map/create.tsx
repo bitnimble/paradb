@@ -30,6 +30,9 @@ export function createMapPage(api: Api, navigate: Navigate, sessionStore: Sessio
   });
 
   return observer(({ id, map }: { id: string, map: PDMap | undefined }) => {
+    if (store.map && store.map.id !== id) {
+      runInAction(() => store.map = undefined);
+    }
     useComponentDidMount(() => {
       if (map) {
         runInAction(() => store.map = map);

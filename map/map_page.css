@@ -1,5 +1,5 @@
 @value gridBaseline from "pages/paradb/base/metrics/metrics.css";
-@value colorGrey from "pages/paradb/base/colors/colors.css";
+@value colorGrey, colorGreyA15, colorGreyA30 from "pages/paradb/base/colors/colors.css";
 
 @value margins: calc(gridBaseline * 3);
 @value albumArtMaxWidth: 300px;
@@ -16,14 +16,27 @@
 }
 
 .albumArt {
-    max-width: 300px;
+    height: albumArtMaxWidth;
+    width: albumArtMaxWidth;
     margin-right: calc(gridBaseline * 3);
+    animation: 2s infinite loadingAlbumArt;
+}
+@keyframes loadingAlbumArt {
+    0% {
+        background-color: colorGreyA15;
+    }
+    50% {
+        background-color: colorGreyA30;
+    }
+    100% {
+        background-color: colorGreyA15;
+    }
 }
 
 .albumArtImg {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 .mapContent {
