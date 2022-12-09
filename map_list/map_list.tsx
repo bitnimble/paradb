@@ -113,7 +113,7 @@ export function createMapListTable(
     tableClassname: styles.mapListTable,
     rowClassname: styles.mapListRow,
     cellClassname: styles.mapListCell,
-    defaultSortColumn: 5,
+    defaultSortColumn: 6,
     defaultSortDirection: 'desc',
   });
 
