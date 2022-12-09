@@ -47,7 +47,7 @@ export function createMapListTable(
   store: MapListStore,
   presenter: MapListPresenter,
 ) {
-  const getRow = (map: PDMap): Row<6> => {
+  const getRow = (map: PDMap): Row<7> => {
     const onSelect = action((e: React.MouseEvent<HTMLAnchorElement>) => {
       captureSkeletonScroll();
       if (!store.enableBulkSelect) {
@@ -76,6 +76,9 @@ export function createMapListTable(
         React.memo(() => wrapWithMapRoute(<T.Small>{map.author}</T.Small>)),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.favorites}</T.Small>, styles.centeredCell)),
         React.memo(() =>
+          wrapWithMapRoute(<T.Small>{map.downloadCount}</T.Small>, styles.centeredCell)
+        ),
+        React.memo(() =>
           wrapWithMapRoute(<T.Small>{formatDate(map.submissionDate)}</T.Small>, styles.centeredCell)
         ),
       ],
@@ -92,7 +95,12 @@ export function createMapListTable(
       {
         content: <T.Small weight="bold">Favorites</T.Small>,
         sortLabel: 'favorites',
-        style: { width: `calc(${metrics.gridBaseline} * 20)` },
+        style: { width: `calc(${metrics.gridBaseline} * 15)` },
+      },
+      {
+        content: <T.Small weight="bold">Downloads</T.Small>,
+        sortLabel: 'downloadCount',
+        style: { width: `calc(${metrics.gridBaseline} * 15)` },
       },
       {
         content: <T.Small weight="bold">Upload date</T.Small>,
@@ -130,9 +138,10 @@ export function createMapListTable(
     Table: observer(() => (
       <div
         ref={tableScrollContainerRef}
-        className={scrollableTable.get()
-          ? styles.isScrollable
-          : undefined}
+        className={classNames(
+          styles.tableScrollContainer,
+          scrollableTable.get() && styles.isScrollable,
+        )}
       >
         <Component/>
       </div>
