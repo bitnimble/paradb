@@ -1,9 +1,0 @@
-@value gridBaseline from "pages/paradb/base/metrics/metrics.css";
-
-.settings {
-    max-width: calc(gridBaseline * 80);
-    margin: calc(gridBaseline * 10) auto auto auto;
-    display: flex;
-    flex-direction: column;
-    gap: calc(gridBaseline * 2);
-}
