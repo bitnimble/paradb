@@ -1,0 +1,80 @@
+@value gridBaseline from "ui/base/metrics/metrics.module.css";
+@value colorGrey, colorGreyA15, colorGreyA30 from "ui/base/colors/colors.module.css";
+
+@value margins: calc(gridBaseline * 3);
+@value albumArtMaxWidth: 300px;
+@value gap: calc(gridBaseline * 3);
+@value minContentWidth: calc(gridBaseline * 80);
+@value breakpoint: calc(albumArtMaxWidth + gap + minContentWidth + margins);
+
+.mapPage {
+    margin: margins;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.albumArt {
+    height: albumArtMaxWidth;
+    width: albumArtMaxWidth;
+    margin-right: calc(gridBaseline * 3);
+    animation: 2s infinite loadingAlbumArt;
+}
+@keyframes loadingAlbumArt {
+    0% {
+        background-color: colorGreyA15;
+    }
+    50% {
+        background-color: colorGreyA30;
+    }
+    100% {
+        background-color: colorGreyA15;
+    }
+}
+
+.albumArtImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mapContent {
+    width: min(100%, calc(gridBaseline * 100));
+}
+
+.difficulties {
+    display: flex;
+    margin: gridBaseline calc(-1 * gridBaseline);
+}
+.difficultyPill {
+    background: colorGrey;
+    margin: 0 gridBaseline;
+    padding: calc(gridBaseline * 0.5) calc(gridBaseline * 2);
+    border-radius: calc(gridBaseline * 2);
+}
+
+.description {
+    margin: calc(gridBaseline * 2) 0;
+    max-height: calc(gridBaseline * 50);
+    overflow-y: auto;
+}
+
+.description br + br + br {
+    display: none;
+}
+
+.actions {
+    margin-top: calc(gridBaseline * 2);
+    display: grid;
+    gap: gridBaseline;
+    grid-auto-flow: column;
+    width: min-content;
+}
+
+@media screen and (min-width: breakpoint) {
+    .mapPage {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}

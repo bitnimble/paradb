@@ -1,0 +1,26 @@
+@value gridBaseline from 'ui/base/metrics/metrics.module.css';
+@value colorDarkGrey, colorPurple, colorWhite from 'ui/base/colors/colors.module.css';
+
+.navbar {
+    display: flex;
+    min-height: calc(gridBaseline * 7);
+    background: colorDarkGrey;
+    color: colorWhite;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    color: inherit;
+    margin-left: calc(gridBaseline * 2.5);
+    text-decoration: none;
+    transition: color 0.1s ease;
+}
+
+.userStatus {
+    margin-right: calc(gridBaseline * 3);
+}
+
+.menuItem {
+    margin: 0 gridBaseline;
+}

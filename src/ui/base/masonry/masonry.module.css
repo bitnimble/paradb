@@ -1,0 +1,18 @@
+.masonry {
+    display: flex;
+    flex-flow: column wrap;
+    align-content: space-between;
+}
+
+.masonryItem {
+    display: flex;
+}
+
+.orderedItem {
+}
+
+.break {
+    flex-basis: 100%;
+    width: 0;
+    margin: 0;
+}

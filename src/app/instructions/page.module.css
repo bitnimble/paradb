@@ -1,0 +1,19 @@
+@value gridBaseline from "ui/base/metrics/metrics.module.css";
+@value colorPurple, colorGreyA5 from "ui/base/colors/colors.module.css";
+
+.instructions {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: calc(gridBaseline * 120);
+}
+
+.section {
+    margin: calc(gridBaseline * 2) 0;
+}
+
+.instructionList li::marker {
+    line-height: 2;
+    font-weight: bold;
+}

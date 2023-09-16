@@ -1,0 +1,45 @@
+@value colorRed, colorGrey, colorGreyA15, colorPurple from "ui/base/colors/colors.module.css";
+@value gridBaseline from "ui/base/metrics/metrics.module.css";
+
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.textboxBorder {
+    border-style: solid;
+    display: flex;
+    align-items: center;
+    padding: gridBaseline;
+}
+
+.borderGrey {
+    border-color: colorGrey;
+}
+.borderPurple {
+    border-color: colorPurple;
+}
+
+.readOnly {
+    background-color: colorGreyA15;
+}
+
+.textbox {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: calc(gridBaseline * 0.5) gridBaseline;
+
+    font-family: 'Futura Light';
+    font-size: 20px;
+
+    height: 100%;
+    resize: vertical;
+}
+.readOnly .textbox {
+    background: transparent;
+}
+
+.errorContainer .textboxBorder {
+    border-color: colorRed;
+}

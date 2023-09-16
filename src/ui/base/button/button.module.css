@@ -1,0 +1,72 @@
+@value colorWhite, colorPurple, colorGreen, colorGrey, colorRed from "ui/base/colors/colors.module.css";
+@value gridBaseline from "ui/base/metrics/metrics.module.css";
+
+@value regularColor: colorPurple;
+@value errorColor: colorRed;
+@value successColor: colorGreen;
+
+.a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    color: inherit;
+    padding: gridBaseline calc(gridBaseline * 2);
+    text-decoration: none;
+    background: colorWhite;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+    cursor: pointer;
+    border: 1px solid regularColor;
+}
+
+.button:hover:not(.disabled) {
+    color: colorWhite;
+}
+
+.regular.button {
+    color: regularColor;
+}
+.regular.button:hover:not(.disabled) {
+    background: regularColor;
+}
+
+.active {
+    background: regularColor;
+    color: white;
+}
+
+.error.button {
+    border-color: errorColor;
+    color: errorColor;
+}
+.error.button:hover:not(.disabled) {
+    background: errorColor;
+}
+
+.success.button {
+    position: relative;
+    border-color: successColor;
+    background: successColor;
+    color: colorWhite;
+}
+.success.button:hover:not(.disabled) {
+    margin: -1px;
+    border-width: 2px;
+}
+
+.button.disabled {
+    border-color: colorGrey;
+    color: colorGrey;
+    cursor: not-allowed;
+}
+
+.loadingSpinner {
+    margin-left: gridBaseline;
+}
