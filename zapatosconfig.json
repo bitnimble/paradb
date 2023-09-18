@@ -1,0 +1,6 @@
+{
+  "db": {
+    "connectionString": "postgresql://localhost/paradb"
+  },
+  "outDir": "./src/api"
+}

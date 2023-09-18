@@ -1,6 +1,6 @@
 'use client';
 
-import { useApi } from 'api/api_provider';
+import { useApi } from 'app/api/api_provider';
 import { createLoginSignupPage } from 'app/_auth/create';
 import React from 'react';
 

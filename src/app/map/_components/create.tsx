@@ -1,4 +1,4 @@
-import { Api } from 'api/api';
+import { Api } from 'app/api/api';
 import { action, observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import React from 'react';

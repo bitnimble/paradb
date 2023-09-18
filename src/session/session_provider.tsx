@@ -1,6 +1,6 @@
 'use client';
 
-import { useApi } from 'api/api_provider';
+import { useApi } from 'app/api/api_provider';
 import React, { createContext, useContext } from 'react';
 import { SessionPresenter, SessionStore } from 'session/session_presenter';
 

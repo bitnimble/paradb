@@ -1,15 +1,11 @@
-'use client';
-
 import { RouteLink } from 'ui/base/text/link';
 import { T } from 'ui/base/text/text';
-import React from 'react';
-import styles from './nav_bar.module.css';
-import { useSession } from 'session/session_provider';
-import { observer } from 'mobx-react';
 import { routeFor, RoutePath } from 'utils/routes';
+import styles from './nav_bar.module.css';
+import { getUserSession } from 'services/session/session';
 
-export const NavBar = observer(() => {
-  const { user } = useSession();
+export const NavBar = async () => {
+  const user = await getUserSession();
 
   return (
     <div className={styles.navbar}>
@@ -48,4 +44,4 @@ export const NavBar = observer(() => {
       </div>
     </div>
   );
-});
+};

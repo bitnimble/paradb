@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 import { LoginSignup } from './login_signup';
-import { Api } from 'api/api';
+import { Api } from 'app/api/api';
 import React from 'react';
 import { LoginSignupPresenter, LoginSignupStore } from './login_signup_presenter';
 

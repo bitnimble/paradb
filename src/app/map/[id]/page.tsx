@@ -1,6 +1,6 @@
 'use client';
 
-import { useApi } from 'api/api_provider';
+import { useApi } from 'app/api/api_provider';
 import { useState } from 'react';
 import { useSession } from 'session/session_provider';
 import { createMapPage } from '../_components/create';

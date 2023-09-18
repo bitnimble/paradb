@@ -8,7 +8,7 @@ import React from 'react';
 import { useSession } from 'session/session_provider';
 import styles from './page.module.css';
 import { SettingsPresenter, SettingsStore } from './settings_presenter';
-import { useApi } from 'api/api_provider';
+import { useApi } from 'app/api/api_provider';
 import { observer } from 'mobx-react';
 
 const noop = () => void 0;
@@ -17,7 +17,6 @@ export default observer(() => {
   const session = useSession();
   const api = useApi();
   const [store] = React.useState(new SettingsStore());
-
   if (!session.user) {
     return null;
   }

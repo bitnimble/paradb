@@ -8,9 +8,9 @@ export function checkIs<T extends { type: string }>(
   throw new Error('Expected obj to be equal to something, but it was not');
 }
 
-export function checkExists<T>(obj: T): NonNullable<T> {
+export function checkExists<T>(obj: T, property?: string): NonNullable<T> {
   if (obj == null) {
-    throw new Error('Expected property to be defined, but found undefined');
+    throw new Error(`Expected ${property || 'property'} to be defined, but found undefined`);
   }
   return obj as NonNullable<T>;
 }

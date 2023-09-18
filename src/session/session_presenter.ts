@@ -1,10 +1,10 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { Api } from 'api/api';
+import { Api } from 'app/api/api';
 import { User } from 'schema/users';
 
 export class SessionStore {
   hasLoaded = false;
-  user?: User;
+  user?: User = undefined;
 
   constructor() {
     makeAutoObservable(this);

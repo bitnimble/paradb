@@ -1,6 +1,6 @@
 import { checkExists } from 'base/preconditions';
 import { action, makeObservable, observable, runInAction } from 'mobx';
-import { Api } from 'api/api';
+import { Api } from 'app/api/api';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { SessionStore } from 'session/session_presenter';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useApi } from 'api/api_provider';
+import { useApi } from 'app/api/api_provider';
 import { MapListPresenter, MapListStore } from 'app/map_list_presenter';
 import classNames from 'classnames';
 import { action, computed, observable, reaction, runInAction } from 'mobx';

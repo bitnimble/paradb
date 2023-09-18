@@ -2,7 +2,7 @@ import { checkExists } from 'base/preconditions';
 import { TableStore } from 'ui/base/table/table_presenter';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { computedFn } from 'mobx-utils';
-import { Api } from 'api/api';
+import { Api } from 'app/api/api';
 import { getMapFileLink } from 'utils/maps';
 import { PDMap, MapSortableAttributes, mapSortableAttributes } from 'schema/maps';
 

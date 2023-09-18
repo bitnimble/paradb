@@ -1,7 +1,7 @@
 import { SessionProvider } from 'session/session_provider';
 import './globals.css';
 import type { Metadata } from 'next';
-import { ApiProvider } from 'api/api_provider';
+import { ApiProvider } from 'app/api/api_provider';
 import { NavBar } from 'ui/nav_bar/nav_bar';
 import styles from './layout.module.css';
 
