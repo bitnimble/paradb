@@ -1,4 +1,4 @@
-import { setupMigration } from 'services/_migrations/migration';
+import { setupMigration } from './migration';
 import { changePassword, getUser } from 'services/users/users_repo';
 
 (async () => {

@@ -2,6 +2,7 @@ import { getQueryParams } from 'app/api/helpers';
 import { ResultError } from 'base/result';
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, serializeApiError } from 'schema/api';
+import * as Sentry from '@sentry/nextjs';
 
 export function error<P, T extends ApiError & P, E extends string>(opts: {
   statusCode: number;
@@ -12,26 +13,25 @@ export function error<P, T extends ApiError & P, E extends string>(opts: {
 }): NextResponse<Buffer> {
   const { errorSerializer, errorBody, statusCode, message, resultError } = opts;
 
-  const errorResponse = { success: false, statusCode, errorMessage: message, ...errorBody } as T;
-
   // Attach error message and tags for Sentry. Just pick the details out of the first error for now.
-  const internalMessage = resultError?.errors[0].internalMessage;
-  const stack = resultError?.errors[0].stack;
-  const internalTags = resultError ? { type: resultError.errors[0].type } : undefined;
-
-  const error = new Error(internalMessage || message);
-  if (stack) {
-    error.stack = stack;
+  const details = resultError?.errors[0];
+  const internalMessage = details?.internalMessage;
+  const error = new Error(
+    internalMessage ? `Internal message: ${internalMessage}\n${message}` : message
+  );
+  if (details?.stack) {
+    error.stack = details.stack;
   }
+  if (details) {
+    Sentry.setTag('type', details.type);
+  }
+  Sentry.captureException(error);
+  console.error(error);
 
-  // TODO: fix sentry tagging
-  const res: NextResponse<Buffer> = new NextResponse(Buffer.from(errorSerializer(errorResponse)), {
+  const errorResponse = { success: false, statusCode, errorMessage: message, ...errorBody } as T;
+  return new NextResponse(errorSerializer(errorResponse), {
     status: statusCode,
   });
-  (res as any).paradbError = error;
-  (res as any).paradbErrorTags = internalTags;
-
-  return res;
 }
 
 export function badRequest(message: string) {

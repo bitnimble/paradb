@@ -1,10 +1,10 @@
 import 'server-only';
 
+import MeiliSearch from 'meilisearch';
 import { initPool } from 'services/db/pool';
 import { getEnvVars } from 'services/env';
 import { MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
 import { FavoritesRepo } from 'services/users/favorites_repo';
-import MeiliSearch from 'meilisearch';
 
 async function createServerContext() {
   const envVars = getEnvVars();
@@ -26,5 +26,11 @@ async function createServerContext() {
     favoritesRepo,
   };
 }
-const serverContext = createServerContext();
-export const getServerContext = () => serverContext;
+
+let serverContext: ReturnType<typeof createServerContext> | undefined;
+export const getServerContext = () => {
+  if (!serverContext) {
+    serverContext = createServerContext();
+  }
+  return serverContext;
+};

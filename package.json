@@ -10,12 +10,12 @@
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",
     "outage": "node -r esbuild-runner/register src/outage/index.ts",
-    "migrate": "node -r esbuild-runner/register",
-    "search:rebuild": "yarn migrate src/api/_migrations/rebuild_meilisearch.ts",
+    "search:rebuild": "bun src/services/_migrations/rebuild_meilisearch.ts",
     "test": "tools/test.sh"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.414.0",
+    "@sentry/nextjs": "^7.69.0",
     "@types/node": "20.4.3",
     "@types/react": "18.2.15",
     "@types/react-dom": "18.2.7",

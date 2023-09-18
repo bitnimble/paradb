@@ -1,11 +1,14 @@
-import { setupMigration } from './migration';
-import { getEnvVars } from 'services/env';
-import { MeilisearchMap, MapsRepo, convertToMeilisearchMap } from 'services/maps/maps_repo';
+import dotenv from 'dotenv';
+dotenv.config({ path: process.env.ENV_FILE });
+
 import { MeiliSearch } from 'meilisearch';
 import { mapSortableAttributes } from 'schema/maps';
+import { initPool } from 'services/db/pool';
+import { getEnvVars } from 'services/env';
+import { MapsRepo, MeilisearchMap, convertToMeilisearchMap } from 'services/maps/maps_repo';
 
 (async () => {
-  await setupMigration();
+  const pool = await initPool();
 
   const { meilisearchHost, meilisearchKey } = getEnvVars();
   const client = new MeiliSearch({ host: meilisearchHost, apiKey: meilisearchKey });
@@ -56,4 +59,6 @@ import { mapSortableAttributes } from 'schema/maps';
     [updateRanking, updateSearch, updateFilters, updateSorts, addData].map((t) => t.taskUid)
   );
   console.log('Done!');
+
+  pool.end();
 })();

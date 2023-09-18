@@ -18,7 +18,7 @@ export class MapListStore {
   loadingMore = false;
   isFirstSearch = true;
 
-  tableStore?: TableStore<PDMap, 7>;
+  tableStore?: TableStore<PDMap, 7> = undefined;
 
   constructor() {
     makeAutoObservable(this);
