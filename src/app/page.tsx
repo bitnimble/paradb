@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import React, { useState } from 'react';
 import { Difficulty, PDMap } from 'schema/maps';
 import { Button } from 'ui/base/button/button';
+import { searchIcon } from 'ui/base/icons/search_icon';
 import metrics from 'ui/base/metrics/metrics.module.css';
 import { Row, Table } from 'ui/base/table/table';
 import { TableStore } from 'ui/base/table/table_presenter';
@@ -17,7 +18,6 @@ import { Textbox } from 'ui/base/textbox/textbox';
 import { KnownDifficulty, difficultyColors, parseDifficulty } from 'utils/difficulties';
 import { RoutePath, routeFor } from 'utils/routes';
 import styles from './page.module.css';
-import { searchIcon } from 'ui/base/icons/search_icon';
 
 export default observer(() => {
   const api = useApi();
@@ -30,7 +30,7 @@ export default observer(() => {
     }
   }, [store]);
 
-  const BulkSelectActions = () => {
+  const BulkSelectActions = observer(() => {
     return store.enableBulkSelect ? (
       <>
         <Button onClick={presenter.onClickBulkDownload}>⭳ {store.selectedMaps.size}</Button>
@@ -39,7 +39,7 @@ export default observer(() => {
     ) : (
       <Button onClick={presenter.onClickBulkSelect}>Bulk select</Button>
     );
-  };
+  });
 
   const onSearch = () => presenter.onSearch('search');
 
