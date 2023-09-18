@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { observer } from 'mobx-react';
 import React from 'react';
 import { Button } from 'ui/base/button/button';
 import { T } from 'ui/base/text/text';
@@ -15,7 +16,7 @@ type SubmitMapPageProps = {
   onSubmit(): void;
 };
 
-export const SubmitMapPage = (props: SubmitMapPageProps) => {
+export const SubmitMapPage = observer((props: SubmitMapPageProps) => {
   const [isDraggingOver, setDraggingOver] = React.useState(false);
 
   const onFileChange = (files: FileList | null) => {
@@ -75,7 +76,7 @@ export const SubmitMapPage = (props: SubmitMapPageProps) => {
     );
   };
 
-  const ProgressBar = ({ uploadState }: { uploadState: UploadState }) => {
+  const ProgressBar = observer(({ uploadState }: { uploadState: UploadState }) => {
     if (uploadState.state === 'pending') {
       return <div className={styles.progressContainer}>Pending</div>;
     } else if (uploadState.state === 'success') {
@@ -97,7 +98,7 @@ export const SubmitMapPage = (props: SubmitMapPageProps) => {
         ></div>
       </div>
     );
-  };
+  });
 
   const { uploadProgress, isUploading, showProgressScreen, onSubmit } = props;
   return (
@@ -137,7 +138,7 @@ export const SubmitMapPage = (props: SubmitMapPageProps) => {
       </Button>
     </div>
   );
-};
+});
 
 const preventDefault = (e: React.DragEvent<HTMLInputElement>) => {
   e.preventDefault();

@@ -1,7 +1,14 @@
-import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 import { Api } from 'app/api/api';
+import {
+  action,
+  computed,
+  makeAutoObservable,
+  makeObservable,
+  observable,
+  runInAction,
+} from 'mobx';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
-import { RoutePath, RouteSegments, routeFor } from 'utils/routes';
+import { RoutePath, routeFor } from 'utils/routes';
 
 export const zipTypes = ['application/zip', 'application/x-zip', 'application/x-zip-compressed'];
 
@@ -15,24 +22,20 @@ export type UploadState = PendingUpload | ActiveUpload | UploadSuccess | UploadE
 
 const MAX_CONNECTIONS = 4;
 export class ThrottledMapUploader {
-  @observable.deep
-  private uploads: UploadState[] = [];
+  uploads: UploadState[] = [];
 
   constructor(private readonly api: Api) {
-    makeObservable(this);
+    makeAutoObservable(this, { uploads: observable.deep }, { autoBind: true });
   }
 
-  @computed
   get isUploading() {
     return this.uploads.some((s) => s.state === 'uploading');
   }
 
-  @computed
   get hasErrors() {
     return this.uploads.some((u) => u.state === 'error');
   }
 
-  @computed
   get uploadProgress() {
     return this.uploads.slice().sort((a, b) => a.file.name.localeCompare(b.file.name));
   }
@@ -118,14 +121,12 @@ export class ThrottledMapUploader {
     });
   }
 
-  @action.bound
   addFiles(files: UploadState[]) {
     files.forEach((f) => {
       this.uploads.push(f);
     });
   }
 
-  @action.bound
   reset() {
     this.uploads = [];
   }
@@ -133,7 +134,7 @@ export class ThrottledMapUploader {
 
 export type SubmitMapField = 'files';
 export class SubmitMapStore extends FormStore<SubmitMapField> {
-  id?: string;
+  id?: string = undefined;
   files = new Map<string, UploadState>();
 
   get filenames() {
