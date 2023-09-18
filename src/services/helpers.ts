@@ -1,8 +1,8 @@
+import * as Sentry from '@sentry/nextjs';
 import { getQueryParams } from 'app/api/helpers';
 import { ResultError } from 'base/result';
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError, serializeApiError } from 'schema/api';
-import * as Sentry from '@sentry/nextjs';
 
 export function error<P, T extends ApiError & P, E extends string>(opts: {
   statusCode: number;
@@ -24,6 +24,7 @@ export function error<P, T extends ApiError & P, E extends string>(opts: {
   }
   if (details) {
     Sentry.setTag('type', details.type);
+    console.error(details.type);
   }
   Sentry.captureException(error);
   console.error(error);

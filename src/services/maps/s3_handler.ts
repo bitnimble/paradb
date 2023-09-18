@@ -1,9 +1,9 @@
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { checkExists } from 'base/preconditions';
 import { Result } from 'base/result';
-import { getEnvVars } from 'services/env';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { getEnvVars } from 'services/env';
 import * as unzipper from 'unzipper';
 
 let s3: { client: S3Client; bucket: string } | undefined;
@@ -24,6 +24,7 @@ function getS3Client() {
           accessKeyId: envVars.s3AccessKeyId,
           secretAccessKey: envVars.s3AccessKeySecret,
         },
+        forcePathStyle: true,
       }),
       bucket: envVars.s3MapsBucket,
     };
@@ -50,7 +51,16 @@ export async function uploadFiles(opts: {
       })
     );
   } catch (e) {
-    return { success: false, errors: [{ type: S3Error.S3_WRITE_ERROR }] };
+    return {
+      success: false,
+      errors: [
+        {
+          type: S3Error.S3_WRITE_ERROR,
+          internalMessage: (e as Error).message,
+          stack: (e as Error).stack,
+        },
+      ],
+    };
   }
 
   // TODO: write it to disk and upload it to the bucket via a worker thread to speed up the

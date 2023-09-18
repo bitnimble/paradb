@@ -1,8 +1,8 @@
-import { serializeSignupRequest, deserializeSignupResponse } from 'schema/users';
+import { deserializeSignupResponse, serializeSignupRequest } from 'schema/users';
 import supertest from 'supertest';
 
 // It's a function in order to defer execution until after the beforeAll() step has run
-export const testServer = () => supertest((global as any).server);
+export const testServer = () => supertest('http://localhost:3000');
 
 export const testPost = async <Req, Res>(
   url: string,
@@ -11,11 +11,14 @@ export const testPost = async <Req, Res>(
   body: Req,
   cookie?: string
 ) => {
-  const builder = testServer().post(url);
+  const req = testServer().post(url);
   if (cookie != null) {
-    builder.set('Cookie', cookie);
+    req.set('Cookie', cookie);
   }
-  const resp = await builder.type('application/octet-stream').send(serializer(body));
+  const resp = await req
+    .type('application/octet-stream')
+    .responseType('application/octet-stream')
+    .send(serializer(body));
 
   return deserializer(resp.body);
 };
@@ -25,11 +28,11 @@ export const testGet = async <Res>(
   deserialize: (b: Uint8Array) => Res,
   cookie?: string
 ) => {
-  const builder = testServer().get(url);
+  const req = testServer().get(url);
   if (cookie != null) {
-    builder.set('Cookie', cookie);
+    req.set('Cookie', cookie);
   }
-  const resp = await builder.type('application/octet-stream');
+  const resp = await req.type('application/octet-stream').responseType('application/octet-stream');
   return deserialize(resp.body);
 };
 
@@ -54,6 +57,7 @@ export const testAuthenticate = async (user?: {
   const resp = await testServer()
     .post('/api/users/signup')
     .type('application/octet-stream')
+    .responseType('application/octet-stream')
     .send(
       serializeSignupRequest(
         user ?? {

@@ -1,5 +1,3 @@
-import 'server-only';
-
 import * as fs from 'fs/promises';
 
 /** Keep in sync with the test env vars in `jest_setup.ts` */

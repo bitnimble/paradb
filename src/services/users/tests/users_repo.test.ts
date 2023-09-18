@@ -1,6 +1,6 @@
 import { _unwrap } from 'base/result';
-import { getPool } from 'services/db/pool';
 import { testUser } from 'services/jest_helpers';
+import { getServerContext } from 'services/server_context';
 import { changePassword, createUser, getUser } from 'services/users/users_repo';
 import * as db from 'zapatos/db';
 

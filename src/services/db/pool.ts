@@ -1,7 +1,6 @@
 import pg from 'pg';
 import { getEnvVars } from 'services/env';
 
-// Connection details are pulled from env variables: https://node-postgres.com/features/connecting
 const db: { pool: pg.Pool | undefined } = { pool: undefined };
 
 export async function initPool(maxConnections?: number) {

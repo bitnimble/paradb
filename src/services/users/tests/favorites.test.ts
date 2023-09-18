@@ -1,13 +1,13 @@
-import { testAuthenticate, testGet, testPost } from 'services/jest_helpers';
 import { apiResponse } from 'schema/api';
-import { serializeSetFavoriteMapsRequest, deserializeGetFavoriteMapsResponse } from 'schema/users';
+import { deserializeGetFavoriteMapsResponse, serializeSetFavoriteMapsRequest } from 'schema/users';
+import { testAuthenticate, testGet, testPost } from 'services/jest_helpers';
 
 describe('favorites handler', () => {
   it('can add and retrieve favorites', async () => {
     const cookie = await testAuthenticate();
 
     const setResp = await testPost(
-      '/api/favorites/set',
+      '/api/favorites',
       serializeSetFavoriteMapsRequest,
       apiResponse.deserialize,
       { mapIds: ['2'], isFavorite: true },
@@ -16,7 +16,7 @@ describe('favorites handler', () => {
 
     expect(setResp.success).toBe(true);
 
-    const getResp = await testGet('/api/favorites/', deserializeGetFavoriteMapsResponse, cookie);
+    const getResp = await testGet('/api/favorites', deserializeGetFavoriteMapsResponse, cookie);
     expect(getResp.success).toBe(true);
 
     const maps = (getResp as Extract<typeof getResp, { success: true }>).maps;

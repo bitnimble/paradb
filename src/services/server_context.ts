@@ -1,5 +1,3 @@
-import 'server-only';
-
 import MeiliSearch from 'meilisearch';
 import { initPool } from 'services/db/pool';
 import { getEnvVars } from 'services/env';
