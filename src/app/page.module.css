@@ -1,5 +1,5 @@
 @value gridBaseline from "ui/base/metrics/metrics.module.css";
-@value colorGreyA30, colorGreyA15, colorGreyA15, colorPurple from "ui/base/colors/colors.module.css";
+@value colorGreyA30, colorGreyA15, colorPurple from "ui/base/colors/colors.module.css";
 
 @value gutter: calc(gridBaseline * 2);
 
