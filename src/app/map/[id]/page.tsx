@@ -1,8 +1,31 @@
 import { MapActions } from 'app/map/_components/map_actions';
-import { MapPage } from 'app/map/_components/map_page';
+import { MapPage, getAlbumArtUrl, getMapDescription } from 'app/map/_components/map_page';
 import NotFound from 'app/not-found';
+import { Metadata } from 'next';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata | undefined> {
+  const { mapsRepo } = await getServerContext();
+  const result = await mapsRepo.getMap(params.id);
+  if (!result.success) {
+    return;
+  }
+  const map = result.value;
+  return {
+    title: `${map.title} - ParaDB`,
+    openGraph: {
+      type: 'music.song',
+      musicians: [map.artist],
+      description: map.description && getMapDescription(map.description),
+      images: [getAlbumArtUrl(map)],
+    },
+  };
+}
 
 export default async ({ params }: { params: { id: string } }) => {
   const { mapsRepo } = await getServerContext();

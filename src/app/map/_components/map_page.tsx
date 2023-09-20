@@ -40,18 +40,25 @@ const DifficultyPills = (props: { difficulties: Difficulty[] }) => (
   </div>
 );
 
+export function getAlbumArtUrl(map: PDMap) {
+  return `/covers/${map.id}/${map.albumArt}`;
+}
+
+export function getMapDescription(description: string) {
+  return sanitizeHtml(breakNewlines(description), {
+    allowedTags,
+    allowedAttributes,
+  });
+}
+
 export const MapPage = (props: Props) => {
   const { map, mapActions } = props;
 
-  const albumArtLink = props.map ? `/covers/${props.map.id}/${props.map.albumArt}` : undefined;
-
   return (
     <div className={styles.mapPage}>
-      {albumArtLink && (
-        <div className={styles.albumArt}>
-          <img className={styles.albumArtImg} src={albumArtLink}></img>
-        </div>
-      )}
+      <div className={styles.albumArt}>
+        <img className={styles.albumArtImg} src={getAlbumArtUrl(map)}></img>
+      </div>
       <div className={styles.mapContent}>
         <T.ExtraLarge display="block" style="title">
           {map.title}
@@ -78,10 +85,7 @@ export const MapPage = (props: Props) => {
             >
               <div
                 dangerouslySetInnerHTML={{
-                  __html: sanitizeHtml(breakNewlines(map.description), {
-                    allowedTags,
-                    allowedAttributes,
-                  }),
+                  __html: getMapDescription(map.description),
                 }}
               />
             </T.Small>
