@@ -1,12 +1,14 @@
-import { SessionProvider } from 'session/session_provider';
-import './globals.css';
-import type { Metadata } from 'next';
 import { ApiProvider } from 'app/api/api_provider';
+import type { Metadata } from 'next';
+import { SessionProvider } from 'session/session_provider';
+import colorStyles from 'ui/base/colors/colors.module.css';
 import { NavBar } from 'ui/nav_bar/nav_bar';
+import './globals.css';
 import styles from './layout.module.css';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
+  themeColor: colorStyles.colorPurple,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

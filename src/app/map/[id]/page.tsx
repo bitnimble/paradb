@@ -19,10 +19,10 @@ export async function generateMetadata({
   return {
     title: `${map.title} - ParaDB`,
     openGraph: {
-      type: 'music.song',
-      musicians: [map.artist],
-      description: map.description && getMapDescription(map.description),
+      siteName: 'ParaDB',
+      title: `${map.title}`,
       images: [getAlbumArtUrl(map)],
+      description: map.description && getMapDescription(map.description),
     },
   };
 }
