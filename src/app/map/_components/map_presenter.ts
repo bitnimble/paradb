@@ -1,14 +1,18 @@
 import { Api } from 'app/api/api';
-import { makeAutoObservable, runInAction } from 'mobx';
+import { makeAutoObservable, observable, runInAction } from 'mobx';
+import React from 'react';
 import { PDMap } from 'schema/maps';
 import { RoutePath, routeFor } from 'utils/routes';
 
 export class MapPageStore {
-  reuploadDialogVisible = false;
-  map?: PDMap = undefined;
+  ReuploadDialog?: React.ComponentType = undefined;
+  map: PDMap;
 
-  constructor() {
-    makeAutoObservable(this);
+  constructor(map: PDMap) {
+    this.map = map;
+    makeAutoObservable(this, {
+      map: observable.deep,
+    });
   }
 }
 
@@ -17,7 +21,7 @@ export class MapPagePresenter {
     private readonly api: Api,
     private readonly store: MapPageStore
   ) {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {}, { autoBind: true });
   }
 
   async getMap(id: string) {
@@ -28,7 +32,7 @@ export class MapPagePresenter {
     runInAction(() => (this.store.map = resp.map));
   }
 
-  deleteMap = async () => {
+  async deleteMap() {
     if (!this.store.map) {
       return;
     }
@@ -43,24 +47,16 @@ export class MapPagePresenter {
 
     // Don't use next routing, in order to force a full load
     window.location.href = routeFor([RoutePath.MAP_LIST]);
-  };
+  }
 
-  toggleFavorite = async () => {
+  async toggleFavorite() {
     if (!this.store.map || !this.store.map.userProjection) {
       return;
     }
     const newVal = !this.store.map.userProjection.isFavorited;
     const resp = await this.api.setFavorites({ mapIds: [this.store.map.id], isFavorite: newVal });
     if (resp.success) {
-      runInAction(() => (this.store.map!.userProjection!.isFavorited = newVal));
+      runInAction(() => (this.store.map.userProjection = { isFavorited: newVal }));
     }
-  };
-
-  showReuploadDialog = () => {
-    this.store.reuploadDialogVisible = true;
-  };
-
-  hideReuploadDialog = () => {
-    this.store.reuploadDialogVisible = false;
-  };
+  }
 }

@@ -1,12 +1,9 @@
-import { T } from 'ui/base/text/text';
-import { Button } from 'ui/base/button/button';
-import { getMapFileLink } from 'utils/maps';
 import React from 'react';
 import sanitizeHtml from 'sanitize-html';
-import styles from './map_page.module.css';
-import { difficultyMap, parseDifficulty, difficultyColors } from 'utils/difficulties';
 import { Difficulty, PDMap } from 'schema/maps';
-import { observer } from 'mobx-react';
+import { T } from 'ui/base/text/text';
+import { difficultyColors, difficultyMap, parseDifficulty } from 'utils/difficulties';
+import styles from './map_page.module.css';
 
 const allowedTags: typeof sanitizeHtml.defaults.allowedTags = [
   ...sanitizeHtml.defaults.allowedTags,
@@ -18,13 +15,8 @@ const allowedAttributes: typeof sanitizeHtml.defaults.allowedAttributes = {
 };
 
 type Props = {
-  map: PDMap | undefined;
-  canModify: boolean;
-  isFavorited: boolean | undefined;
-  ReuploadDialog?: React.ComponentType;
-  showReuploadDialog(): void;
-  deleteMap(): void;
-  toggleFavorite(): void;
+  map: PDMap;
+  mapActions: React.ReactNode;
 };
 
 export const sortDifficulty = (a: Difficulty, b: Difficulty) => {
@@ -48,94 +40,59 @@ const DifficultyPills = (props: { difficulties: Difficulty[] }) => (
   </div>
 );
 
-@observer
-export class MapPage extends React.Component<Props> {
-  private get albumArtLink() {
-    return this.props.map ? `/covers/${this.props.map.id}/${this.props.map.albumArt}` : undefined;
-  }
+export const MapPage = (props: Props) => {
+  const { map, mapActions } = props;
 
-  private get downloadLink() {
-    return this.props.map ? getMapFileLink(this.props.map.id) : undefined;
-  }
+  const albumArtLink = props.map ? `/covers/${props.map.id}/${props.map.albumArt}` : undefined;
 
-  private breakNewlines(content: string) {
-    return content.replaceAll('\r', '').replaceAll('\n\n', '<br/>');
-  }
-
-  render() {
-    const {
-      map,
-      canModify,
-      isFavorited,
-      ReuploadDialog,
-      showReuploadDialog,
-      deleteMap,
-      toggleFavorite,
-    } = this.props;
-    if (!map) {
-      return <div className={styles.mapPage}>Loading...</div>;
-    }
-    return (
-      <div className={styles.mapPage}>
-        {this.albumArtLink && (
-          <div className={styles.albumArt}>
-            <img className={styles.albumArtImg} src={this.albumArtLink}></img>
-          </div>
-        )}
-        <div className={styles.mapContent}>
-          <T.ExtraLarge display="block" style="title">
-            {map.title}
-          </T.ExtraLarge>
-          <T.Large display="block" color="grey">
-            {map.artist}
-          </T.Large>
-          <br />
-          <T.Small display="block" color="grey">
-            {map.author != null ? `Mapped by ${map.author}` : undefined}
-          </T.Small>
-          <T.Small display="block" color="grey">
-            Submitted {new Date(map.submissionDate).toDateString()}
-          </T.Small>
-
-          <DifficultyPills difficulties={map.difficulties} />
-          {map.description != null ? (
-            <div className={styles.description}>
-              <T.Small
-                color="grey"
-                ComponentOverride={({ className, children }) => (
-                  <div className={className}>{children}</div>
-                )}
-              >
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: sanitizeHtml(this.breakNewlines(map.description), {
-                      allowedTags,
-                      allowedAttributes,
-                    }),
-                  }}
-                />
-              </T.Small>
-            </div>
-          ) : undefined}
-          <div className={styles.actions}>
-            {isFavorited != null && (
-              <Button onClick={toggleFavorite} style={isFavorited ? 'active' : 'regular'}>
-                ❤
-              </Button>
-            )}
-            {this.downloadLink && <Button link={this.downloadLink}>Download</Button>}
-            {canModify && (
-              <>
-                <Button onClick={showReuploadDialog}>Reupload</Button>
-                <Button style="error" onClick={deleteMap}>
-                  Delete
-                </Button>
-              </>
-            )}
-            {ReuploadDialog && <ReuploadDialog />}
-          </div>
+  return (
+    <div className={styles.mapPage}>
+      {albumArtLink && (
+        <div className={styles.albumArt}>
+          <img className={styles.albumArtImg} src={albumArtLink}></img>
         </div>
+      )}
+      <div className={styles.mapContent}>
+        <T.ExtraLarge display="block" style="title">
+          {map.title}
+        </T.ExtraLarge>
+        <T.Large display="block" color="grey">
+          {map.artist}
+        </T.Large>
+        <br />
+        <T.Small display="block" color="grey">
+          {map.author != null ? `Mapped by ${map.author}` : undefined}
+        </T.Small>
+        <T.Small display="block" color="grey">
+          Submitted {new Date(map.submissionDate).toDateString()}
+        </T.Small>
+
+        <DifficultyPills difficulties={map.difficulties} />
+        {map.description != null ? (
+          <div className={styles.description}>
+            <T.Small
+              color="grey"
+              ComponentOverride={({ className, children }) => (
+                <div className={className}>{children}</div>
+              )}
+            >
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(breakNewlines(map.description), {
+                    allowedTags,
+                    allowedAttributes,
+                  }),
+                }}
+              />
+            </T.Small>
+          </div>
+        ) : undefined}
+        {mapActions}
       </div>
-    );
-  }
+    </div>
+  );
+};
+
+function breakNewlines(content: string) {
+  return content.replaceAll('\r', '').replaceAll('\n\n', '<br/>');
 }

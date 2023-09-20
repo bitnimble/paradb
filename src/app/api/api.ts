@@ -1,35 +1,35 @@
 import * as qs from 'qs';
 import { ApiResponse, apiResponse } from 'schema/api';
 import {
-  FindMapsResponse,
-  SearchMapsRequest,
-  GetMapResponse,
   DeleteMapResponse,
+  FindMapsResponse,
+  GetMapResponse,
+  SearchMapsRequest,
   SubmitMapRequest,
   SubmitMapResponse,
+  deserializeDeleteMapResponse,
   deserializeFindMapsResponse,
   deserializeGetMapResponse,
-  deserializeDeleteMapResponse,
   deserializeSubmitMapResponse,
   serializeSubmitMapRequest,
 } from 'schema/maps';
 import {
+  ChangePasswordRequest,
+  ChangePasswordResponse,
   LoginRequest,
   LoginResponse,
+  SetFavoriteMapsRequest,
   SignupRequest,
   SignupResponse,
   User,
-  ChangePasswordRequest,
-  ChangePasswordResponse,
-  SetFavoriteMapsRequest,
-  serializeLoginRequest,
-  deserializeLoginResponse,
-  serializeSignupRequest,
-  deserializeSignupResponse,
-  deserializeGetUserResponse,
-  serializeChangePasswordRequest,
   deserializeChangePasswordResponse,
+  deserializeGetUserResponse,
+  deserializeLoginResponse,
+  deserializeSignupResponse,
+  serializeChangePasswordRequest,
+  serializeLoginRequest,
   serializeSetFavoriteMapsRequest,
+  serializeSignupRequest,
 } from 'schema/users';
 
 export interface Api {
@@ -86,7 +86,7 @@ export class HttpApi implements Api {
 
   async setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse> {
     const bsonReq = serializeSetFavoriteMapsRequest(req);
-    const bsonResp = await post(path(this.apiBase, 'favorites', 'set'), bsonReq);
+    const bsonResp = await post(path(this.apiBase, 'favorites'), bsonReq);
     return apiResponse.deserialize(bsonResp);
   }
 

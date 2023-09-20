@@ -92,6 +92,7 @@ export class ThrottledMapUploader {
 
   async start(reuploadMapId?: string) {
     if (reuploadMapId != null && this.uploads.length > 1) {
+      // TODO: wire this through to a UI error
       throw new Error(
         'A reupload map ID was specified, but more than one file was selected to be uploaded.'
       );
