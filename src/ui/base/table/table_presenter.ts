@@ -4,8 +4,8 @@ import { Columns } from './table';
 export type SortDirection = 'asc' | 'desc';
 
 export class TableStore<T, N extends number> {
-  sortColumn: number | undefined;
-  sortDirection: SortDirection | undefined;
+  sortColumn: number | undefined = undefined;
+  sortDirection: SortDirection | undefined = undefined;
 
   constructor(
     readonly data: IObservableValue<T[] | undefined> | IComputedValue<T[] | undefined>,

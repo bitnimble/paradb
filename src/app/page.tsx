@@ -194,6 +194,7 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
         tableClassname={styles.mapListTable}
         rowClassname={styles.mapListRow}
         cellClassname={styles.mapListCell}
+        onSortChange={presenter.onSortChanged}
       />
     </div>
   );
