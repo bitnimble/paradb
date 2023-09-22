@@ -1,10 +1,10 @@
+import { Api } from 'app/api/api';
 import { checkExists } from 'base/preconditions';
-import { TableStore } from 'ui/base/table/table_presenter';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { computedFn } from 'mobx-utils';
-import { Api } from 'app/api/api';
+import { MapSortableAttributes, PDMap, mapSortableAttributes } from 'schema/maps';
+import { TableStore } from 'ui/base/table/table_presenter';
 import { getMapFileLink } from 'utils/maps';
-import { PDMap, MapSortableAttributes, mapSortableAttributes } from 'schema/maps';
 
 const SEARCH_LIMIT = 20;
 
@@ -16,11 +16,11 @@ export class MapListStore {
   maps?: PDMap[] = undefined;
   hasMore = true;
   loadingMore = false;
-  isFirstSearch = true;
 
   tableStore?: TableStore<PDMap, 7> = undefined;
 
-  constructor() {
+  constructor(query: string) {
+    this.query = query;
     makeAutoObservable(this);
   }
 }
@@ -120,17 +120,8 @@ export class MapListPresenter {
   }
 
   async onSearch(trigger: 'sort' | 'search') {
-    // The default sort on first load is by "new" to surface new maps, but when the user searches
-    // for something manually for the first time, we want to revert back to unsorted (i.e. sort
-    // the search results by relevance instead).
-    if (
-      trigger === 'search' &&
-      this.store.maps &&
-      this.store.isFirstSearch &&
-      this.store.tableStore != null
-    ) {
+    if (trigger === 'search' && this.store.query !== '') {
       runInAction(() => {
-        this.store.isFirstSearch = false;
         checkExists(this.store.tableStore).sortColumn = undefined;
         checkExists(this.store.tableStore).sortDirection = undefined;
       });

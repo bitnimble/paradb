@@ -5,23 +5,24 @@ import { MapListPresenter, MapListStore } from 'app/map_list_presenter';
 import classNames from 'classnames';
 import { action, computed, observable, reaction, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
+import { useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 import { Difficulty, PDMap } from 'schema/maps';
 import { Button } from 'ui/base/button/button';
-import { searchIcon } from 'ui/base/icons/search_icon';
 import metrics from 'ui/base/metrics/metrics.module.css';
 import { Row, Table } from 'ui/base/table/table';
 import { TableStore } from 'ui/base/table/table_presenter';
 import { RouteLink } from 'ui/base/text/link';
 import { T } from 'ui/base/text/text';
-import { Textbox } from 'ui/base/textbox/textbox';
 import { KnownDifficulty, difficultyColors, parseDifficulty } from 'utils/difficulties';
 import { RoutePath, routeFor } from 'utils/routes';
 import styles from './page.module.css';
+import { Search } from './search';
 
 export default observer(() => {
   const api = useApi();
-  const [store] = useState(new MapListStore());
+  const searchParams = useSearchParams();
+  const [store] = useState(new MapListStore(searchParams.get('q') || ''));
   const presenter = new MapListPresenter(api, store);
 
   React.useEffect(() => {
@@ -41,21 +42,10 @@ export default observer(() => {
     );
   });
 
-  const onSearch = () => presenter.onSearch('search');
-
   return (
     <div className={styles.mapList}>
       <div className={styles.filter}>
-        <Textbox
-          error={undefined}
-          value={store.query}
-          borderColor="purple"
-          borderWidth={2}
-          placeholder="Search for a song or artist..."
-          onChange={presenter.onChangeQuery}
-          onSubmit={onSearch}
-        />
-        <Button onClick={onSearch}>{searchIcon} Search</Button>
+        <Search query={store.query} />
         <BulkSelectActions />
       </div>
       <div
