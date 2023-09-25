@@ -10,7 +10,7 @@
     "lint": "next lint",
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",
-    "outage": "node -r esbuild-runner/register src/outage/index.ts",
+    "outage": "bun src/outage/index.ts",
     "search:rebuild": "bun src/services/_migrations/rebuild_meilisearch.ts",
     "test": "tools/test.sh"
   },
@@ -26,7 +26,6 @@
     "classnames": "^2.3.2",
     "dotenv": "^16.3.1",
     "encoding": "^0.1.13",
-    "esbuild-runner": "^2.2.2",
     "eslint": "8.45.0",
     "eslint-config-next": "13.4.12",
     "iron-session": "^6.3.1",
