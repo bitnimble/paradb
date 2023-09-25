@@ -18,10 +18,12 @@ tar -xzf .next.tar.gz
   nohup minio server /data > /dev/null 2>&1 &
   yarn test
 } || {
+  CODE=$?
   pkill -f "sh -c next start" || true
   pkill -f ".bin/next start" || true
   pkill -f "next-router-worker" || true
   pkill -f "next/dist/compiled" || true
   pkill -f "meilisearch" || true
   pkill -f "minio" || true
+  exit $CODE
 }
