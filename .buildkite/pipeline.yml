@@ -1,3 +1,6 @@
+env:
+  PATH: "/etc/.npm-global/bin:$PATH"
+
 steps:
   - label: ":package: Installing dependencies"
     command: "tools/ci/install.sh"

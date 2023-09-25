@@ -20,10 +20,8 @@ ln -s "$(pwd)/$NODE_18/bin/node" /usr/local/bin/node
 ln -s "$(pwd)/$NODE_18/bin/npm" /usr/local/bin/npm
 
 echo "Installing yarn"
-mkdir /tmp/.npm-global
-npm config set prefix /tmp/.npm-global
-export PATH="/tmp/.npm-global/bin:$PATH"
-
+mkdir /etc/.npm-global
+npm config set prefix /etc/.npm-global
 npm install -g yarn
 
 curl -fsSL https://bun.sh/install | bash
