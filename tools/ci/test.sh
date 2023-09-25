@@ -1,7 +1,14 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # shellcheck source=/dev/null
 source "/.paradb-deps"
+
+yarn
+
+buildkite-agent artifact download .next.tar.gz
+tar -xzvf .next.tar.gz
 
 yarn start &
 yarn test

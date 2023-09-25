@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 if [ -f "/.paradb-deps" ]; then
   echo "Dependencies already installed"
   exit
