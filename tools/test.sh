@@ -16,10 +16,10 @@ ENV_FILE=.env.test bun "$REPO/src/services/_migrations/rebuild_meilisearch.ts" |
 
 echo "Clearing local S3"
 mc alias set local http://127.0.0.1:9000 minioadmin minioadmin
-mc admin user add local abc 12345678
-mc rb local/paradb-maps-test
+mc admin user add local abc 12345678 || true
+mc rb local/paradb-maps-test || true
 mc mb local/paradb-maps-test
-mc admin policy attach local readwrite --user abc
+mc admin policy attach local readwrite --user abc || true
 
 # Run tests
 echo "Running tests"

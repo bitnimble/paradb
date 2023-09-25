@@ -8,7 +8,7 @@ source "/.paradb-deps"
 yarn
 
 buildkite-agent artifact download .next.tar.gz .
-tar -xzvf .next.tar.gz
+tar -xzf .next.tar.gz
 
 yarn start &
 nohup meilisearch --no-analytics --master-key="123" > /dev/null 2>&1 &
