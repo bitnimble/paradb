@@ -3,15 +3,14 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO="$SCRIPT_DIR/../"
 TEST_DB="paradb_test"
-POSTGRES_USER="postgres"
 
 echo "Cleaning out test database"
-dropdb --if-exists "${TEST_DB}" 2>&1 >/dev/null
-createdb  "${TEST_DB}" 2>&1 >/dev/null
-psql -q -d "${TEST_DB}" -f "$REPO/db/init.sql"
+sudo -u postgres -- dropdb --if-exists "${TEST_DB}" 2>&1 >/dev/null
+sudo -u postgres -- createdb  "${TEST_DB}" 2>&1 >/dev/null
+sudo -u postgres -- psql -q -d "${TEST_DB}" -f "$REPO/db/init.sql"
 
 echo "Rebuilding search index"
-ENV_FILE=.env.test bun "$REPO/src/services/_migrations/rebuild_meilisearch.ts"
+ENV_FILE=.env.test bun "$REPO/src/services/_migrations/rebuild_meilisearch.ts" || exit
 
 echo "Clearing local S3"
 mc alias set local http://127.0.0.1:9000 minioadmin minioadmin
