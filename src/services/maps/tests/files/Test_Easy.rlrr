@@ -1,0 +1,170 @@
+{
+    "version": 0.6,
+    "recordingMetadata": {
+        "title": "Test",
+        "description": "",
+        "coverImagePath": "album.jpg",
+        "artist": "Test",
+        "creator": "",
+        "length": 11.1814,
+        "complexity": 1
+    },
+    "audioFileData": {
+        "songTracks": [
+            "guitar.ogg",
+            "rhythm.ogg",
+            "song.ogg",
+            "vocals.ogg"
+        ],
+        "drumTracks": [
+            "drums.ogg"
+        ],
+        "calibrationOffset": 0.0
+    },
+    "instruments": [
+        {
+            "name": "BP_HiHat_C_1",
+            "class": "BP_HiHat_C",
+            "location": [
+                17.22353,
+                -34.08699,
+                94.211975
+            ],
+            "rotation": [
+                15.416171,
+                19.771341,
+                6.125736
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "name": "BP_Kick_C_1",
+            "class": "BP_Kick_C",
+            "location": [
+                -69.758492,
+                60.319191,
+                34.294422
+            ],
+            "rotation": [
+                -96.766594,
+                2.265444,
+                38.000126
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "name": "BP_Crash17_C_1",
+            "class": "BP_Crash17_C",
+            "location": [
+                26.813931,
+                52.215088,
+                135.513931
+            ],
+            "rotation": [
+                -10.405132,
+                44.075054,
+                25.513369
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "name": "BP_Snare_C_1",
+            "class": "BP_Snare_C",
+            "location": [
+                17.106194,
+                -1.370838,
+                68.553436
+            ],
+            "rotation": [
+                3.194685,
+                15.114579,
+                1.082093
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        }
+    ],
+    "events": [
+        {
+            "name": "BP_Kick_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "2.9524"
+        },
+        {
+            "name": "BP_Kick_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "3.5952"
+        },
+        {
+            "name": "BP_Kick_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "4.2749"
+        },
+        {
+            "name": "BP_Kick_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "4.9201"
+        },
+        {
+            "name": "BP_Kick_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "5.5653"
+        },
+        {
+            "name": "BP_Kick_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "6.2104"
+        },
+        {
+            "name": "BP_Kick_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "6.8627"
+        },
+        {
+            "name": "BP_Snare_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "7.5220"
+        },
+        {
+            "name": "BP_Crash17_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "7.8517"
+        },
+        {
+            "name": "BP_HiHat_C_1",
+            "vel": 100,
+            "loc": 0,
+            "time": "8.1814"
+        }
+    ],
+    "bpmEvents": [
+        {
+            "bpm": 180.0,
+            "time": 0.0
+        }
+    ]
+}

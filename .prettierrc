@@ -1,0 +1,16 @@
+{
+  "tabWidth": 2,
+  "printWidth": 100,
+  "singleQuote": true,
+  "endOfLine": "lf",
+  "quoteProps": "preserve",
+  "trailingComma": "es5",
+  "overrides": [
+    {
+      "files": "*.css",
+      "options": {
+        "tabWidth": 4
+      }
+    }
+  ]
+}

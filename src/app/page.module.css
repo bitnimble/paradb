@@ -1,0 +1,129 @@
+@value gridBaseline from "ui/base/metrics/metrics.module.css";
+@value colorGreyA30, colorGreyA15, colorPurple from "ui/base/colors/colors.module.css";
+
+@value gutter: calc(gridBaseline * 2);
+
+.filter {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+    border-bottom: 1px solid colorGreyA15;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-flow: column;
+    gap: gridBaseline;
+    padding: gridBaseline gutter;
+}
+
+.tableContainer {
+    padding-bottom: calc(gridBaseline * 2);
+    display: flex;
+    flex-direction: column;
+}
+
+.tableScrollContainer {
+    overflow-x: auto;
+}
+
+.isScrollable .mapListRow {
+    box-shadow: 0 0 0 1px colorGreyA15;
+}
+
+.loadMoreButton {
+    display: block;
+    margin: auto;
+}
+
+.mapListTable {
+    padding: 0 gutter;
+    color: #666;
+}
+
+.mapListRow {
+    position: relative;
+    box-shadow: 0 0 0 1px transparent;
+    transition: box-shadow 0.05s linear;
+}
+
+.mapListRow:hover,
+.bulkSelectEnabled .mapListRow:hover {
+    box-shadow: 0 0 0 1px colorPurple;
+}
+
+.bulkSelectEnabled .mapListRow {
+    box-shadow: 0 0 0 1px colorGreyA15;
+}
+
+.bulkSelectEnabled .mapListRow::after {
+    content: '';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    right: gridBaseline;
+    transform: translateY(-50%);
+    width: calc(gridBaseline * 3);
+    height: calc(gridBaseline * 3);
+    border: 1px solid colorGreyA15;
+    pointer-events: none;
+}
+
+.bulkSelectEnabled .mapListRow.mapListRowSelected::after {
+    content: '✔';
+    color: colorPurple;
+    font-weight: bolder;
+    font-size: 20px;
+    border: 2px solid colorPurple;
+}
+
+.bulkSelectEnabled .mapListRowSelected,
+.bulkSelectEnabled .mapListRowSelected:hover {
+    box-shadow: 0 0 0 2px colorPurple;
+}
+
+.mapListCell {
+    position: relative;
+}
+
+.routeLink {
+    display: block;
+    padding: calc(gridBaseline * 1.5) gridBaseline;
+}
+
+.centeredCell {
+    display: flex;
+    justify-content: center;
+}
+
+.difficulties {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: calc(gridBaseline * 0.5);
+    overflow: hidden;
+}
+
+.difficultyColorPill {
+    width: 100%;
+    flex: 1;
+}
+
+.greyPill {
+    background-color: colorGreyA15;
+}
+.greyPill + .greyPill {
+    border-top: 1px solid colorGreyA30;
+}
+
+@media (max-width: 640px) {
+    .filter {
+        grid-auto-flow: row;
+    }
+}

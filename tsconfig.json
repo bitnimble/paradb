@@ -1,11 +1,34 @@
 {
-  "extends": "../../../tsconfig.json",
-  "include": [
-    ".",
-    "../../base",
-    "../../../config"
-  ],
-  "exclude": [
-    "fallback"
-  ]
+  "compilerOptions": {
+    "target": "es2015",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      },
+      {
+        "name": "typescript-plugin-css-modules",
+        "options": {
+          "customMatcher": "\\.css$"
+        }
+      }
+    ],
+    "baseUrl": "src",
+    "allowJs": true
+  },
+  "include": ["src", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }
