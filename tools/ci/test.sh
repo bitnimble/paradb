@@ -5,6 +5,15 @@ set -euo pipefail
 # shellcheck source=/dev/null
 source "/.paradb-deps"
 
+kill_all() {
+  pkill -f "sh -c next start" || true
+  pkill -f ".bin/next start" || true
+  pkill -f "next-router-worker" || true
+  pkill -f "next/dist/compiled" || true
+  pkill -f "meilisearch" || true
+  pkill -f "minio" || true
+}
+
 yarn
 cp .env.test .env
 
@@ -19,11 +28,8 @@ tar -xzf .next.tar.gz
   yarn test
 } || {
   CODE=$?
-  pkill -f "sh -c next start" || true
-  pkill -f ".bin/next start" || true
-  pkill -f "next-router-worker" || true
-  pkill -f "next/dist/compiled" || true
-  pkill -f "meilisearch" || true
-  pkill -f "minio" || true
+  kill_all
   exit $CODE
 }
+
+kill_all
