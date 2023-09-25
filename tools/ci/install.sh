@@ -38,14 +38,9 @@ chmod +x /usr/local/bin/mc
 wget https://dl.min.io/server/minio/release/linux-amd64/archive/minio_20230920224955.0.0_amd64.deb -O minio.deb
 dpkg -i minio.deb
 
-nohup /usr/local/bin/minio server /data > /dev/null 2>&1 &
-
 echo "Setting up postgres"
 service postgresql start
 sudo -u postgres -E psql -c "CREATE ROLE paradb_test LOGIN SUPERUSER PASSWORD '1234';"
-
-echo "Setting up meilisearch"
-nohup meilisearch --no-analytics --master-key="123" > /dev/null 2>&1 &
 
 popd || exit
 
