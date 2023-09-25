@@ -12,7 +12,7 @@ echo "Building"
 cp .env.test .env
 yarn build
 
-tar -czvf .next.tar.gz .next
+tar -czf .next.tar.gz .next
 buildkite-agent artifact upload .next.tar.gz
 
 echo "Finished build"

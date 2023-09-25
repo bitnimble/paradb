@@ -7,7 +7,7 @@ source "/.paradb-deps"
 
 yarn
 
-buildkite-agent artifact download .next.tar.gz
+buildkite-agent artifact download .next.tar.gz .next.tar.gz
 tar -xzvf .next.tar.gz
 
 yarn start &
