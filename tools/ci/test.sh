@@ -6,12 +6,14 @@ set -euo pipefail
 source "/.paradb-deps"
 
 yarn
+cp .env.test .env
 
 buildkite-agent artifact download .next.tar.gz .
 tar -xzf .next.tar.gz
 
 yarn start &
 nohup meilisearch --no-analytics --master-key="123" > /dev/null 2>&1 &
+
 nohup minio server /data > /dev/null 2>&1 &
 yarn test
 
