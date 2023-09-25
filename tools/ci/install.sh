@@ -15,11 +15,11 @@ pushd /tmp || exit
 echo "Setting up node"
 NODE_18=node-v18.18.0-linux-x64
 wget "https://nodejs.org/dist/v18.18.0/$NODE_18.tar.xz"
-tar xf "$NODE_18.tar.xz"
-WD=$(pwd)
-ln -s "$WD/$NODE_18/bin/node" /usr/local/bin/node
-ln -s "$WD/$NODE_18/bin/npm" /usr/local/bin/npm
+tar xvf "$NODE_18.tar.xz"
+ln -s "$(pwd)/$NODE_18/bin/node" /usr/local/bin/node
+ln -s "$(pwd)/$NODE_18/bin/npm" /usr/local/bin/npm
 
+echo "Installing yarn"
 mkdir /tmp/.npm-global
 npm config set prefix /tmp/.npm-global
 export PATH="/tmp/.npm-global/bin:$PATH"
