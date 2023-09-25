@@ -1,4 +1,4 @@
 steps:
-  - label: ":wrench: Installing dependencies"
+  - label: ":hammer: Installing dependencies"
     command: "tools/install.sh"
     key: deps
