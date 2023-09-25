@@ -49,4 +49,4 @@ popd || exit
 
 touch /.paradb-deps
 
-echo "Installed dependencies!"
+echo "Installed dependencies"
