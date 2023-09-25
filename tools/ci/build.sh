@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=/dev/null
+source "/.paradb-deps"
+
 echo "Installing node_modules"
 yarn --force
 

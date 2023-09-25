@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# shellcheck source=/dev/null
+source "/.paradb-deps"
+
 yarn start &
 yarn test
 
