@@ -24,14 +24,15 @@ export async function getUserSession(): Promise<UserSession | undefined> {
     return;
   }
 
-  const {
-    paradbSession: { userSession },
-  } = await unsealData<IronSessionData>(cookie.value, {
+  const { paradbSession } = await unsealData<IronSessionData>(cookie.value, {
     password: envVars.cookieSecret,
   });
+  if (paradbSession == null) {
+    return;
+  }
 
   // Round-trip it through the schema serializers to validate and strip excess properties
-  return deserializeUserSession(serializeUserSession(userSession));
+  return deserializeUserSession(serializeUserSession(paradbSession.userSession));
 }
 
 export async function setUserSession(_session: UserSession) {
