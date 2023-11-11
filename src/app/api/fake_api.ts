@@ -43,6 +43,10 @@ export class FakeApi implements Api {
     return { success: true };
   }
 
+  async getSession(): Promise<User> {
+    return { id: '0', username: 'alice', email: 'alice@test.com' };
+  }
+
   async getMe(): Promise<User> {
     return { id: '0', username: 'alice', email: 'alice@test.com' };
   }
