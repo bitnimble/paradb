@@ -25,7 +25,7 @@ export class SessionPresenter {
     }
 
     try {
-      const user = await this.api.getMe();
+      const user = await this.api.getSession();
       runInAction(() => (this.store.user = user));
     } catch (e) {
       // Unauthorized, so don't do anything

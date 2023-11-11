@@ -38,6 +38,9 @@ export interface Api {
   signup(req: SignupRequest): Promise<SignupResponse>;
 
   /* User */
+  // Same as getMe(), but will not report errors to sentry if unauthorized. This is only
+  // intended to be used as a logged-in session check.
+  getSession(): Promise<User>;
   getMe(): Promise<User>;
   changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse>;
   setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse>;
@@ -67,6 +70,15 @@ export class HttpApi implements Api {
     const bsonReq = serializeSignupRequest(req);
     const resp = await post(path(this.apiBase, 'users', 'signup'), bsonReq);
     return deserializeSignupResponse(resp);
+  }
+
+  async getSession(): Promise<User> {
+    const bsonResp = await get(path(this.apiBase, 'users', 'session'));
+    const resp = deserializeGetUserResponse(bsonResp);
+    if (!resp.success) {
+      throw new Error();
+    }
+    return resp.user;
   }
 
   async getMe(): Promise<User> {
