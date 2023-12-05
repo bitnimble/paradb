@@ -15,6 +15,7 @@ module.exports = withSentryConfig(
     silent: true,
     org: "bitnimble",
     project: "paradb",
+    authToken: process.env.SENTRY_AUTH_TOKEN,
   },
   {
     // For all available options, see:
