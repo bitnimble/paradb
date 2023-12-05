@@ -141,6 +141,24 @@ describe('maps handler', () => {
       });
     });
 
+    it('is missing a drum audio track', async () => {
+      const { response } = await testMapUpload('files/Test_missing_audio_drums.zip');
+      expect(response).toEqual({
+        success: false,
+        statusCode: 400,
+        errorMessage: 'Missing audio track drums.ogg in Test_Easy.rlrr',
+      });
+    });
+
+    it('is missing a song audio track', async () => {
+      const { response } = await testMapUpload('files/Test_missing_audio_song.zip');
+      expect(response).toEqual({
+        success: false,
+        statusCode: 400,
+        errorMessage: 'Missing audio track song.ogg in Test_Easy.rlrr',
+      });
+    });
+
     it('is corrupted, or an unsupported archive format', async () => {
       const { response } = await testMapUpload('files/Test_invalid_archive.zip');
       expect(response).toEqual({
@@ -173,8 +191,7 @@ describe('maps handler', () => {
       expect(response).toEqual({
         success: false,
         statusCode: 400,
-        errorMessage:
-          'Invalid map data; a map .rlrr is missing a required field (title, artist or complexity)',
+        errorMessage: 'Test_Easy.rlrr is missing the "title" metadata property',
       });
     });
   });

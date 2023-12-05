@@ -5,7 +5,7 @@ import { PromisedResult, Result, ResultError, wrapError } from 'base/result';
 import { getServerContext } from 'services/server_context';
 // @ts-ignore
 import * as encoding from 'encoding';
-import { Index } from 'meilisearch';
+import { ErrorStatusCode, Index } from 'meilisearch';
 import path from 'path';
 import { MapSortableAttributes, PDMap } from 'schema/maps';
 import * as unzipper from 'unzipper';
@@ -85,6 +85,7 @@ export const enum ValidateMapError {
 export const enum ValidateMapDifficultyError {
   INVALID_FORMAT = 'invalid_format',
   MISSING_VALUES = 'missing_values',
+  NO_AUDIO = 'no_audio',
 }
 export const enum MeilisearchError {
   SEARCH_INDEX_ERROR = 'search-index-error',
@@ -454,10 +455,13 @@ async function validateMapFiles(opts: {
   if (!difficultyFiles.every((f) => path.basename(f.path).startsWith(opts.expectedMapName))) {
     return { success: false, errors: [{ type: ValidateMapError.INCORRECT_FOLDER_NAME }] };
   }
+  // Gets a file in the map archive, relative to the primary map directory
+  const getMapFile = (filename: string) =>
+    opts.mapFiles.find((f) => f.path === `${opts.expectedMapName}${path.sep}${filename}`);
 
   const difficultyResults = await Promise.all(
     difficultyFiles.map((f) =>
-      f.buffer().then((b) => validateMapMetadata(path.basename(f.path), b))
+      f.buffer().then((b) => validateMapDifficulty(path.basename(f.path), b, getMapFile))
     )
   );
   if (difficultyResults.length === 0) {
@@ -491,7 +495,7 @@ async function validateMapFiles(opts: {
           errors: [
             {
               type: ValidateMapError.MISMATCHED_DIFFICULTY_METADATA,
-              userMessage: `mismatched '${key}': '${value}' vs '${expected}'`,
+              internalMessage: `mismatched '${key}': '${value}' vs '${expected}'`,
             },
           ],
         };
@@ -502,7 +506,7 @@ async function validateMapFiles(opts: {
   const albumArtFiles = validDifficultyResults
     .map((v) => v.value.albumArt)
     .filter((s): s is string => s != null)
-    .map((fn) => opts.mapFiles.find((f) => path.basename(f.path) === fn));
+    .map(getMapFile);
 
   if (!allExists(albumArtFiles)) {
     return { success: false, errors: [{ type: ValidateMapError.MISSING_ALBUM_ART }] };
@@ -528,9 +532,10 @@ async function validateMapFiles(opts: {
   };
 }
 
-function validateMapMetadata(
+function validateMapDifficulty(
   filename: string,
-  mapBuffer: Buffer
+  mapBuffer: Buffer,
+  getMapFile: (filename: string) => unzipper.File | undefined
 ): Result<RawMapMetadata & { difficultyName: string }, ValidateMapDifficultyError> {
   let map: any;
   try {
@@ -538,6 +543,7 @@ function validateMapMetadata(
   } catch (e) {
     return { success: false, errors: [{ type: ValidateMapDifficultyError.INVALID_FORMAT }] };
   }
+  // Validate metadata fields
   const metadata = map.recordingMetadata;
   if (!metadata) {
     return { success: false, errors: [{ type: ValidateMapDifficultyError.INVALID_FORMAT }] };
@@ -554,7 +560,7 @@ function validateMapMetadata(
         errors: [
           {
             type: ValidateMapDifficultyError.MISSING_VALUES,
-            userMessage: `Property ${key} was missing a value`,
+            userMessage: `${filename} is missing the "${key}" metadata property`,
           },
         ],
       };
@@ -569,6 +575,40 @@ function validateMapMetadata(
   if (difficultyMatch == null) {
     return { success: false, errors: [{ type: ValidateMapDifficultyError.INVALID_FORMAT }] };
   }
+
+  // Validate audio files
+  // TODO: add automatic schema validation
+  const songTracks = map.audioFileData?.songTracks;
+  const drumTracks = map.audioFileData?.drumTracks;
+  if (
+    !Array.isArray(songTracks) ||
+    !Array.isArray(drumTracks) ||
+    !songTracks.every((s) => typeof s === 'string') ||
+    !drumTracks.every((s) => typeof s === 'string')
+  ) {
+    return {
+      success: false,
+      errors: [
+        {
+          type: ValidateMapDifficultyError.INVALID_FORMAT,
+          userMessage: 'AudioFileData tracks has invalid values',
+        },
+      ],
+    };
+  }
+  const errors: ResultError<ValidateMapDifficultyError>['errors'] = [];
+  for (const track of [...songTracks, ...drumTracks]) {
+    if (getMapFile(track) == null) {
+      errors.push({
+        type: ValidateMapDifficultyError.NO_AUDIO,
+        userMessage: `Missing audio track ${track} in ${filename}`,
+      });
+    }
+  }
+  if (errors.length !== 0) {
+    return { success: false, errors };
+  }
+
   return {
     success: true,
     value: { ...requiredFields, ...optionalFields, difficultyName: difficultyMatch[1] },
@@ -610,6 +650,7 @@ export const submitErrorMap: Record<
   ],
   [ValidateMapError.MISSING_ALBUM_ART]: [400, 'Missing album art'],
   [ValidateMapError.NO_DATA]: [400, 'Invalid map archive; could not find map data'],
+  [ValidateMapDifficultyError.NO_AUDIO]: [400, 'Invalid map archive; missing audio files'],
   [ValidateMapDifficultyError.INVALID_FORMAT]: [
     400,
     'Invalid map data; could not process the map .rlrr files',

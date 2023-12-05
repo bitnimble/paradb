@@ -66,7 +66,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     const [statusCode, message] = submitErrorMap[submitMapResult.errors[0].type];
     return error({
       statusCode,
-      message,
+      message: submitMapResult.errors[0].userMessage || message,
       errorBody: {},
       errorSerializer: serializeSubmitMapResponse,
       resultError: submitMapResult,
