@@ -1,15 +1,15 @@
 env:
-  PATH: "/etc/.npm-global/bin:$PATH"
+  PATH: '/etc/.npm-global/bin:$PATH'
 
 steps:
-  - label: ":package: Installing dependencies"
-    command: "tools/ci/install.sh"
+  - label: ':package: Installing dependencies'
+    command: 'tools/ci/install.sh'
     key: deps
-  - label: ":hammer_and_wrench: Building"
-    command: "tools/ci/build.sh"
+  - label: ':hammer_and_wrench: Building'
+    command: 'tools/ci/build.sh'
     key: build
     depends_on: deps
-  - label: ":test_tube: Running backend tests"
-    command: "tools/ci/test.sh"
+  - label: ':test_tube: Running backend tests'
+    command: 'tools/ci/test.sh'
     key: test
     depends_on: build

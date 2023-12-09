@@ -1,4 +1,4 @@
-const { withSentryConfig } = require("@sentry/nextjs");
+const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -13,8 +13,8 @@ module.exports = withSentryConfig(
 
     // Suppresses source map uploading logs during build
     silent: true,
-    org: "bitnimble",
-    project: "paradb",
+    org: 'bitnimble',
+    project: 'paradb',
     authToken: process.env.SENTRY_AUTH_TOKEN,
   },
   {
@@ -24,15 +24,13 @@ module.exports = withSentryConfig(
     // Upload a larger set of source maps for prettier stack traces (increases build time)
     widenClientFileUpload: true,
 
-    tunnelRoute: "/monitoring",
+    tunnelRoute: '/monitoring',
 
     // Hides source maps from generated client bundles
     hideSourceMaps: true,
 
     // Automatically tree-shake Sentry logger statements to reduce bundle size
     disableLogger: true,
-    excludeServerRoutes: [
-      "/api/users/session"
-    ]
+    excludeServerRoutes: ['/api/users/session'],
   }
 );
