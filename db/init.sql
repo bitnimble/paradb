@@ -8,6 +8,7 @@ CREATE TABLE maps (
   uploader varchar(256) not null,
   download_count int not null default 0,
   description text,
+  tags text,
   complexity int,
   album_art text
 );

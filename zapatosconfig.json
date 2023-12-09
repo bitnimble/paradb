@@ -2,5 +2,5 @@
   "db": {
     "connectionString": "postgresql://localhost/paradb"
   },
-  "outDir": "./src/api"
+  "outDir": "./src/services"
 }
