@@ -66,15 +66,17 @@ export const MapPage = (props: Props) => {
         <T.Large display="block" color="grey">
           {map.artist}
         </T.Large>
-        <br />
-        <T.Small display="block" color="grey">
-          {map.author != null ? `Mapped by ${map.author}` : undefined}
-        </T.Small>
-        <T.Small display="block" color="grey">
-          Submitted {new Date(map.submissionDate).toDateString()}
-        </T.Small>
+        <div>
+          <T.Small display="block" color="grey">
+            {map.author != null ? `Mapped by ${map.author}` : undefined}
+          </T.Small>
+          <T.Small display="block" color="grey">
+            Submitted {new Date(map.submissionDate).toDateString()}
+          </T.Small>
+        </div>
 
         <DifficultyPills difficulties={map.difficulties} />
+        {mapActions}
         {map.description != null ? (
           <div className={styles.description}>
             <T.Small
@@ -91,7 +93,6 @@ export const MapPage = (props: Props) => {
             </T.Small>
           </div>
         ) : undefined}
-        {mapActions}
       </div>
     </div>
   );
