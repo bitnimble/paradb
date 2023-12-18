@@ -2,6 +2,7 @@ const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  distDir: process.env.BUILD_DIR || '.next',
   reactStrictMode: true,
 };
 
