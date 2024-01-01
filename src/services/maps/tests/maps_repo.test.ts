@@ -5,7 +5,7 @@ import { getServerContext } from 'services/server_context';
 import { createUser } from 'services/users/users_repo';
 
 describe('maps repo', () => {
-  it('can find maps', async () => {
+  it('can get maps', async () => {
     const { mapsRepo } = await getServerContext();
     const result = await mapsRepo.getMap('2');
     expect(result.success).toBe(true);
@@ -14,6 +14,32 @@ describe('maps repo', () => {
     expect(map.id).toEqual('2');
     expect(map.title).toEqual('All Star 2');
     expect(map.artist).toEqual('Smash Mouth 2');
+  });
+
+  it('cannot get hidden maps', async () => {
+    const { mapsRepo } = await getServerContext();
+    const result = await mapsRepo.getMap('3');
+    expect(result.success).toBe(false);
+  });
+
+  it('cannot find hidden maps', async () => {
+    const { mapsRepo } = await getServerContext();
+    const result = await mapsRepo.findMaps();
+    expect(result.success).toBe(true);
+    const ids = (result as Extract<typeof result, { success: true }>).value.map((m) => m.id);
+    expect(ids.includes('3')).toBe(false);
+  });
+
+  it('cannot search for hidden maps', async () => {
+    const { mapsRepo } = await getServerContext();
+    const result = await mapsRepo.searchMaps({
+      query: 'All Star',
+      offset: 0,
+      limit: 5,
+    });
+    expect(result.success).toBe(true);
+    const ids = (result as Extract<typeof result, { success: true }>).value.map((m) => m.id);
+    expect(ids.includes('3')).toBe(false);
   });
 
   it('can delete a map', async () => {

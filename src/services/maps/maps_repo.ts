@@ -15,6 +15,12 @@ import {
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
 
+const enum MapStatus {
+  PUBLIC = 'P',
+  HIDDEN = 'H',
+  INVALID = 'I',
+}
+
 export type MeilisearchMap = {
   id: string;
   title?: string;
@@ -83,60 +89,65 @@ export class MapsRepo {
   async findMaps(by?: FindMapsBy, userId?: string): PromisedResult<PDMap[], DbError> {
     const { pool } = await getServerContext();
 
-    const whereable = by ? { id: db.conditions.isIn(by.ids) } : db.all;
+    const whereable = by ? { id: db.conditions.isIn(by.ids) } : {};
 
     try {
       const maps = await db
-        .select('maps', whereable, {
-          lateral: {
-            difficulties: db.select(
-              'difficulties',
-              { map_id: db.parent('id') },
-              {
-                columns: ['difficulty', 'difficulty_name'],
-              }
-            ),
-            favorites: db.count('favorites', { map_id: db.parent('id') }),
-            ...(userId
-              ? {
-                  userProjection: db.selectOne(
-                    'favorites',
-                    {
-                      map_id: db.parent('id'),
-                      user_id: userId,
-                    },
-                    {
-                      columns: [],
-                      lateral: {
-                        isFavorited: db.selectOne(
-                          'favorites',
-                          {
-                            map_id: db.parent('map_id'),
-                            user_id: userId,
-                          },
-                          { alias: 'favorites2' }
-                        ),
-                      },
-                    }
-                  ),
+        .select(
+          'maps',
+          // Only select publicly visible maps.
+          { ...whereable, map_status: MapStatus.PUBLIC },
+          {
+            lateral: {
+              difficulties: db.select(
+                'difficulties',
+                { map_id: db.parent('id') },
+                {
+                  columns: ['difficulty', 'difficulty_name'],
                 }
-              : {}),
-          },
-          columns: [
-            'id',
-            'submission_date',
-            'title',
-            'artist',
-            'author',
-            'uploader',
-            'download_count',
-            'description',
-            'tags',
-            'complexity',
-            'album_art',
-          ],
-          order: { by: 'title', direction: 'ASC' },
-        })
+              ),
+              favorites: db.count('favorites', { map_id: db.parent('id') }),
+              ...(userId
+                ? {
+                    userProjection: db.selectOne(
+                      'favorites',
+                      {
+                        map_id: db.parent('id'),
+                        user_id: userId,
+                      },
+                      {
+                        columns: [],
+                        lateral: {
+                          isFavorited: db.selectOne(
+                            'favorites',
+                            {
+                              map_id: db.parent('map_id'),
+                              user_id: userId,
+                            },
+                            { alias: 'favorites2' }
+                          ),
+                        },
+                      }
+                    ),
+                  }
+                : {}),
+            },
+            columns: [
+              'id',
+              'submission_date',
+              'title',
+              'artist',
+              'author',
+              'uploader',
+              'download_count',
+              'description',
+              'tags',
+              'complexity',
+              'album_art',
+            ],
+            order: { by: 'title', direction: 'ASC' },
+          }
+        )
         .run(pool);
       return {
         success: true,
@@ -170,6 +181,10 @@ export class MapsRepo {
     const searchResults = response.hits;
     const ids = searchResults.map((r) => r.id);
 
+    // Note: hidden or invalid maps may be indexed in Meilisearch, but should be filtered out when
+    // querying further metadata via `findMaps`.
+    // TODO: look at stripping hidden/invalid maps from Meilisearch as well, but this should be
+    // good enough for now.
     const mapsResult = await this.findMaps({ by: 'id', ids }, user);
     if (!mapsResult.success) {
       return mapsResult;
@@ -185,7 +200,7 @@ export class MapsRepo {
       const map = await db
         .selectOne(
           'maps',
-          { id: mapId },
+          { id: mapId, map_status: MapStatus.PUBLIC },
           {
             lateral: {
               difficulties: db.select(
@@ -348,6 +363,7 @@ export class MapsRepo {
           'maps',
           snakeCaseKeys({
             id,
+            mapStatus: MapStatus.PUBLIC,
             submissionDate: now,
             title: title,
             artist: artist,
