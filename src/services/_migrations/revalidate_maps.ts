@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: process.env.ENV_FILE });
+
 import { MapStatus } from 'services/maps/maps_repo';
 import { getServerContext } from 'services/server_context';
 
