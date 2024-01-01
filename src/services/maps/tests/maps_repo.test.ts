@@ -24,7 +24,7 @@ describe('maps repo', () => {
 
   it('cannot find hidden maps', async () => {
     const { mapsRepo } = await getServerContext();
-    const result = await mapsRepo.findMaps();
+    const result = await mapsRepo.findMaps({ by: 'all' });
     expect(result.success).toBe(true);
     const ids = (result as Extract<typeof result, { success: true }>).value.map((m) => m.id);
     expect(ids.includes('3')).toBe(false);

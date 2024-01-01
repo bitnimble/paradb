@@ -1,7 +1,7 @@
 import { camelCaseKeys, DbError, snakeCaseKeys } from 'services/db/helpers';
 import { generateId, IdDomain } from 'services/db/id_gen';
 import { checkExists } from 'base/preconditions';
-import { PromisedResult, wrapError } from 'base/result';
+import { PromisedResult, Result, wrapError } from 'base/result';
 import { getServerContext } from 'services/server_context';
 import { Index } from 'meilisearch';
 import { MapSortableAttributes, PDMap } from 'schema/maps';
@@ -12,10 +12,11 @@ import {
   ValidateMapDifficultyError,
   ValidateMapError,
 } from 'services/maps/map_validator';
+import { getEnvVars } from 'services/env';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
 
-const enum MapStatus {
+export const enum MapStatus {
   PUBLIC = 'P',
   HIDDEN = 'H',
   INVALID = 'I',
@@ -57,10 +58,17 @@ export function convertToMeilisearchMap(map: Partial<PDMap> & { id: string }): M
   };
 }
 
-export type FindMapsBy = { by: 'id'; ids: string[] };
+export type FindMapsBy =
+  | { by: 'id'; ids: string[] }
+  // This should not be allowed to be performed outside of an authorized server call. Do not allow
+  // users to query all maps.
+  | { by: 'all' };
 
 export const enum GetMapError {
   MISSING_MAP = 'missing_map',
+  UNKNOWN_DB_ERROR = 'unknown_db_error',
+}
+export const enum UpdateMapError {
   UNKNOWN_DB_ERROR = 'unknown_db_error',
 }
 export const enum DeleteMapError {
@@ -86,10 +94,12 @@ export class MapsRepo {
 
   // TODO: add search parameters to findMaps
   // TODO: pull `userId` out as RequestContext
-  async findMaps(by?: FindMapsBy, userId?: string): PromisedResult<PDMap[], DbError> {
+  async findMaps(findBy: FindMapsBy, userId?: string): PromisedResult<PDMap[], DbError> {
     const { pool } = await getServerContext();
 
-    const whereable = by ? { id: db.conditions.isIn(by.ids) } : {};
+    // TODO: validate by.by === 'all' against the user role. Only an admin or root context can
+    // perform a query to fetch all maps.
+    const whereable = findBy.by === 'id' ? { id: db.conditions.isIn(findBy.ids) } : {};
 
     try {
       const maps = await db
@@ -244,6 +254,16 @@ export class MapsRepo {
     }
   }
 
+  async changeMapStatus(id: string, status: MapStatus): Promise<Result<undefined, UpdateMapError>> {
+    const { pool } = await getServerContext();
+    try {
+      await db.update('maps', { map_status: status }, { id }).run(pool);
+      return { success: true, value: undefined };
+    } catch (e) {
+      return { success: false, errors: [wrapError(e, UpdateMapError.UNKNOWN_DB_ERROR)] };
+    }
+  }
+
   private async updateMeilisearchMap(
     map: Partial<PDMap> & { id: string }
   ): PromisedResult<void, MeilisearchError> {
@@ -335,7 +355,7 @@ export class MapsRepo {
     }
 
     const buffer = Buffer.from(opts.mapFile);
-    const validatedMapResult = await validateMap({ id, mapsDir: mapsDir, buffer });
+    const validatedMapResult = await validateMap({ id, buffer });
     if (!validatedMapResult.success) {
       return validatedMapResult;
     }
@@ -406,6 +426,27 @@ export class MapsRepo {
     } catch (e) {
       return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
     }
+  }
+
+  async revalidateMap(
+    id: string
+  ): Promise<Result<undefined, ValidateMapError | ValidateMapDifficultyError>> {
+    // Download the map from S3
+    const ab = await fetch(`${getEnvVars().publicS3BaseUrl}/${id}.zip`).then((r) =>
+      r.arrayBuffer()
+    );
+    const buffer = Buffer.from(ab);
+    const validateResult = await validateMap({ id, buffer });
+
+    // Re-spread the result object to strip out anything else from the valdiator that we don't care
+    // about, e.g. albumArtFiles
+    if (!validateResult.success) {
+      return {
+        success: false,
+        errors: validateResult.errors,
+      };
+    }
+    return { success: true, value: undefined };
   }
 }
 

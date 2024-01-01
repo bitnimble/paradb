@@ -20,7 +20,7 @@ import { MapsRepo, MeilisearchMap, convertToMeilisearchMap } from 'services/maps
   const mapsIndex = await client.getIndex<MeilisearchMap>('maps');
 
   const mapsRepo = new MapsRepo(mapsIndex);
-  const mapsResult = await mapsRepo.findMaps();
+  const mapsResult = await mapsRepo.findMaps({ by: 'all' });
   if (!mapsResult.success) {
     throw new Error(JSON.stringify(mapsResult.errors));
   }

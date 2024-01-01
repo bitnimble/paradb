@@ -25,7 +25,6 @@ export const enum ValidateMapDifficultyError {
 
 export async function validateMap(opts: {
   id: string;
-  mapsDir: string;
   buffer: Buffer;
 }): PromisedResult<
   RawMap & { albumArtFiles: unzipper.File[] },
