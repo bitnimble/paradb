@@ -53,10 +53,10 @@ export default function Instructions() {
             <li>
               Move the zip file from the downloaded location to{' '}
               <T.Medium style="code">
-                Quest/Internal Shared Storage/Android/data/com.tanirganemre.paradiddle/Songs/Hotel
-                California.zip
+                Quest/Internal Shared Storage/Paradiddle/Songs/Hotel California.zip
               </T.Medium>
-              . You may need to create the "Songs" directory if it doesn't exist yet.
+              . You may need to create the "Paradiddle" and "Songs" directories if they don't exist
+              yet.
             </li>
             <li>
               Unzip the zip file, creating a folder of the same name. For example, if the song was
@@ -64,23 +64,18 @@ export default function Instructions() {
               <T.Medium style="code" display="block">
                 {`Quest/
 ├─ Internal Shared Storage/
-│  ├─ Android/
-│  |  ├─ data/
-|  |  │  ├─ com.tanirganemre.paraddidle/
-│  │  |  │  ├─ Songs/
-│  │  │  │  │  ├─ Hotel California/
-│  │  │  │  │  │  ├─ Hotel California_Easy.rlrr
-│  │  │  │  │  │  ├─ Hotel California_Medium.rlrr
-│  │  │  │  │  │  ├─ Hotel California_Hard.rlrr
-│  │  │  │  │  │  ├─ Hotel California_Expert.rlrr
-│  │  │  │  │  │  ├─ drums_1.ogg
-│  │  │  │  │  │  ├─ ...`}
+│  ├─ Paradiddle/
+│  │  ├─ Songs/
+│  │  │  ├─ Hotel California/
+│  │  │  │  ├─ Hotel California_Easy.rlrr
+│  │  │  │  ├─ Hotel California_Medium.rlrr
+│  │  │  │  ├─ Hotel California_Hard.rlrr
+│  │  │  │  ├─ Hotel California_Expert.rlrr
+│  │  │  │  ├─ drums_1.ogg
+│  │  │  │  ├─ ...`}
               </T.Medium>
               Note: it is important that the folder name matches the song / rlrr filename --
-              otherwise, the song will appear in the game but won't be playable. Also, if you
-              uninstall the Quest app, the "Songs" directory will be deleted, so you may want to
-              back it up somewhere else before uninstalling the app if you want to keep your custom
-              maps.
+              otherwise, the song will appear in the game but won't be playable.
             </li>
             <li>Delete the zip file, open up the game and enjoy your new map!</li>
           </ol>
