@@ -25,11 +25,11 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
 
   const submitMapReq = await getBody(req, deserializeSubmitMapRequest);
 
-  if (submitMapReq.mapData.byteLength > 1024 * 1024 * 40) {
+  if (submitMapReq.mapData.byteLength > 1024 * 1024 * 100) {
     // 40MiB. We use MiB because that's what Windows displays in Explorer and therefore what users will expect.
     return error({
       statusCode: 400,
-      message: 'File is over the filesize limit (40MB)',
+      message: 'File is over the filesize limit (100MB)',
       errorBody: {},
       errorSerializer: serializeSubmitMapResponse,
     });
