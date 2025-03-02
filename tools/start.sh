@@ -9,8 +9,7 @@ DB="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
 echo "db connection string"
 echo "$DB"
 
-if psql -U paradb -c "select * from pg_tables where schemaname = 'public' and tablename = 'maps';" | head -n 3 | tail -n 1 | cut -d \| -f 2 | gre
-p -qw maps; then
+if psql -U paradb -c "select * from pg_tables where schemaname = 'public' and tablename = 'maps';" | head -n 3 | tail -n 1 | cut -d \| -f 2 | grep -qw maps; then
   echo "Found paradb database in postgres; skipping initialization..."
 else
   echo "Could not find paradb database in postgres; initializing..."
