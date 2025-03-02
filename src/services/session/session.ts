@@ -16,23 +16,27 @@ export function createSessionFromUser(user: User): UserSession {
 }
 
 export async function getUserSession(): Promise<UserSession | undefined> {
-  const envVars = getEnvVars();
-  const cookieName = envVars.cookieName;
-  const cookie = cookies().get(cookieName);
+  try {
+    const envVars = getEnvVars();
+    const cookieName = envVars.cookieName;
+    const cookie = cookies().get(cookieName);
 
-  if (!cookie) {
-    return;
+    if (!cookie) {
+      return;
+    }
+
+    const { paradbSession } = await unsealData<IronSessionData>(cookie.value, {
+      password: envVars.cookieSecret,
+    });
+    if (paradbSession == null) {
+      return;
+    }
+
+    // Round-trip it through the schema serializers to validate and strip excess properties
+    return deserializeUserSession(serializeUserSession(paradbSession.userSession));
+  } catch (e) {
+    return undefined;
   }
-
-  const { paradbSession } = await unsealData<IronSessionData>(cookie.value, {
-    password: envVars.cookieSecret,
-  });
-  if (paradbSession == null) {
-    return;
-  }
-
-  // Round-trip it through the schema serializers to validate and strip excess properties
-  return deserializeUserSession(serializeUserSession(paradbSession.userSession));
 }
 
 export async function setUserSession(_session: UserSession) {

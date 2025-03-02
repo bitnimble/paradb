@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server';
 import { serializeApiError } from 'schema/api';
 import { serializeGetUserResponse } from 'schema/users';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const session = await getUserSession();
   if (!session) {

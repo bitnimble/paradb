@@ -6,12 +6,11 @@
     "dev": "next dev",
     "dev:test": "ENV=.env.test NODE_ENV=test next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "tools/start.sh",
     "lint": "next lint",
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",
-    "outage": "bun src/outage/index.ts",
-    "search:rebuild": "bun src/services/_migrations/rebuild_meilisearch.ts",
+    "search:rebuild": "yarn tsx src/services/_migrations/rebuild_meilisearch.ts",
     "test": "tools/test.sh"
   },
   "dependencies": {
@@ -42,6 +41,7 @@
     "sanitize-html": "^2.11.0",
     "server-only": "^0.0.1",
     "snakecase-keys": "^5.4.6",
+    "tsx": "^4.19.3",
     "typescript": "5.1.6",
     "unzipper": "^0.10.14",
     "zapatos": "^6.1.4",
