@@ -45,6 +45,7 @@
     "typescript": "5.1.6",
     "unzipper": "^0.10.14",
     "zapatos": "^6.1.4",
+    "zod": "^3.24.2",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

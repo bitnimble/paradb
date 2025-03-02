@@ -13,6 +13,7 @@ import {
   ValidateMapError,
 } from 'services/maps/map_validator';
 import { getEnvVars } from 'services/env';
+import { AdvancedSearchMapRequest } from 'schema/maps_zod';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
 
@@ -202,6 +203,45 @@ export class MapsRepo {
 
     const maps = new Map(mapsResult.value.map((m) => [m.id, m]));
     return { success: true, value: searchResults.map((m) => maps.get(m.id)).filter(exists) };
+  }
+
+  async advancedSearchMaps(searchOptions: AdvancedSearchMapRequest) {
+    // TODO: prevent escaping the search query lol
+    const filterParts = [
+      searchOptions.artist ? `artist = "${searchOptions.artist}"` : null,
+      searchOptions.uploader ? `uploader = "${searchOptions.uploader}"` : null,
+    ].filter(exists);
+
+    const response = await this.meilisearchMaps.search<MeilisearchMap>(searchOptions.title, {
+      filter: filterParts.join(' AND '),
+    });
+    const searchResults = response.hits;
+    const ids = searchResults.map((r) => r.id);
+
+    // Note: hidden or invalid maps may be indexed in Meilisearch, but should be filtered out when
+    // querying further metadata via `findMaps`.
+    // TODO: look at stripping hidden/invalid maps from Meilisearch as well, but this should be
+    // good enough for now.
+    // TODO: include user projection for requesting-user-specific metadata
+    const mapsResult = await this.findMaps({ by: 'id', ids });
+    if (!mapsResult.success) {
+      return mapsResult;
+    }
+
+    const maps = new Map(mapsResult.value.map((m) => [m.id, m]));
+    return {
+      success: true,
+      value: searchResults
+        .map((m) => maps.get(m.id))
+        .filter(exists)
+        .map((m) => {
+          const submissionDate = new Date(m.submissionDate);
+          return {
+            ...m,
+            submissionDate,
+          };
+        }),
+    } as const;
   }
 
   async getMap(mapId: string, userId?: string): PromisedResult<PDMap, GetMapError> {
