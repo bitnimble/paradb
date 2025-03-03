@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "tools/docker/dev.sh",
     "dev:test": "ENV=.env.test NODE_ENV=test next dev",
     "build": "next build",
-    "start": "tools/start.sh",
+    "start": "tools/docker/start.sh",
     "lint": "next lint",
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",

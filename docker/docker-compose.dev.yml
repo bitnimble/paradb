@@ -1,0 +1,18 @@
+services:
+  paradb:
+    extends:
+      file: docker-compose.yml
+      service: paradb
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ..:/etc/paradb/paradb
+  meilisearch:
+    extends:
+      file: docker-compose.yml
+      service: meilisearch
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres

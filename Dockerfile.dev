@@ -1,0 +1,9 @@
+# syntax=docker/dockerfile:1.7-labs
+FROM node:lts-bookworm-slim
+
+WORKDIR /etc/paradb/paradb
+
+RUN apt update
+RUN DEBIAN_FRONTEND=noninteractive apt install postgresql-client ca-certificates -y
+
+ENTRYPOINT ["yarn", "dev"]
