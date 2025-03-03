@@ -15,7 +15,7 @@ init_db () {
     echo "Creating db"
     createdb "$PGDATABASE" -w
     echo "Running schema init script"
-    psql -d "$DB" -f "$HERE/../db/init.sql"
+    psql -d "$DB" -f "$HERE/../../db/init.sql"
     echo "Done."
   fi
 }

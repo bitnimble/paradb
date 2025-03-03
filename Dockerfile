@@ -9,4 +9,4 @@ RUN DEBIAN_FRONTEND=noninteractive apt install postgresql-client ca-certificates
 RUN yarn install
 RUN yarn build
 
-ENTRYPOINT ["yarn", "start"]
+ENTRYPOINT ["tools/docker/start.sh"]

@@ -1,9 +1,11 @@
 import { clearUserSession } from 'services/session/session';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   clearUserSession();
-  return NextResponse.redirect('/');
+  const url = request.nextUrl.clone();
+  url.pathname = '/';
+  return NextResponse.redirect(url);
 }
