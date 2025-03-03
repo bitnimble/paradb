@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { useTypedParse } from 'schema/api_zod';
+import { PaginatedApiRequest, PaginatedApiResponse, useTypedParse } from 'schema/api_zod';
 
 // TODO: rename to pdMap once the non-zod schema types have been migrated fully.
 export const pdMapZod = z.object({
@@ -21,19 +21,25 @@ export const pdMapZod = z.object({
 
 // Fields in this advanced search are AND'ed together
 export const AdvancedSearchMapRequest = useTypedParse(
-  z.object({
-    title: z.string().nullish(),
-    artist: z.string().nullish(),
-    uploader: z.string().nullish(),
-    submissionDateStart: z.date().nullish(),
-    submissionDateEnd: z.date().nullish(),
-  })
+  z.intersection(
+    PaginatedApiRequest,
+    z.object({
+      title: z.string().nullish(),
+      artist: z.string().nullish(),
+      uploader: z.string().nullish(),
+      submissionDateStart: z.date().nullish(),
+      submissionDateEnd: z.date().nullish(),
+    })
+  )
 );
 export const AdvancedSearchMapResponse = useTypedParse(
-  z.object({
-    success: z.literal(true),
-    maps: z.array(pdMapZod),
-  })
+  z.intersection(
+    PaginatedApiResponse,
+    z.object({
+      success: z.literal(true),
+      maps: z.array(pdMapZod),
+    })
+  )
 );
 
 export type AdvancedSearchMapRequest = z.infer<typeof AdvancedSearchMapRequest>;

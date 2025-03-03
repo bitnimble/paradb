@@ -212,10 +212,12 @@ export class MapsRepo {
       searchOptions.uploader ? `uploader = "${searchOptions.uploader}"` : null,
     ].filter(exists);
 
-    const response = await this.meilisearchMaps.search<MeilisearchMap>(searchOptions.title, {
+    const searchResponse = await this.meilisearchMaps.search(searchOptions.title, {
       filter: filterParts.join(' AND '),
+      hitsPerPage: searchOptions.limitPerPage || 20,
+      page: searchOptions.page || 1,
     });
-    const searchResults = response.hits;
+    const searchResults = searchResponse.hits;
     const ids = searchResults.map((r) => r.id);
 
     // Note: hidden or invalid maps may be indexed in Meilisearch, but should be filtered out when
@@ -231,7 +233,9 @@ export class MapsRepo {
     const maps = new Map(mapsResult.value.map((m) => [m.id, m]));
     return {
       success: true,
-      value: searchResults
+      totalCount: searchResponse.totalHits,
+      page: searchResponse.page,
+      maps: searchResults
         .map((m) => maps.get(m.id))
         .filter(exists)
         .map((m) => {

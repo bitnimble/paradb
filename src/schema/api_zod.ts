@@ -15,4 +15,18 @@ export const ZodApiError = useTypedParse(
   })
 );
 
+export const PaginatedApiRequest = useTypedParse(
+  z.object({
+    limitPerPage: z.number().nullish(),
+    page: z.number().nullish(),
+  })
+);
+
+export const PaginatedApiResponse = useTypedParse(
+  z.object({
+    totalCount: z.number(),
+    page: z.number(),
+  })
+);
+
 export type ZodApiError = z.infer<typeof ZodApiError>;
