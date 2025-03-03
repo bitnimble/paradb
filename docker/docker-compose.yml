@@ -55,7 +55,7 @@ services:
       - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready', '-d', 'paradb']
+      test: ['CMD-SHELL', 'su', '-c', 'pg_isready -U paradb -d paradb', 'postgres']
       retries: 5
       timeout: 60s
       start_period: 10s
