@@ -1,6 +1,7 @@
-import MeiliSearch from 'meilisearch';
+import { MeiliSearch } from 'meilisearch';
 import { initPool } from 'services/db/pool';
 import { getEnvVars } from 'services/env';
+import { Flags } from 'services/flags';
 import { MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
 import { FavoritesRepo } from 'services/users/favorites_repo';
 
@@ -20,6 +21,7 @@ async function createServerContext() {
 
   return {
     pool,
+    flags,
     mapsRepo,
     favoritesRepo,
   };
@@ -31,4 +33,11 @@ export const getServerContext = () => {
     serverContext = createServerContext();
   }
   return serverContext;
+};
+let flags: Flags | undefined;
+export const getFlags = () => {
+  if (!flags) {
+    flags = new Flags();
+  }
+  return flags;
 };

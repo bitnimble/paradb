@@ -20,6 +20,11 @@ export type EnvVars = {
   s3MapsBucket: string;
   meilisearchHost: string;
   meilisearchKey: string;
+  dynamicConfigEndpoint: string;
+  dynamicConfigBucket: string;
+  dynamicConfigAccessKeyId: string;
+  dynamicConfigSecretKey: string;
+  dynamicConfigRepoFile: string;
 };
 
 /**
@@ -48,6 +53,11 @@ export function getEnvVars() {
     s3MapsBucket: process.env.S3_MAPS_BUCKET,
     meilisearchHost: process.env.MEILISEARCH_HOST,
     meilisearchKey: process.env.MEILISEARCH_KEY,
+    dynamicConfigEndpoint: process.env.DYNAMIC_CONFIG_ENDPOINT,
+    dynamicConfigBucket: process.env.DYNAMIC_CONFIG_BUCKET,
+    dynamicConfigAccessKeyId: process.env.DYNAMIC_CONFIG_ACCESS_KEY_ID,
+    dynamicConfigSecretKey: process.env.DYNAMIC_CONFIG_SECRET_KEY,
+    dynamicConfigRepoFile: process.env.DYNAMIC_CONFIG_REPO_FILE,
   };
   let fail = false;
   for (const [key, value] of Object.entries(_envVars)) {
