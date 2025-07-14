@@ -1,24 +1,33 @@
+## Requirements
+
+- [Docker](https://www.docker.com/) and Docker Compose
+- [Node.js](https://nodejs.org/) (version 18 or higher)
+- [Yarn](https://yarnpkg.com/) package manager
+
 ## Installation
 
-```
-# Clone and install deps
-git clone https://github.com/bitnimble/paradb.git
-cd paradb
-yarn
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/bitnimble/paradb.git
+   cd paradb
+   ```
 
-# Install and start postgres
-sudo apt install postgresql
-sudo service postgresql start
+2. **Create environment file**
+   ```bash
+   cp .env.sample .env
+   ```
+   Then edit the `.env` file with your specific configuration values.
 
-# Create postgres user for yourself
-sudo -u postgres createuser --interactive --pwprompt
+3. **Start the development environment**
+   ```bash
+   yarn dev
+   ```
+   
+   Alternatively, you can use Docker Compose directly:
+   ```bash
+   docker compose -f docker/docker-compose.dev.yml --env-file .env up
+   # or in detached mode
+   docker compose -f docker/docker-compose.dev.yml --env-file .env up -d
+   ```
 
-# Edit .env to fill out your username and password!
-
-# Create db and instantiate schema
-createdb paradb
-db/init.sh
-
-# Start server
-yarn dev
-```
+The application will be available at http://localhost:3000 once all services are running.
