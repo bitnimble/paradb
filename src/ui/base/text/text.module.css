@@ -1,4 +1,4 @@
-@value colorBlack, colorGreyA5, colorRed, colorWhite, colorGrey, colorPurple from "ui/base/colors/colors.module.css";
+@value colorBlack, colorGreyA5, colorRed, colorWhite, colorGrey, colorPurple, colorPurpleDark, colorGreyA5Dark from "ui/base/colors/colors.module.css";
 @value weightValueSemibold: 600;
 @value gridBaseline from "ui/base/metrics/metrics.module.css";
 
@@ -23,6 +23,11 @@
     background-color: colorGreyA5;
     border: 1px solid colorPurple;
     border-radius: calc(gridBaseline / 2);
+}
+
+:global([data-theme="dark"]) .styleCode {
+    background-color: colorGreyA5Dark;
+    border-color: colorPurpleDark;
 }
 
 .weightRegular {
@@ -78,6 +83,17 @@
     color: colorPurple;
 }
 
+:global([data-theme="dark"]) .textColorPurple {
+    color: colorPurpleDark;
+}
+.textColorAuto {
+    color: inherit;
+}
+
+:global([data-theme="dark"]) .textColorAuto {
+    color: colorWhite;
+}
+
 .displayInline.styleCode {
     padding: calc(gridBaseline / 6) calc(gridBaseline);
 }
@@ -88,4 +104,5 @@
 }
 
 .custom {
+    /* Custom text styles can be added here */
 }

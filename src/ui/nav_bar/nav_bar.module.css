@@ -1,5 +1,5 @@
 @value gridBaseline from 'ui/base/metrics/metrics.module.css';
-@value colorDarkGrey, colorPurple, colorWhite from 'ui/base/colors/colors.module.css';
+@value colorDarkGrey, colorDarkGreyDark, colorPurple, colorWhite from 'ui/base/colors/colors.module.css';
 
 .navbar {
     display: flex;
@@ -10,6 +10,10 @@
     justify-content: space-between;
 }
 
+:global([data-theme="dark"]) .navbar {
+    background: colorDarkGreyDark;
+}
+
 .logo {
     color: inherit;
     margin-left: calc(gridBaseline * 2.5);
@@ -17,10 +21,19 @@
     transition: color 0.1s ease;
 }
 
+.navbarActions {
+    display: flex;
+    align-items: center;
+}
+
 .userStatus {
-    margin-right: calc(gridBaseline * 3);
+    margin-right: calc(gridBaseline * 1);
 }
 
 .menuItem {
     margin: 0 gridBaseline;
+}
+
+.themeToggleContainer {
+    margin-right: calc(gridBaseline * 2);
 }

@@ -11,3 +11,13 @@
 @value colorGreen: #4c4;
 @value colorRed: #f00;
 @value colorPurple: #9b15f1;
+
+/* Dark mode compatible variants */
+@value colorPurpleDark: #7b1db7;
+@value colorGreyDark: #ccc;
+@value colorDarkGreyDark: #292929;
+@value colorBgDark: #1a1a1a;
+@value colorBgSecondaryDark: #2a2a2a;
+@value colorGreyA30Dark: rgba(204, 204, 204, 0.3);
+@value colorGreyA15Dark: rgba(204, 204, 204, 0.15);
+@value colorGreyA5Dark: rgba(204, 204, 204, 0.05);

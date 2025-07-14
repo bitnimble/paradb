@@ -1,5 +1,5 @@
 @value gridBaseline from "ui/base/metrics/metrics.module.css";
-@value colorPurple, colorRed, colorGreyA30, colorGreyA5 from "ui/base/colors/colors.module.css";
+@value colorPurple, colorPurpleDark, colorRed, colorGreyA30, colorGreyA5 from "ui/base/colors/colors.module.css";
 
 .submitMap {
     height: 100%;
@@ -27,6 +27,10 @@
 
 .fileContainer.hasMapData {
     border-color: colorPurple;
+}
+
+:global([data-theme="dark"]) .fileContainer.hasMapData {
+    border-color: colorPurpleDark;
 }
 
 .fileContainer.isSubmitting {
@@ -80,6 +84,10 @@
     left: 0;
     top: 0;
     background: colorPurple;
+}
+
+:global([data-theme="dark"]) .progressInner {
+    background: colorPurpleDark;
 }
 
 .progressError {

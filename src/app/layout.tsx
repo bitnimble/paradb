@@ -2,6 +2,7 @@ import { ApiProvider } from 'app/api/api_provider';
 import type { Metadata } from 'next';
 import { SessionProvider } from 'session/session_provider';
 import colorStyles from 'ui/base/colors/colors.module.css';
+import { ThemeProvider } from 'ui/base/theme/theme_provider';
 import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
@@ -15,14 +16,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <ApiProvider>
-          <SessionProvider>
-            <div className={styles.skeleton}>
-              <NavBar />
-              <div className={styles.content}>{children}</div>
-            </div>
-          </SessionProvider>
-        </ApiProvider>
+        <ThemeProvider>
+          <ApiProvider>
+            <SessionProvider>
+              <div className={styles.skeleton}>
+                <NavBar />
+                <div className={styles.content}>{children}</div>
+              </div>
+            </SessionProvider>
+          </ApiProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

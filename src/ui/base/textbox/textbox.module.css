@@ -1,4 +1,4 @@
-@value colorRed, colorGrey, colorGreyA15, colorPurple from "ui/base/colors/colors.module.css";
+@value colorRed, colorGrey, colorGreyA15, colorPurple, colorPurpleDark, colorBgSecondaryDark, colorBgDark, colorWhite from "ui/base/colors/colors.module.css";
 @value gridBaseline from "ui/base/metrics/metrics.module.css";
 
 .container {
@@ -20,8 +20,16 @@
     border-color: colorPurple;
 }
 
+:global([data-theme="dark"]) .borderPurple {
+    border-color: colorPurpleDark;
+}
+
 .readOnly {
     background-color: colorGreyA15;
+}
+
+:global([data-theme="dark"]) .readOnly {
+    background-color: colorBgSecondaryDark;
 }
 
 .textbox {
@@ -32,9 +40,16 @@
 
     font-family: 'Futura Light';
     font-size: 20px;
+    background: transparent;
+    color: inherit;
 
     height: 100%;
     resize: vertical;
+}
+
+:global([data-theme="dark"]) .textbox {
+    background: colorBgDark;
+    color: colorWhite;
 }
 .readOnly .textbox {
     background: transparent;
