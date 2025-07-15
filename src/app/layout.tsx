@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ApiProvider>
           <SessionProvider>
-            <div className={styles.skeleton}>
+            <div id="skeleton" className={styles.skeleton}>
               <NavBar />
               <div className={styles.content}>{children}</div>
             </div>

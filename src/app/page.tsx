@@ -3,10 +3,11 @@
 import { useApi } from 'app/api/api_provider';
 import { MapListPresenter, MapListStore } from 'app/map_list_presenter';
 import classNames from 'classnames';
+import useInfiniteScroll from 'hooks/useInfiniteScroll';
 import { action, computed, observable, reaction, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import { useSearchParams } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Difficulty, PDMap } from 'schema/maps';
 import { Button } from 'ui/base/button/button';
 import metrics from 'ui/base/metrics/metrics.module.css';
@@ -25,7 +26,13 @@ export default observer(() => {
   const [store] = useState(new MapListStore(searchParams.get('q') || ''));
   const presenter = new MapListPresenter(api, store);
 
-  React.useEffect(() => {
+  useInfiniteScroll(() => {
+    if (store.hasMore && !store.loadingMore) {
+      presenter.onLoadMore();
+    }
+  });
+
+  useEffect(() => {
     if (store.maps == null) {
       presenter.onSearch('search');
     }
@@ -85,7 +92,7 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
   const scrollableTable = observable.box(false);
   const tableScrollContainerRef = React.createRef<HTMLDivElement>();
   // TODO: avoid mixing mobx and hooks
-  React.useEffect(() => {
+  useEffect(() => {
     const dispose = reaction(
       () => store.maps,
       () => {
