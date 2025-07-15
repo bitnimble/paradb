@@ -23,12 +23,7 @@
    yarn
    ```
 
-4. **Build the application**
-   ```bash
-   yarn build
-   ```
-
-5. **Start the development environment**
+4. **Start the development environment**
    ```bash
    yarn dev
    ```
