@@ -18,7 +18,17 @@
    ```
    Then edit the `.env` file with your specific configuration values.
 
-3. **Start the development environment**
+3. **Install dependencies**
+   ```bash
+   yarn
+   ```
+
+4. **Build the application**
+   ```bash
+   yarn build
+   ```
+
+5. **Start the development environment**
    ```bash
    yarn dev
    ```
