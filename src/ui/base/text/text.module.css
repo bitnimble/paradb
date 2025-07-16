@@ -1,4 +1,4 @@
-@value colorBlack, colorGreyA5, colorRed, colorWhite, colorGrey, colorPurple, colorPurpleDark, colorGreyA5Dark from "ui/base/colors/colors.module.css";
+@value colorGreyA5, colorRed, colorWhite, colorGrey, colorPurple, colorPurpleDark, colorGreyA5Dark from "ui/base/colors/colors.module.css";
 @value weightValueSemibold: 600;
 @value gridBaseline from "ui/base/metrics/metrics.module.css";
 
@@ -25,7 +25,7 @@
     border-radius: calc(gridBaseline / 2);
 }
 
-:global([data-theme="dark"]) .styleCode {
+:global([data-theme='dark']) .styleCode {
     background-color: colorGreyA5Dark;
     border-color: colorPurpleDark;
 }
@@ -66,10 +66,6 @@
     font-size: 36px;
     line-height: 1.3;
 }
-
-.textColorBlack {
-    color: colorBlack;
-}
 .textColorRed {
     color: colorRed;
 }
@@ -83,14 +79,14 @@
     color: colorPurple;
 }
 
-:global([data-theme="dark"]) .textColorPurple {
+:global([data-theme='dark']) .textColorPurple {
     color: colorPurpleDark;
 }
 .textColorAuto {
     color: inherit;
 }
 
-:global([data-theme="dark"]) .textColorAuto {
+:global([data-theme='dark']) .textColorAuto {
     color: colorWhite;
 }
 
