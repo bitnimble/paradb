@@ -1,7 +1,8 @@
-@value colorWhite, colorPurple, colorGreen, colorGrey, colorRed from "ui/base/colors/colors.module.css";
+@value colorWhite, colorPurple, colorPurpleDark, colorGreen, colorGrey, colorRed, colorBgDark from "ui/base/colors/colors.module.css";
 @value gridBaseline from "ui/base/metrics/metrics.module.css";
 
 @value regularColor: colorPurple;
+@value regularColorDark: colorPurpleDark;
 @value errorColor: colorRed;
 @value successColor: colorGreen;
 
@@ -18,12 +19,16 @@
     color: inherit;
     padding: gridBaseline calc(gridBaseline * 2);
     text-decoration: none;
-    background: colorWhite;
+    background: transparent;
     transition:
         background 0.15s ease,
         color 0.15s ease;
     cursor: pointer;
     border: 1px solid regularColor;
+}
+
+[data-theme="dark"] .button {
+    border-color: regularColorDark;
 }
 
 .button:hover:not(.disabled) {
@@ -33,14 +38,28 @@
 .regular.button {
     color: regularColor;
 }
+
+[data-theme="dark"] .regular.button {
+    color: colorWhite;
+}
+
 .regular.button:hover:not(.disabled) {
     background: regularColor;
 }
 
+[data-theme="dark"] .button:hover:not(.disabled) {
+    background: regularColorDark;
+}
+
 .active {
     background: regularColor;
-    color: white;
+    color: colorWhite;
 }
+
+[data-theme="dark"] .active {
+    background: regularColorDark;
+}
+
 
 .error.button {
     border-color: errorColor;

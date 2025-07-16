@@ -17,4 +17,11 @@ body {
 body {
     /* TODO: define and import default typography styles from base/text */
     font-family: 'Futura Light';
+    background-color: #fff;
+    color: #000;
+}
+
+[data-theme="dark"] body {
+    background-color: #1a1a1a;
+    color: #fff;
 }

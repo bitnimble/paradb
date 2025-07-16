@@ -1,11 +1,14 @@
-@value colorPurple from "ui/base/colors/colors.module.css";
+@value colorPurple, colorPurpleDark from "ui/base/colors/colors.module.css";
 
 .link {
     cursor: pointer;
     color: inherit;
-    transition: color 0.15s ease;
 }
 
 .link:hover {
     color: colorPurple;
+}
+
+:global([data-theme="dark"]) .link:hover {
+    color: colorPurpleDark;
 }
