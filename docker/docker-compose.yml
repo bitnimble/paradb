@@ -2,15 +2,15 @@ services:
   paradb:
     build:
       context: ..
-      args:
-        - PGHOST=postgres
-        - PGPORT=5432
-        - PGUSER=postgres
-        - PGDATABASE=paradb
-        - PGPASSWORD=${PGPASSWORD}
-        - MEILISEARCH_HOST=meilisearch:7700
-        - MAPS_DIR=/etc/paradb/maps
     container_name: paradb_server
+    environment:
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGDATABASE=paradb
+      - PGPASSWORD=${PGPASSWORD}
+      - MEILISEARCH_HOST=meilisearch:7700
+      - MAPS_DIR=/etc/paradb/maps
     volumes:
       - ${PARADB_MAPS_DIR}:/etc/paradb/maps
     ports:
