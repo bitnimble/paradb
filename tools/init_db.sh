@@ -11,8 +11,6 @@ init() {
   createdb paradb
   echo "Running schema init script"
   psql -d paradb -f "$HERE/../db/init.sql"
-  echo "Importing fake data"
-  psql -d paradb -f "$HERE/../db/fake_data.sql"
 }
 
 read -r -p "This will completely destroy and recreate the database. Are you sure? [y/N] " response

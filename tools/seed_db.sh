@@ -4,8 +4,5 @@ set -euo pipefail
 
 HERE="$(realpath "${0}" | xargs dirname)"
 
-sleep 5
-
-# Reinitialise meilisearch
-yarn search:rebuild
-yarn next start
+echo "Importing fake data"
+psql -d paradb -f "$HERE/../db/fake_data.sql"
