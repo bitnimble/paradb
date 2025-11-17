@@ -34,19 +34,27 @@ export class Flags {
   }
 
   private createS3Client() {
-    const envVars = getEnvVars();
-    return new S3Client({
-      endpoint: envVars.dynamicConfigEndpoint,
-      region: 'auto',
-      credentials: {
-        accessKeyId: envVars.dynamicConfigAccessKeyId,
-        secretAccessKey: envVars.dynamicConfigSecretKey,
-      },
-      forcePathStyle: true,
-    });
+    try {
+      const envVars = getEnvVars();
+      return new S3Client({
+        endpoint: envVars.dynamicConfigEndpoint,
+        region: 'auto',
+        credentials: {
+          accessKeyId: envVars.dynamicConfigAccessKeyId,
+          secretAccessKey: envVars.dynamicConfigSecretKey,
+        },
+        forcePathStyle: true,
+      });
+    } catch (e) {
+      console.warn('Failed to create S3 client for Flags, dynamic flags will be disabled');
+      return null;
+    }
   }
 
   private updateFlags = async () => {
+    if (!this.s3client) {
+      return;
+    }
     const envVars = getEnvVars();
     try {
       const resp = await this.s3client.send(

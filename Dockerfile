@@ -7,5 +7,6 @@ WORKDIR /etc/paradb/paradb
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install postgresql-client ca-certificates -y
 RUN yarn install
+RUN yarn next build
 
 ENTRYPOINT ["tools/docker/start.sh"]
