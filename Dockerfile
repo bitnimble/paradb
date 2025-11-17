@@ -4,6 +4,8 @@ FROM node:lts-bookworm-slim
 COPY --exclude=node_modules ./ /etc/paradb/paradb
 WORKDIR /etc/paradb/paradb
 
+ARG SENTRY_AUTH_TOKEN
+
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install postgresql-client ca-certificates -y
 RUN yarn install

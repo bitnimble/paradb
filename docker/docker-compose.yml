@@ -2,6 +2,8 @@ services:
   paradb:
     build:
       context: ..
+      args:
+        - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
     container_name: paradb_server
     environment:
       - PGHOST=postgres
