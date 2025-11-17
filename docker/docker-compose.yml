@@ -5,7 +5,7 @@ services:
       args:
         - PGHOST=postgres
         - PGPORT=5432
-        - PGUSER=paradb
+        - PGUSER=postgres
         - PGDATABASE=paradb
         - PGPASSWORD=${PGPASSWORD}
         - MEILISEARCH_HOST=meilisearch:7700
@@ -39,13 +39,13 @@ services:
     container_name: paradb_postgres
     environment:
       - POSTGRES_DB=paradb
-      - POSTGRES_USER=paradb
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${PGPASSWORD}
     volumes:
       - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ['CMD-SHELL', 'su', '-c', 'pg_isready -U paradb -d paradb', 'postgres']
+      test: ['CMD-SHELL', 'su', '-c', 'pg_isready -U postgres -d paradb', 'postgres']
       retries: 5
       timeout: 60s
       start_period: 10s
