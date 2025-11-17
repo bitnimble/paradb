@@ -4,6 +4,13 @@ FROM node:lts-bookworm-slim
 COPY --exclude=node_modules ./ /etc/paradb/paradb
 WORKDIR /etc/paradb/paradb
 
+ENV PGHOST
+ENV PGPORT
+ENV PGUSER
+ENV PGDATABASE
+ENV PGPASSWORD
+ENV MEILISEARCH_HOST
+
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install postgresql-client ca-certificates -y
 RUN yarn install

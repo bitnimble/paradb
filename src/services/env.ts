@@ -40,7 +40,7 @@ export function getEnvVars() {
     pgDatabase: process.env.PGDATABASE,
     pgUser: process.env.PGUSER,
     pgPassword: process.env.PGPASSWORD,
-    mapsDir: process.env.MAPS_DIR,
+    mapsDir: process.env.PARADB_MAPS_DIR,
     sentryDsn: process.env.SENTRY_DSN,
     sentryEnvironment: process.env.SENTRY_ENV,
     cookieName: process.env.COOKIE_NAME,
