@@ -82,7 +82,7 @@ const Home = observer(() => {
   return (
     <div className={styles.mapList}>
       <div className={styles.filter}>
-        <Search query={store.query} />
+        <Search store={store} onSearch={() => presenter.onSearch('search')} />
         <BulkSelectActions />
       </div>
       <div

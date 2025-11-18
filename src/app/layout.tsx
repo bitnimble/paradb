@@ -16,6 +16,8 @@ export const viewport = {
   themeColor: colorStyles.colorPurple,
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const flags = getFlags();
   return (

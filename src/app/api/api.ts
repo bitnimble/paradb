@@ -133,8 +133,10 @@ export class HttpApi implements Api {
   ): Promise<SubmitMapResponse> {
     return new Promise((res, rej) => {
       const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      formData.append('mapData', new Blob([req.mapData]));
+      formData.append('id', req.id || '');
       xhr.open('POST', path(this.apiBase, 'maps', 'submit'), true);
-      xhr.setRequestHeader('Content-Type', contentType);
       xhr.responseType = 'arraybuffer';
       xhr.upload.addEventListener('progress', onProgress);
       xhr.upload.addEventListener('load', onUploadFinish);
@@ -145,8 +147,7 @@ export class HttpApi implements Api {
       xhr.onerror = () => {
         rej();
       };
-      const serialized = serializeSubmitMapRequest(req);
-      xhr.send(serialized);
+      xhr.send(formData);
     });
   }
 }

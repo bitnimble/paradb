@@ -54,11 +54,12 @@ import { MapsRepo, MeilisearchMap, convertToMeilisearchMap } from 'services/maps
     mapsResult.value.map((m) => convertToMeilisearchMap(m)),
     { primaryKey: 'id' }
   );
+  console.log(`Added ${mapsResult.value.length} maps, waiting for tasks to complete...`);
 
-  await client.waitForTasks(
+  const [_1, _2, _3, _4, addDataResults] = await client.waitForTasks(
     [updateRanking, updateSearch, updateFilters, updateSorts, addData].map((t) => t.taskUid)
   );
+  console.log(addDataResults.error ? `Error: ${JSON.stringify(addDataResults.error)}` : '');
+  await pool.end();
   console.log('Done!');
-
-  pool.end();
 })();

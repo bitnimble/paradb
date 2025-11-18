@@ -24,4 +24,4 @@ init_db () {
 
 init_db
 yarn search:rebuild
-yarn next dev
+yarn next dev --webpack

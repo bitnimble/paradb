@@ -5,7 +5,9 @@ const { withSentryConfig } = require('@sentry/nextjs');
 const nextConfig: NextConfig = {
   distDir: process.env.BUILD_DIR || '.next',
   reactStrictMode: true,
-  serverExternalPackages: ['rimraf'],
+  experimental: {
+    proxyClientMaxBodySize: '100mb',
+  },
 };
 
 module.exports = withSentryConfig(

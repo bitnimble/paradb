@@ -12,6 +12,7 @@ import { Button } from 'ui/base/button/button';
 import { createDialog } from 'ui/base/dialog/create';
 import { getMapFileLink } from 'utils/maps';
 import styles from './map_page.module.css';
+import { useRouter } from 'next/navigation';
 
 type MapActionsProps = {
   map: PDMap;
@@ -20,6 +21,7 @@ type MapActionsProps = {
 export const MapActions = observer((props: MapActionsProps) => {
   const sessionStore = useSession();
   const api = useApi();
+  const router = useRouter();
   const [store] = React.useState(new MapPageStore(props.map));
   const presenter = new MapPagePresenter(api, store);
 
@@ -28,7 +30,7 @@ export const MapActions = observer((props: MapActionsProps) => {
   const isFavorited = store.map.userProjection?.isFavorited;
 
   const showReuploadDialog = action(() => {
-    const SubmitMap = createSubmitMapPage(api, store.map.id);
+    const SubmitMap = createSubmitMapPage(api, router, store.map.id);
     store.ReuploadDialog = createDialog(
       SubmitMap,
       action(() => (store.ReuploadDialog = undefined))

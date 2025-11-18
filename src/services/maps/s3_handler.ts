@@ -74,7 +74,7 @@ export async function uploadFiles(opts: {
   // For now, write all of the album art files to the on-disk maps directory.
   // TODO: display all of the album arts in the FE, e.g. in a carousel, or when selecting a difficulty
   const albumArtFolderPath = path.resolve(opts.mapsDir, opts.id);
-  await fs.mkdir(albumArtFolderPath);
+  await fs.mkdir(albumArtFolderPath, { recursive: true });
   await Promise.all(
     opts.albumArtFiles.map((a) => {
       const albumArt = checkExists(a, 'albumArt');

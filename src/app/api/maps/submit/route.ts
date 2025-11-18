@@ -1,10 +1,7 @@
+import { parseFormData } from '@mjackson/form-data-parser';
 import { getBody } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  SubmitMapResponse,
-  deserializeSubmitMapRequest,
-  serializeSubmitMapResponse,
-} from 'schema/maps';
+import { SubmitMapResponse, serializeSubmitMapResponse } from 'schema/maps';
 import { getEnvVars } from 'services/env';
 import { error } from 'services/helpers';
 import { submitErrorMap } from 'services/maps/maps_repo';
@@ -23,9 +20,16 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     });
   }
 
-  const submitMapReq = await getBody(req, deserializeSubmitMapRequest);
+  const submitMapReq = await req.formData();
+  const mapData = await (submitMapReq.get('mapData') as File)
+    .arrayBuffer()
+    .then((buf) => new Uint8Array(buf));
+  let id = submitMapReq.get('id') as string | undefined;
+  if (id === '') {
+    id = undefined;
+  }
 
-  if (submitMapReq.mapData.byteLength > 1024 * 1024 * 100) {
+  if (mapData.byteLength > 1024 * 1024 * 100) {
     // 40MiB. We use MiB because that's what Windows displays in Explorer and therefore what users will expect.
     return error({
       statusCode: 400,
@@ -36,12 +40,12 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
   }
 
   const { mapsRepo } = await getServerContext();
-  if (submitMapReq.id) {
-    const mapResult = await mapsRepo.getMap(submitMapReq.id);
+  if (id) {
+    const mapResult = await mapsRepo.getMap(id);
     if (!mapResult.success) {
       return error({
         statusCode: 404,
-        message: `Could not find specified map to resubmit: ${submitMapReq.id}`,
+        message: `Could not find specified map to resubmit: ${id}`,
         errorBody: {},
         errorSerializer: serializeSubmitMapResponse,
       });
@@ -49,7 +53,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     if (mapResult.value.uploader !== user.id) {
       return error({
         statusCode: 403,
-        message: `Not authorized to modify the specified map: ${submitMapReq.id}`,
+        message: `Not authorized to modify the specified map: ${id}`,
         errorBody: {},
         errorSerializer: serializeSubmitMapResponse,
       });
@@ -57,9 +61,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
   }
 
   const submitMapResult = await mapsRepo.upsertMap(getEnvVars().mapsDir, {
-    id: submitMapReq.id,
+    id,
     uploader: user.id,
-    mapFile: submitMapReq.mapData,
+    mapFile: mapData,
   });
   if (!submitMapResult.success) {
     // TODO: report all errors back to the client and not just the first one

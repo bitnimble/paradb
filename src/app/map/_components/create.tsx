@@ -3,11 +3,12 @@ import { observer } from 'mobx-react';
 import React from 'react';
 import { SubmitMapPage } from './submit_map';
 import { SubmitMapPresenter, SubmitMapStore, ThrottledMapUploader } from './submit_map_presenter';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
-export function createSubmitMapPage(api: Api, id?: string) {
+export function createSubmitMapPage(api: Api, router: AppRouterInstance, id?: string) {
   const store: SubmitMapStore = new SubmitMapStore(id);
   const uploader = new ThrottledMapUploader(api);
-  const presenter = new SubmitMapPresenter(uploader, store);
+  const presenter = new SubmitMapPresenter(uploader, store, router);
 
   return observer(() => {
     React.useEffect(() => {

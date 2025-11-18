@@ -7,6 +7,7 @@ import {
   observable,
   runInAction,
 } from 'mobx';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
 
@@ -156,7 +157,8 @@ export class SubmitMapStore extends FormStore<SubmitMapField> {
 export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
   constructor(
     private readonly uploader: ThrottledMapUploader,
-    private readonly store: SubmitMapStore
+    private readonly store: SubmitMapStore,
+    private readonly router: AppRouterInstance
   ) {
     super(store);
     makeObservable(this, { onChangeData: action.bound });
@@ -189,13 +191,12 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     this.store.reset();
     const [ids, errors] = await this.uploader.start(this.store.id);
 
-    // Don't use next routing, in order to force a full load
     if (errors.length !== 0) {
       // TODO: show errors
     } else if (ids.length === 1) {
-      window.location.href = routeFor([RoutePath.MAP, ids[0]]);
+      this.router.push(routeFor([RoutePath.MAP, ids[0]]));
     } else {
-      window.location.href = routeFor([RoutePath.MAP_LIST]);
+      this.router.push(routeFor([RoutePath.MAP_LIST]));
     }
   };
 }
