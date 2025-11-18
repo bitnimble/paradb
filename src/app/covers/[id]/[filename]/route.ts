@@ -5,8 +5,9 @@ import * as fs from 'fs';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string; filename: string } }
+  props: { params: Promise<{ id: string; filename: string }> }
 ) {
+  const params = await props.params;
   const { id, filename } = params;
 
   const coverPath = path.join(getEnvVars().mapsDir, id, filename);

@@ -19,7 +19,7 @@ export async function getUserSession(): Promise<UserSession | undefined> {
   try {
     const envVars = getEnvVars();
     const cookieName = envVars.cookieName;
-    const cookie = cookies().get(cookieName);
+    const cookie = (await cookies()).get(cookieName);
 
     if (!cookie) {
       return;
@@ -50,11 +50,11 @@ export async function setUserSession(_session: UserSession) {
     password: envVars.cookieSecret,
   });
 
-  cookies().set(cookieName, cookieValue);
+  (await cookies()).set(cookieName, cookieValue);
 }
 
-export function clearUserSession() {
+export async function clearUserSession() {
   const envVars = getEnvVars();
   const cookieName = envVars.cookieName;
-  cookies().delete(cookieName);
+  (await cookies()).delete(cookieName);
 }

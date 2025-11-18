@@ -10,6 +10,9 @@ import { MaintenanceBanner } from 'app/maintenance_banner';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
+};
+
+export const viewport = {
   themeColor: colorStyles.colorPurple,
 };
 

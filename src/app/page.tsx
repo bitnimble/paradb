@@ -6,12 +6,12 @@ import classNames from 'classnames';
 import { action, computed, observable, reaction, runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import { useSearchParams } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { Difficulty, PDMap } from 'schema/maps';
 import { Button } from 'ui/base/button/button';
 import metrics from 'ui/base/metrics/metrics.module.css';
 import { Row, Table } from 'ui/base/table/table';
-import { TableStore } from 'ui/base/table/table_presenter';
+import { TableSortStore, TableStore } from 'ui/base/table/table_presenter';
 import { RouteLink } from 'ui/base/text/link';
 import { T } from 'ui/base/text/text';
 import { KnownDifficulty, difficultyColors, parseDifficulty } from 'utils/difficulties';
@@ -19,17 +19,54 @@ import { RoutePath, routeFor } from 'utils/routes';
 import styles from './page.module.css';
 import { Search } from './search';
 
-export default observer(() => {
+export default function Page() {
+  return (
+    <Suspense fallback={<div></div>}>
+      <Home />
+    </Suspense>
+  );
+}
+
+const Home = observer(() => {
   const api = useApi();
   const searchParams = useSearchParams();
-  const [store] = useState(new MapListStore(searchParams.get('q') || ''));
-  const presenter = new MapListPresenter(api, store);
+  const [store] = useState(
+    new MapListStore(
+      searchParams.get('q') || '',
+      new TableSortStore(
+        [
+          { content: <div></div>, style: { minWidth: '8px', width: '8px' } },
+          { content: <T.Small weight="bold">Song title</T.Small>, sortLabel: 'title' },
+          { content: <T.Small weight="bold">Artist</T.Small>, sortLabel: 'artist' },
+          { content: <T.Small weight="bold">Mapper</T.Small>, sortLabel: 'author' },
+          {
+            content: <T.Small weight="bold">Favorites</T.Small>,
+            sortLabel: 'favorites',
+            style: { width: `calc(${metrics.gridBaseline} * 15)` },
+          },
+          {
+            content: <T.Small weight="bold">Downloads</T.Small>,
+            sortLabel: 'downloadCount',
+            style: { width: `calc(${metrics.gridBaseline} * 15)` },
+          },
+          {
+            content: <T.Small weight="bold">Upload date</T.Small>,
+            sortLabel: 'submissionDate',
+            style: { width: `calc(${metrics.gridBaseline} * 20)` },
+          },
+        ],
+        6,
+        'desc'
+      )
+    )
+  );
+  const [presenter] = useState(() => new MapListPresenter(api, store));
 
   React.useEffect(() => {
     if (store.maps == null) {
       presenter.onSearch('search');
     }
-  }, [store]);
+  }, []);
 
   const BulkSelectActions = observer(() => {
     return store.enableBulkSelect ? (
@@ -103,36 +140,7 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
     return () => dispose();
   }, []);
 
-  const [tableStore] = useState(
-    new TableStore(
-      computed(() => store.maps),
-      [
-        { content: <div></div>, style: { minWidth: '8px', width: '8px' } },
-        { content: <T.Small weight="bold">Song title</T.Small>, sortLabel: 'title' },
-        { content: <T.Small weight="bold">Artist</T.Small>, sortLabel: 'artist' },
-        { content: <T.Small weight="bold">Mapper</T.Small>, sortLabel: 'author' },
-        {
-          content: <T.Small weight="bold">Favorites</T.Small>,
-          sortLabel: 'favorites',
-          style: { width: `calc(${metrics.gridBaseline} * 15)` },
-        },
-        {
-          content: <T.Small weight="bold">Downloads</T.Small>,
-          sortLabel: 'downloadCount',
-          style: { width: `calc(${metrics.gridBaseline} * 15)` },
-        },
-        {
-          content: <T.Small weight="bold">Upload date</T.Small>,
-          sortLabel: 'submissionDate',
-          style: { width: `calc(${metrics.gridBaseline} * 20)` },
-        },
-      ],
-      6,
-      'desc'
-    )
-  );
-  // TODO: invert the dependency and remove this
-  runInAction(() => (store.tableStore = tableStore));
+  const [tableStore] = useState(() => new TableStore(computed(() => store.maps)));
 
   const getRow = (map: PDMap): Row<7> => {
     const onSelect = action((e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -180,6 +188,7 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
     >
       <Table
         store={tableStore}
+        sortStore={store.tableSortStore}
         rowMapper={getRow}
         tableClassname={styles.mapListTable}
         rowClassname={styles.mapListRow}

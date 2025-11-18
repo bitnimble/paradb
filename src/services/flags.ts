@@ -1,8 +1,16 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getEnvVars } from 'services/env';
 
-const stringFlag = (defaultValue: string) => ({ type: 'string', defaultValue }) as const;
-const booleanFlag = (defaultValue: boolean) => ({ type: 'boolean', defaultValue }) as const;
+const stringFlag = (defaultValue: string) =>
+  ({
+    type: 'string',
+    defaultValue,
+  }) as const;
+const booleanFlag = (defaultValue: boolean) =>
+  ({
+    type: 'boolean',
+    defaultValue,
+  }) as const;
 
 const flagDefaults = {
   ['showMaintenanceBanner']: booleanFlag(false),

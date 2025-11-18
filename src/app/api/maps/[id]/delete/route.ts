@@ -9,8 +9,9 @@ import { DeleteMapResponse, serializeDeleteMapResponse } from 'schema/maps';
 const send = (res: DeleteMapResponse) => new NextResponse<Buffer>(serializeDeleteMapResponse(res));
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<Buffer>> {
+  const params = await props.params;
   const user = await getUserSession();
   if (!user) {
     return send({

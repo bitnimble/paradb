@@ -1,9 +1,11 @@
+import { NextConfig } from 'next';
+
 const { withSentryConfig } = require('@sentry/nextjs');
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   distDir: process.env.BUILD_DIR || '.next',
   reactStrictMode: true,
+  serverExternalPackages: ['rimraf'],
 };
 
 module.exports = withSentryConfig(

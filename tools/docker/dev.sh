@@ -6,7 +6,7 @@ HERE="$(realpath "${0}" | xargs dirname)"
 DB="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
 
 init_db () {
-  if psql -U paradb -c "select * from pg_tables where schemaname = 'public' and tablename = 'maps';" | head -n 3 | tail -n 1 | cut -d \| -f 2 | grep -qw maps; then
+  if psql -U "$PGUSER" -c "select * from pg_tables where schemaname = 'public' and tablename = 'maps';" | head -n 3 | tail -n 1 | cut -d \| -f 2 | grep -qw maps; then
     echo "Found paradb database in postgres; skipping initialization..."
   else
     echo "Could not find paradb database in postgres; initializing..."
@@ -16,6 +16,8 @@ init_db () {
     createdb "$PGDATABASE" -w
     echo "Running schema init script"
     psql -d "$DB" -f "$HERE/../../db/init.sql"
+    echo "Seeding fake data"
+    psql -d "$DB" -f "$HERE/../../db/fake_data.sql"
     echo "Done."
   fi
 }

@@ -13,7 +13,7 @@ export const config = {
 const contentType =
   process.env.NODE_ENV === 'test' ? 'application/octet-stream' : 'application/x-protobuf';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const response = NextResponse.next();
   response.headers.set('Content-Type', contentType);
   return response;

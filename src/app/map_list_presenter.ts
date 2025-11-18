@@ -3,7 +3,7 @@ import { checkExists } from 'base/preconditions';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { computedFn } from 'mobx-utils';
 import { MapSortableAttributes, PDMap, mapSortableAttributes } from 'schema/maps';
-import { TableStore } from 'ui/base/table/table_presenter';
+import { TableSortStore } from 'ui/base/table/table_presenter';
 import { getMapFileLink } from 'utils/maps';
 
 const SEARCH_LIMIT = 20;
@@ -17,9 +17,10 @@ export class MapListStore {
   hasMore = true;
   loadingMore = false;
 
-  tableStore?: TableStore<PDMap, 7> = undefined;
-
-  constructor(query: string) {
+  constructor(
+    query: string,
+    readonly tableSortStore: TableSortStore<PDMap, 7>
+  ) {
     this.query = query;
     makeAutoObservable(this);
   }
@@ -96,7 +97,7 @@ export class MapListPresenter {
   }
 
   private getTableSortParams() {
-    const tableStore = checkExists(this.store.tableStore);
+    const tableStore = checkExists(this.store.tableSortStore);
     if (tableStore.sortColumn == null || tableStore.sortDirection == null) {
       return null;
     }
@@ -122,8 +123,8 @@ export class MapListPresenter {
   async onSearch(trigger: 'sort' | 'search') {
     if (trigger === 'search' && this.store.query !== '') {
       runInAction(() => {
-        checkExists(this.store.tableStore).sortColumn = undefined;
-        checkExists(this.store.tableStore).sortDirection = undefined;
+        this.store.tableSortStore.sortColumn = undefined;
+        this.store.tableSortStore.sortDirection = undefined;
       });
     }
     const sort = this.getTableSortParams();
