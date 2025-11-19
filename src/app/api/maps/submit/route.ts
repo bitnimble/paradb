@@ -1,4 +1,3 @@
-import { parseFormData } from '@mjackson/form-data-parser';
 import { getBody } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 import { SubmitMapResponse, serializeSubmitMapResponse } from 'schema/maps';
