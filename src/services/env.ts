@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 
 /** Keep in sync with the test env vars in `jest_setup.ts` */
 export type EnvVars = {
+  baseUrl: string;
   pgHost: string;
   pgPort: number;
   pgDatabase: string;
@@ -35,6 +36,7 @@ export type EnvVars = {
  */
 export function getEnvVars() {
   const _envVars: { [K in keyof EnvVars]: EnvVars[K] | undefined } = {
+    baseUrl: process.env.BASE_URL,
     pgHost: process.env.PGHOST,
     pgPort: Number(process.env.PGPORT || undefined),
     pgDatabase: process.env.PGDATABASE,

@@ -7,9 +7,11 @@ import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
 import { MaintenanceBanner } from 'app/maintenance_banner';
+import { getEnvVars } from 'services/env';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
+  metadataBase: new URL(getEnvVars().baseUrl),
 };
 
 export const viewport = {
