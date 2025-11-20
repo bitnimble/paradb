@@ -7,11 +7,10 @@ import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
 import { MaintenanceBanner } from 'app/maintenance_banner';
-import { getEnvVars } from 'services/env';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
-  metadataBase: new URL(getEnvVars().baseUrl),
+  metadataBase: new URL(process.env.BASE_URL || 'http://locahost:3000'),
 };
 
 export const viewport = {
