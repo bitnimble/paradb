@@ -1,4 +1,4 @@
-import { bool, extend, list, num, optional, rec, Reify, str, u8array, union } from './builder';
+import { bool, extend, list, num, optional, rec, Reify, str, union } from './builder';
 import { apiError, apiSuccess } from './api';
 
 /* Structs */
@@ -79,13 +79,6 @@ export type SearchMapsRequest = {
 };
 
 /* POST submitMap */
-export type SubmitMapRequest = Reify<typeof serializeSubmitMapRequest>;
-export const { serialize: serializeSubmitMapRequest, deserialize: deserializeSubmitMapRequest } =
-  rec('submitMapRequest', {
-    id: optional(str('id')),
-    mapData: u8array('mapData'),
-  });
-
 export type SubmitMapSuccess = Reify<typeof submitMapSuccess>;
 const submitMapSuccess = extend('submitMapSuccess', apiSuccess, {
   id: str('id'),

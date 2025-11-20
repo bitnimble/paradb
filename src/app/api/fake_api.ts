@@ -4,7 +4,6 @@ import {
   SearchMapsRequest,
   GetMapResponse,
   DeleteMapResponse,
-  SubmitMapRequest,
   SubmitMapResponse,
   PDMap,
 } from 'schema/maps';
@@ -78,7 +77,7 @@ export class FakeApi implements Api {
     return { success: true };
   }
 
-  async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
+  async submitMap(req: { id?: string; mapData: Uint8Array }): Promise<SubmitMapResponse> {
     await delay();
     return { success: true, id: allStar.id };
   }

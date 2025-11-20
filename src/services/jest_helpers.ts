@@ -6,8 +6,8 @@ export const testServer = () => supertest('http://localhost:3000');
 
 export const testPost = async <Req, Res>(
   url: string,
-  serializer: (t: Req) => Uint8Array,
-  deserializer: (b: Uint8Array) => Res,
+  serializer: (t: Req) => string,
+  deserializer: (s: string) => Res,
   body: Req,
   cookie?: string
 ) => {
@@ -16,8 +16,8 @@ export const testPost = async <Req, Res>(
     req.set('Cookie', cookie);
   }
   const resp = await req
-    .type('application/octet-stream')
-    .responseType('application/octet-stream')
+    .type('application/json')
+    .responseType('application/json')
     .send(serializer(body));
 
   return deserializer(resp.body);
@@ -25,14 +25,14 @@ export const testPost = async <Req, Res>(
 
 export const testGet = async <Res>(
   url: string,
-  deserialize: (b: Uint8Array) => Res,
+  deserialize: (s: string) => Res,
   cookie?: string
 ) => {
   const req = testServer().get(url);
   if (cookie != null) {
     req.set('Cookie', cookie);
   }
-  const resp = await req.type('application/octet-stream').responseType('application/octet-stream');
+  const resp = await req.type('application/json').responseType('application/json');
   return deserialize(resp.body);
 };
 

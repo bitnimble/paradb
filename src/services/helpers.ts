@@ -6,7 +6,7 @@ import { ApiError, serializeApiError } from 'schema/api';
 
 export function error<P, T extends ApiError & P, E extends string>(opts: {
   statusCode: number;
-  errorSerializer(o: T): Uint8Array;
+  errorSerializer(o: T): string;
   errorBody: P;
   message: string;
   resultError?: ResultError<E>;

@@ -2,20 +2,20 @@ import * as msgpackr from 'msgpackr';
 
 export interface Type<T> {
   /**
-   * Serializes an input value and returns a Uint8Array to be sent over-the-wire. For record-like
+   * Serializes an input value and returns a string to be sent over-the-wire. For record-like
    * types, this will strip any additional unspecified properties before serializing it.
    * @param t the value to be serialized
-   * @returns a Uint8Array buffer representing a serialized form of the input value
+   * @returns a string representing a serialized form of the input value
    */
-  serialize(t: T): Uint8Array;
+  serialize(t: T): string;
   /**
-   * Attempts to deserialize an input Uint8Array back to the original type, and then validates that
+   * Attempts to deserialize an input string back to the original type, and then validates that
    * it conforms to the constraints originally provided to the builder function. For record-like
    * types, this will strip any additional unspecified properties that happened to be present in the
    * deserialized value before returning it to the caller.
-   * @param u a Uint8Array buffer
+   * @param s a string
    */
-  deserialize(u: Uint8Array): T;
+  deserialize(s: string): T;
   /**
    * Validates that the input conforms to the constraints originally provided to the builder
    * function. This does not attempt to transform or deserialize the input value before validating,
@@ -51,9 +51,9 @@ export type Reify<Schema> = Schema extends Record<string, Type<any>>
   ? T extends (infer I)[]
     ? I[]
     : T
-  : Schema extends (t: infer T) => Uint8Array
+  : Schema extends (t: infer T) => string
   ? T
-  : Schema extends (u: Uint8Array) => infer T
+  : Schema extends (s: string) => infer T
   ? T
   : never;
 
@@ -72,11 +72,11 @@ abstract class TypeImpl<T> implements Type<T> {
 
   readonly serialize = (t: T) => {
     const validated = this.validate(t);
-    return msgpackr.pack(validated);
+    return JSON.stringify(validated);
   };
 
-  readonly deserialize = (u: Uint8Array) => {
-    const unpacked = msgpackr.unpack(u);
+  readonly deserialize = (s: string) => {
+    const unpacked = JSON.parse(s);
     const validated = this.validate(unpacked);
     return validated;
   };
@@ -156,16 +156,6 @@ class NumberType<T extends number> extends TypeImpl<T> {
       }
     }
     return n as T;
-  };
-}
-
-export const u8array = (name: string): Type<Uint8Array> => new Uint8ArrayType(name);
-class Uint8ArrayType extends TypeImpl<Uint8Array> {
-  readonly validate = (u: unknown) => {
-    if (!(u instanceof Uint8Array)) {
-      throw new InvalidTypeError(this.name, 'u8array', u);
-    }
-    return u;
   };
 }
 
