@@ -18,18 +18,12 @@ services:
     depends_on:
       meilisearch:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
       minio:
         condition: service_healthy
   meilisearch:
     extends:
       file: docker-compose.yml
       service: meilisearch
-  postgres:
-    extends:
-      file: docker-compose.yml
-      service: postgres
   minio:
     image: minio/minio:latest
     container_name: paradb_minio
@@ -40,7 +34,7 @@ services:
       - paradb_minio_data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 5s
       timeout: 20s
       retries: 3

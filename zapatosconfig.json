@@ -1,6 +1,6 @@
 {
   "db": {
-    "connectionString": "postgresql://localhost/paradb"
+    "connectionString": "postgresql://{{PGUSER}}:{{PGPASSWORD}}@{{PGHOST}}:{{PGPORT}}/{{PGDATABASE}}"
   },
   "outDir": "./src/services"
 }

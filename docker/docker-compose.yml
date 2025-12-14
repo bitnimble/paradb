@@ -6,10 +6,10 @@ services:
         - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
     container_name: paradb_server
     environment:
-      - PGHOST=postgres
-      - PGPORT=5432
-      - PGUSER=postgres
-      - PGDATABASE=paradb
+      - PGHOST=${PGHOST}
+      - PGPORT=${PGPORT}
+      - PGUSER=${PGUSER}
+      - PGDATABASE=${PGDATABASE}
       - PGPASSWORD=${PGPASSWORD}
       - MEILISEARCH_HOST=meilisearch:7700
       - MAPS_DIR=/etc/paradb/maps
@@ -21,8 +21,6 @@ services:
     depends_on:
       meilisearch:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
   meilisearch:
     image: getmeili/meilisearch:v1.13
     container_name: paradb_meilisearch
@@ -33,21 +31,6 @@ services:
     restart: unless-stopped
     healthcheck:
       test: set -o pipefail;curl -fsS http://localhost:7700/health | grep -q '{"status":"available"}'
-      retries: 5
-      timeout: 60s
-      start_period: 10s
-  postgres:
-    image: postgres:12-alpine
-    container_name: paradb_postgres
-    environment:
-      - POSTGRES_DB=paradb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${PGPASSWORD}
-    volumes:
-      - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ['CMD-SHELL', 'su', '-c', 'pg_isready -U postgres -d paradb', 'postgres']
       retries: 5
       timeout: 60s
       start_period: 10s
