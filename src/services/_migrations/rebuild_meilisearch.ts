@@ -57,7 +57,8 @@ import { MapsRepo, MeilisearchMap, convertToMeilisearchMap } from 'services/maps
   console.log(`Added ${mapsResult.value.length} maps, waiting for tasks to complete...`);
 
   const [_1, _2, _3, _4, addDataResults] = await client.waitForTasks(
-    [updateRanking, updateSearch, updateFilters, updateSorts, addData].map((t) => t.taskUid)
+    [updateRanking, updateSearch, updateFilters, updateSorts, addData].map((t) => t.taskUid),
+    { timeOutMs: 60000 }
   );
   console.log(addDataResults.error ? `Error: ${JSON.stringify(addDataResults.error)}` : '');
   await pool.end();
