@@ -1,0 +1,21 @@
+services:
+  paradb:
+    extends:
+      file: docker-compose.dev.yml
+      service: paradb
+    entrypoint: ["tools/docker/test.sh"]
+  meilisearch:
+    extends:
+      file: docker-compose.dev.yml
+      service: meilisearch
+  postgres:
+    extends:
+      file: docker-compose.dev.yml
+      service: postgres
+  minio:
+    extends:
+      file: docker-compose.dev.yml
+      service: minio
+
+volumes:
+  paradb_minio_data:

@@ -4,6 +4,10 @@ FROM node:lts-bookworm-slim
 WORKDIR /etc/paradb/paradb
 
 RUN apt update
-RUN DEBIAN_FRONTEND=noninteractive apt install postgresql-client ca-certificates -y
+RUN DEBIAN_FRONTEND=noninteractive apt install postgresql-client ca-certificates wget curl -y
+
+RUN echo "Setting up minio"
+RUN wget -P /usr/local/bin/ https://dl.min.io/client/mc/release/linux-amd64/mc
+RUN chmod +x /usr/local/bin/mc
 
 ENTRYPOINT ["tools/docker/dev.sh"]

@@ -20,9 +20,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
   }
 
   const submitMapReq = await req.formData();
-  const mapData = await (submitMapReq.get('mapData') as File)
-    .arrayBuffer()
-    .then((buf) => new Uint8Array(buf));
+  const mapData = await (submitMapReq.get('mapData') as Blob).arrayBuffer();
   let id = submitMapReq.get('id') as string | undefined;
   if (id === '') {
     id = undefined;

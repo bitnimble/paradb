@@ -3,15 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "docker compose -f docker/docker-compose.dev.yml --env-file .env up",
-    "dev:test": "ENV=.env.test NODE_ENV=test next dev",
-    "build": "docker compose -f docker/docker-compose.yml --env-file .env build",
-    "start": "docker compose -f docker/docker-compose.yml --env-file .env up --build",
+    "dev": "sudo docker compose -f docker/docker-compose.dev.yml --env-file .env up",
+    "build": "sudo docker compose -f docker/docker-compose.yml --env-file .env build",
+    "start": "sudo docker compose -f docker/docker-compose.yml --env-file .env up --build",
     "lint": "eslint .",
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",
     "search:rebuild": "yarn tsx src/services/_migrations/rebuild_meilisearch.ts",
-    "test": "tools/test.sh"
+    "test": "sudo docker compose -f docker/docker-compose.test.yml --env-file .env.test up --build --abort-on-container-exit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.414.0",
