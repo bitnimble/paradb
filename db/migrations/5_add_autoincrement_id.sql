@@ -1,4 +1,0 @@
-ALTER TABLE maps ADD _id SERIAL;
-ALTER TABLE difficulties ADD _id SERIAL;
-ALTER TABLE users ADD _id SERIAL;
-ALTER TABLE favorites ADD _id SERIAL;

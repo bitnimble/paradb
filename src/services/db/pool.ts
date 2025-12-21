@@ -22,7 +22,10 @@ export async function initPool(maxConnections?: number) {
     const client = await db.pool.connect();
     client.release();
   } catch (e) {
-    throw new Error('Could not connect to database, is it running?');
+    throw new Error(
+      'Could not connect to database, is it running? Connection string: ' +
+        `postgresql://${envVars.pgUser}:${envVars.pgPassword}@${envVars.pgHost}:${envVars.pgPort}/${envVars.pgDatabase}`
+    );
   }
 
   return db.pool;
