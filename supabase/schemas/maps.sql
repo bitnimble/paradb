@@ -10,7 +10,7 @@ CREATE TABLE maps (
   download_count int not null default 0,
   description text,
   tags text,
-  complexity int,
+  complexity int not null,
   album_art text
 );
 
@@ -18,5 +18,5 @@ CREATE TABLE difficulties (
   _id serial,
   map_id varchar(16) references maps (id) not null,
   difficulty int,
-  difficulty_name varchar(256)
+  difficulty_name varchar(256) not null
 );
