@@ -17,10 +17,9 @@ export const enum EmailStatus {
   VERIFIED = 'V',
 }
 
-type GetUserOpts = GetUserByUsernameOpts | GetUserByIdOpts | GetUserByEmailOpts;
+type GetUserOpts = GetUserByUsernameOpts | GetUserByIdOpts;
 type GetUserByUsernameOpts = { by: 'username'; username: string };
 type GetUserByIdOpts = { by: 'id'; id: string };
-type GetUserByEmailOpts = { by: 'email'; email: string };
 export const enum GetUserError {
   NO_USER = 'no_user',
 }
@@ -38,12 +37,6 @@ export async function getUser(opts: GetUserOpts): PromisedResult<User, DbError |
         .run(pool);
     } else if (opts.by === 'id') {
       user = await db.selectOne('users', { id: opts.id }).run(pool);
-    } else {
-      user = await db
-        .selectOne('users', {
-          email: db.sql`lower(${db.self}) = ${db.param(opts.email.toLowerCase())}`,
-        })
-        .run(pool);
     }
   } catch (e) {
     return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
@@ -93,8 +86,10 @@ export async function createUser(
     if (existingUsernameResult.success) {
       errorResult.errors.push({ type: CreateUserError.USERNAME_TAKEN });
     }
-    const existingEmailResult = await getUser({ by: 'email', email: opts.email });
-    if (existingEmailResult.success) {
+    const existingEmailResult = await supabase.rpc('check_email_exists', {
+      input_email: opts.email,
+    });
+    if (existingEmailResult.error || existingEmailResult.data === false) {
       errorResult.errors.push({ type: CreateUserError.EMAIL_TAKEN });
     }
   } catch (e) {
@@ -139,9 +134,8 @@ export async function createUser(
           accountStatus: AccountStatus.ACTIVE,
           username: opts.username,
           email: opts.email,
-          // Anybody signing up post-Supabase-migration will be verified by Supabase.
           // TODO: force email confirmation on all users with EmailStatus.UNVERIFIED
-          emailStatus: EmailStatus.VERIFIED,
+          emailStatus: EmailStatus.UNVERIFIED,
           password: '\\x00' as const,
           passwordUpdated: now,
           supabaseId: checkExists(data.user || data.session?.user).id,
@@ -176,8 +170,9 @@ export async function changePassword(
   const { supabase } = await getServerContext();
   const errorResult: ResultError<ChangePasswordError> = { success: false, errors: [] };
 
+  const email = checkExists((await supabase.auth.getUser()).data.user?.email);
   // Validate password requirements
-  const feedback = isPasswordWeak(opts.newPassword, opts.user.email, opts.user.username);
+  const feedback = isPasswordWeak(opts.newPassword, email, opts.user.username);
   if (feedback) {
     return {
       success: false,
