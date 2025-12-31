@@ -40,10 +40,8 @@ describe('user repository', () => {
       password: testUser.password,
     });
 
-    const user = await _unwrap(getUser({ by: 'email', email: testUser.email }));
-    expect(user).toEqual(
-      expect.objectContaining({ email: testUser.email, username: testUser.username })
-    );
+    const user = await _unwrap(getUser({ by: 'username', username: testUser.username }));
+    expect(user).toEqual(expect.objectContaining({ username: testUser.username }));
   });
 
   it('can change a password', async () => {
@@ -52,7 +50,7 @@ describe('user repository', () => {
       username: testUser.username,
       password: testUser.password,
     });
-    const originalUser = await _unwrap(getUser({ by: 'email', email: testUser.email }));
+    const originalUser = await _unwrap(getUser({ by: 'username', username: testUser.username }));
 
     const result = await changePassword({
       user: originalUser,
