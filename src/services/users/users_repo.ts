@@ -123,21 +123,15 @@ export async function createUser(
     return { success: false, errors: [wrapError(error, DbError.UNKNOWN_DB_ERROR)] };
   }
 
-  const now = new Date();
   try {
     await db
       .insert(
         'users',
         snakeCaseKeys({
           id,
-          creationDate: now,
-          accountStatus: AccountStatus.ACTIVE,
           username: opts.username,
-          email: opts.email,
           // TODO: force email confirmation on all users with EmailStatus.UNVERIFIED
           emailStatus: EmailStatus.UNVERIFIED,
-          password: '\\x00' as const,
-          passwordUpdated: now,
           supabaseId: checkExists(data.user || data.session?.user).id,
         })
       )
