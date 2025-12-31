@@ -35,7 +35,6 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     password,
   });
   if (error) {
-    console.log(error);
     return send(invalidCredentials);
   }
   return send({
