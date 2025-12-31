@@ -25,6 +25,8 @@ services:
       - MEILI_MASTER_KEY=${MEILISEARCH_KEY}
     volumes:
       - ${MEILISEARCH_DATA_DIR}:/meili_data
+    ports:
+      - 7700:7700
     restart: unless-stopped
     healthcheck:
       test: set -o pipefail;curl -fsS http://localhost:7700/health | grep -q '{"status":"available"}'
