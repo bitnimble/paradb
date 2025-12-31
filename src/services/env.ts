@@ -1,5 +1,3 @@
-import * as fs from 'fs/promises';
-
 /** Keep in sync with the test env vars in `jest_setup.ts` */
 export type EnvVars = {
   baseUrl: string;
@@ -8,7 +6,6 @@ export type EnvVars = {
   pgDatabase: string;
   pgUser: string;
   pgPassword: string;
-  mapsDir: string;
   sentryDsn: string;
   sentryEnvironment: string;
   cookieName: string;
@@ -46,7 +43,6 @@ export function getEnvVars() {
     pgDatabase: process.env.PGDATABASE,
     pgUser: process.env.PGUSER,
     pgPassword: process.env.PGPASSWORD,
-    mapsDir: process.env.MAPS_DIR,
     sentryDsn: process.env.SENTRY_DSN,
     sentryEnvironment: process.env.SENTRY_ENV,
     cookieName: process.env.COOKIE_NAME,
@@ -83,11 +79,6 @@ export function getEnvVars() {
     throw new Error('One or more environment variables were missing, see above.');
   }
   envVars = _envVars as EnvVars;
-  try {
-    fs.access(envVars.mapsDir);
-  } catch (e) {
-    throw new Error('Could not access maps dir; ' + e);
-  }
 
   return envVars;
 }

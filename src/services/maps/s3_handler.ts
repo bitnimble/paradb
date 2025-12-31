@@ -127,7 +127,6 @@ export async function uploadFiles(opts: {
 
   return {
     success: true,
-    // All file paths persisted in the DB are relative to mapsDir
     value: opts.albumArtFiles.length > 0 ? path.basename(opts.albumArtFiles[0]!.path) : undefined,
   };
 }
@@ -138,11 +137,6 @@ export async function deleteFiles(opts: { id: string }): Promise<Result<undefine
     return mapDeleteResult;
   }
 
-  const { mapsDir } = getEnvVars();
-
-  // Attempt to remove from both disk and S3
-  const albumArtFolderPath = path.resolve(mapsDir, opts.id);
-  await fs.rm(albumArtFolderPath, { recursive: true, force: true });
   try {
     const s3 = getS3Client();
     const albumArtFiles = await s3.client.send(

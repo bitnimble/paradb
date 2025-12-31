@@ -12,9 +12,6 @@ services:
       - PGDATABASE=${PGDATABASE}
       - PGPASSWORD=${PGPASSWORD}
       - MEILISEARCH_HOST=meilisearch:7700
-      - MAPS_DIR=/etc/paradb/maps
-    volumes:
-      - ${PARADB_MAPS_DIR}:/etc/paradb/maps
     ports:
       - 3000:3000
     restart: unless-stopped
