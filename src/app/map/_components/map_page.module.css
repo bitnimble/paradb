@@ -18,6 +18,7 @@
 }
 
 .albumArt {
+    position: relative;
     flex-shrink: 0;
     height: albumArtMaxWidth;
     width: albumArtMaxWidth;

@@ -9,10 +9,15 @@ export async function GET(
 ) {
   const params = await props.params;
   const { id, filename } = params;
+  const { publicS3BaseUrl, mapsDir } = getEnvVars();
 
-  const coverPath = path.join(getEnvVars().mapsDir, id, filename);
-  if (!coverPath.startsWith(getEnvVars().mapsDir)) {
+  const coverPath = path.join(mapsDir, id, filename);
+  if (!coverPath.startsWith(mapsDir)) {
     return new NextResponse(undefined, { status: 404 });
+  }
+  if (!fs.existsSync(coverPath)) {
+    // If it doesn't exist on disk, it might have been pushed to S3
+    return NextResponse.redirect(`${publicS3BaseUrl}/albumArt/${id}/${filename}`);
   }
   return new NextResponse(streamFile(coverPath));
 }

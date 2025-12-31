@@ -355,10 +355,8 @@ export class MapsRepo {
 
   async deleteMap({
     id,
-    mapsDir,
   }: {
     id: string;
-    mapsDir: string;
   }): PromisedResult<undefined, DbError | DeleteMapError | S3Error> {
     const { pool } = await getServerContext();
     try {
@@ -374,14 +372,13 @@ export class MapsRepo {
         return { success: false, errors: [{ type: DeleteMapError.MISSING_MAP }] };
       }
       await this.meilisearchMaps.deleteDocument(id);
-      return deleteFiles({ mapsDir, id });
+      return deleteFiles({ id });
     } catch (e) {
       return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
     }
   }
 
   async upsertMap(
-    mapsDir: string,
     opts: UpsertMapOpts
   ): PromisedResult<
     PDMap,
@@ -410,12 +407,12 @@ export class MapsRepo {
 
     // We are updating a map; delete the old file off S3 first
     if (opts.id) {
-      const deleteResult = await deleteFiles({ mapsDir, id });
+      const deleteResult = await deleteFiles({ id });
       if (!deleteResult.success) {
         return deleteResult;
       }
     }
-    const uploadResult = await uploadFiles({ id: id, mapsDir: mapsDir, buffer, albumArtFiles });
+    const uploadResult = await uploadFiles({ id, buffer, albumArtFiles });
     if (!uploadResult.success) {
       return uploadResult;
     }

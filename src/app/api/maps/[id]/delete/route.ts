@@ -41,7 +41,7 @@ export async function POST(
     });
   }
 
-  const deleteResult = await mapsRepo.deleteMap({ id, mapsDir: getEnvVars().mapsDir });
+  const deleteResult = await mapsRepo.deleteMap({ id });
   if (deleteResult.success === false) {
     return send({
       success: false,

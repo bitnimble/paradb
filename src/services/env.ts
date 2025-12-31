@@ -31,13 +31,14 @@ export type EnvVars = {
   supabaseSecretKey: string;
 };
 
+let envVars: EnvVars | undefined;
 /**
  * Retrieves and validates the environment variables.
- * This is global and is okay to call from any once-off install method, but should not be on any hot
- * paths (api route handlers, etc) as it does an fs.access call to validate that the maps directory
- * exists.
  */
 export function getEnvVars() {
+  if (envVars) {
+    return envVars;
+  }
   const _envVars: { [K in keyof EnvVars]: EnvVars[K] | undefined } = {
     baseUrl: process.env.BASE_URL,
     pgHost: process.env.PGHOST,
@@ -78,10 +79,10 @@ export function getEnvVars() {
       fail = true;
     }
   }
-  const envVars = _envVars as EnvVars;
   if (fail) {
     throw new Error('One or more environment variables were missing, see above.');
   }
+  envVars = _envVars as EnvVars;
   try {
     fs.access(envVars.mapsDir);
   } catch (e) {

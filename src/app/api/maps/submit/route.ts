@@ -57,7 +57,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     }
   }
 
-  const submitMapResult = await mapsRepo.upsertMap(getEnvVars().mapsDir, {
+  const submitMapResult = await mapsRepo.upsertMap({
     id,
     uploader: user.id,
     mapFile: mapData,
