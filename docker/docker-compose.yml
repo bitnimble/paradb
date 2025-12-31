@@ -22,7 +22,7 @@ services:
       meilisearch:
         condition: service_healthy
   meilisearch:
-    image: getmeili/meilisearch:v1.13
+    image: getmeili/meilisearch:v1.31
     container_name: paradb_meilisearch
     environment:
       - MEILI_MASTER_KEY=${MEILISEARCH_KEY}

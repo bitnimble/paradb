@@ -1,20 +1,14 @@
-import { createPassword } from 'services/crypto/crypto';
-import {
-  CamelCase,
-  DbError,
-  camelCaseKeys,
-  fromBytea,
-  snakeCaseKeys,
-  toBytea,
-} from 'services/db/helpers';
+import { checkExists } from 'base/preconditions';
+import { PromisedResult, ResultError, wrapError } from 'base/result';
+import { SignupSuccess } from 'schema/users';
+import { CamelCase, DbError, camelCaseKeys, snakeCaseKeys } from 'services/db/helpers';
 import { IdDomain, generateId } from 'services/db/id_gen';
 import { getServerContext } from 'services/server_context';
-import { PromisedResult, ResultError, wrapError } from 'base/result';
 import * as db from 'zapatos/db';
 import { users } from 'zapatos/schema';
 import zxcvbn from 'zxcvbn';
 
-export type User = Omit<CamelCase<users.JSONSelectable>, 'password'> & { password: string };
+export type User = CamelCase<users.JSONSelectable>;
 export const enum AccountStatus {
   ACTIVE = 'A',
 }
@@ -30,6 +24,8 @@ type GetUserByEmailOpts = { by: 'email'; email: string };
 export const enum GetUserError {
   NO_USER = 'no_user',
 }
+// TODO: rename all of my tables from 'user' to 'profile' to clearly distinguish between public
+// profiles and Supabase auth user table
 export async function getUser(opts: GetUserOpts): PromisedResult<User, DbError | GetUserError> {
   const { pool } = await getServerContext();
   let user: users.JSONSelectable | undefined;
@@ -54,7 +50,8 @@ export async function getUser(opts: GetUserOpts): PromisedResult<User, DbError |
   }
 
   if (user != null) {
-    return { success: true, value: { ...camelCaseKeys(user), password: fromBytea(user.password) } };
+    // TODO: fix NullToUndefined type
+    return { success: true, value: { ...camelCaseKeys(user), supabaseId: user.supabase_id } };
   }
   return { success: false, errors: [{ type: GetUserError.NO_USER }] };
 }
@@ -79,8 +76,8 @@ export const enum CreateUserError {
 }
 export async function createUser(
   opts: CreateUserOpts
-): PromisedResult<User, DbError | CreateUserError> {
-  const { pool } = await getServerContext();
+): PromisedResult<SignupSuccess, DbError | CreateUserError> {
+  const { pool, supabase } = await getServerContext();
   const errorResult: ResultError<DbError | CreateUserError> = { success: false, errors: [] };
   // Validate password requirements
   const feedback = isPasswordWeak(opts.password, opts.email, opts.username);
@@ -108,6 +105,7 @@ export async function createUser(
     return errorResult;
   }
 
+  // Looks all good - proceed to create new user in Supabase and profile in our DB
   const id = await generateId(
     IdDomain.USERS,
     async (id) => (await getUser({ by: 'id', id })).success
@@ -116,12 +114,23 @@ export async function createUser(
     return { success: false, errors: [{ type: CreateUserError.TOO_MANY_ID_GEN_ATTEMPTS }] };
   }
 
-  const password = await createPassword(opts.password);
-  const passwordBuffer = toBytea(password);
+  const { data, error } = await supabase.auth.signUp({
+    email: opts.email,
+    password: opts.password,
+    options: {
+      data: {
+        id,
+        username: opts.username,
+      },
+    },
+  });
+  if (error) {
+    return { success: false, errors: [wrapError(error, DbError.UNKNOWN_DB_ERROR)] };
+  }
 
   const now = new Date();
   try {
-    const inserted = await db
+    await db
       .insert(
         'users',
         snakeCaseKeys({
@@ -130,13 +139,28 @@ export async function createUser(
           accountStatus: AccountStatus.ACTIVE,
           username: opts.username,
           email: opts.email,
-          emailStatus: EmailStatus.UNVERIFIED,
-          password: passwordBuffer,
+          // Anybody signing up post-Supabase-migration will be verified by Supabase.
+          // TODO: force email confirmation on all users with EmailStatus.UNVERIFIED
+          emailStatus: EmailStatus.VERIFIED,
+          password: '\\x00' as const,
           passwordUpdated: now,
+          supabaseId: checkExists(data.user || data.session?.user).id,
         })
       )
       .run(pool);
-    return { success: true, value: camelCaseKeys(inserted) };
+    return {
+      success: true,
+      value: {
+        success: true,
+        id,
+        session: data.session
+          ? {
+              accessToken: data.session.access_token,
+              refreshToken: data.session.refresh_token,
+            }
+          : undefined,
+      },
+    };
   } catch (e) {
     return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
   }
@@ -149,7 +173,7 @@ export const enum ChangePasswordError {
 export async function changePassword(
   opts: ChangePasswordOpts
 ): PromisedResult<undefined, DbError | ChangePasswordError> {
-  const { pool } = await getServerContext();
+  const { supabase } = await getServerContext();
   const errorResult: ResultError<ChangePasswordError> = { success: false, errors: [] };
 
   // Validate password requirements
@@ -165,19 +189,9 @@ export async function changePassword(
     return errorResult;
   }
 
-  const password = await createPassword(opts.newPassword);
-  const passwordBuffer = toBytea(password);
-
-  const now = new Date();
-  try {
-    await db
-      .update('users', snakeCaseKeys({ password: passwordBuffer, passwordUpdated: now }), {
-        id: opts.user.id,
-      })
-      .run(pool);
-
-    return { success: true, value: undefined };
-  } catch (e) {
-    return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
+  const { error } = await supabase.auth.updateUser({ password: opts.newPassword });
+  if (error) {
+    return { success: false, errors: [wrapError(error, DbError.UNKNOWN_DB_ERROR)] };
   }
+  return { success: true, value: undefined };
 }

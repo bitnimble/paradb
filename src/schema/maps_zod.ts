@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { z } from 'zod';
 import { PaginatedApiRequest, PaginatedApiResponse, useTypedParse } from 'schema/api_zod';
 

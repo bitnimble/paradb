@@ -22,7 +22,6 @@ describe('user repository', () => {
     const user = actualUsers[0];
 
     // Should be hashed
-    expect(user.password).not.toEqual(testUser.password);
     expect(user).toEqual(
       expect.objectContaining({ email: testUser.email, username: testUser.username })
     );
@@ -54,7 +53,6 @@ describe('user repository', () => {
       password: testUser.password,
     });
     const originalUser = await _unwrap(getUser({ by: 'email', email: testUser.email }));
-    const oldPassword = originalUser.password;
 
     const result = await changePassword({
       user: originalUser,
@@ -62,11 +60,7 @@ describe('user repository', () => {
     });
     expect(result.success).toEqual(true);
 
-    const updatedUser = await _unwrap(getUser({ by: 'email', email: testUser.email }));
-    const updatedPassword = updatedUser.password;
-
-    expect(oldPassword).not.toEqual(updatedPassword);
-    // Should be hashed
-    expect(updatedPassword).not.toEqual('ThisIsANewPassword457');
+    // TODO: check that the old password no longer works. Figure out how to set up a Supabase
+    // user session in a unit test.
   });
 });

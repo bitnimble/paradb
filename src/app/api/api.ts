@@ -1,3 +1,4 @@
+import { SupabaseClient } from '@supabase/supabase-js';
 import * as qs from 'qs';
 import { ApiResponse, apiResponse } from 'schema/api';
 import {
@@ -29,8 +30,11 @@ import {
   serializeSetFavoriteMapsRequest,
   serializeSignupRequest,
 } from 'schema/users';
+import { createClient } from 'services/session/supabase_client';
 
 export interface Api {
+  readonly supabase: SupabaseClient;
+
   /* Auth */
   login(req: LoginRequest): Promise<LoginResponse>;
   signup(req: SignupRequest): Promise<SignupResponse>;
@@ -57,6 +61,7 @@ export interface Api {
 
 export class HttpApi implements Api {
   private apiBase = '/api';
+  readonly supabase = createClient();
 
   async login(req: LoginRequest): Promise<LoginResponse> {
     const bsonReq = serializeLoginRequest(req);

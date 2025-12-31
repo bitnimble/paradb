@@ -1,5 +1,5 @@
-import { action, makeObservable, observable, runInAction } from 'mobx';
 import { Api } from 'app/api/api';
+import { action, makeObservable, observable, runInAction } from 'mobx';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
 
@@ -55,6 +55,10 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
 
     const resp = await this.api.login({ username, password });
     if (resp.success) {
+      await this.api.supabase.auth.setSession({
+        access_token: resp.accessToken,
+        refresh_token: resp.refreshToken,
+      });
       window.location.href = routeFor([RoutePath.MAP_LIST]);
     } else {
       this.pushErrors(['form'], resp.errorMessage || 'Could not login. Please try again later.');
@@ -77,6 +81,15 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
 
     const resp = await this.api.signup({ username, email, password });
     if (resp.success) {
+      if (resp.session) {
+        await this.api.supabase.auth.setSession({
+          access_token: resp.session.accessToken,
+          refresh_token: resp.session.refreshToken,
+        });
+      } else {
+        // TODO: show message that they need to confirm their email. Currently not needed as email
+        // verification is not enabled in the Supabase project settings.
+      }
       window.location.href = routeFor([RoutePath.MAP_LIST]);
     } else {
       if (resp.email) {

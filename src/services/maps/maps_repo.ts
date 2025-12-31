@@ -14,6 +14,7 @@ import {
 } from 'services/maps/map_validator';
 import { getEnvVars } from 'services/env';
 import { AdvancedSearchMapRequest } from 'schema/maps_zod';
+import { getDbPool } from 'services/db/pool';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
 
@@ -96,7 +97,7 @@ export class MapsRepo {
   // TODO: add search parameters to findMaps
   // TODO: pull `userId` out as RequestContext
   async findMaps(findBy: FindMapsBy, userId?: string): PromisedResult<PDMap[], DbError> {
-    const { pool } = await getServerContext();
+    const pool = await getDbPool();
 
     // TODO: validate by.by === 'all' against the user role. Only an admin or root context can
     // perform a query to fetch all maps.

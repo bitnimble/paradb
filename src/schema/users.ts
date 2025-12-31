@@ -24,7 +24,6 @@ export const { serialize: serializeUserSession, deserialize: deserializeUserSess
   {
     id: str('id'),
     username: str('username'),
-    accountStatus: str('accountStatus'),
     email: str('email'),
   }
 );
@@ -40,11 +39,16 @@ export const { serialize: serializeLoginRequest, deserialize: deserializeLoginRe
 );
 export type LoginError = Reify<typeof loginError>;
 const loginError = extend('loginError', apiError, {});
+export type LoginSuccess = Reify<typeof loginSuccess>;
+const loginSuccess = extend('loginSuccess', apiSuccess, {
+  accessToken: str('accessToken'),
+  refreshToken: str('refreshToken'),
+});
 export type LoginResponse = Reify<typeof serializeLoginResponse>;
 export const { serialize: serializeLoginResponse, deserialize: deserializeLoginResponse } = union(
   'loginResponse',
   'success',
-  [apiSuccess, loginError]
+  [loginSuccess, loginError]
 );
 
 /* Signup */
@@ -63,11 +67,21 @@ const signupError = extend('signupError', apiError, {
   email: optional(str('email')),
   password: optional(str('password')),
 });
+export type SignupSuccess = Reify<typeof signupSuccess>;
+const signupSuccess = extend('signupSuccess', apiSuccess, {
+  id: str('id'),
+  session: optional(
+    rec('session', {
+      accessToken: str('accessToken'),
+      refreshToken: str('refreshToken'),
+    })
+  ),
+});
 export type SignupResponse = Reify<typeof serializeSignupResponse>;
 export const { serialize: serializeSignupResponse, deserialize: deserializeSignupResponse } = union(
   'signupResponse',
   'success',
-  [apiSuccess, signupError]
+  [signupSuccess, signupError]
 );
 
 /** Update */

@@ -18,6 +18,7 @@ import {
   User,
 } from 'schema/users';
 import { Api } from './api';
+import { createClient } from 'services/session/supabase_client';
 
 const DELAY = 500;
 
@@ -28,18 +29,20 @@ async function delay(ms: number = DELAY) {
 }
 
 export class FakeApi implements Api {
+  readonly supabase = createClient();
+
   async changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
     return { success: true };
   }
   async login(req: LoginRequest): Promise<LoginResponse> {
-    return { success: true };
+    return { success: true, accessToken: '123', refreshToken: '456' };
   }
   async setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse> {
     return { success: true };
   }
 
   async signup(req: SignupRequest): Promise<SignupResponse> {
-    return { success: true };
+    return { success: true, id: 'U123456' };
   }
 
   async getSession(): Promise<User> {

@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import { loadEnvConfig } from '@next/env';
 import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
@@ -6,7 +6,8 @@ import { getServerContext } from 'services/server_context';
 
 let tmpMapsDir: string | undefined;
 
-dotenv.config({ path: process.env.ENV_FILE });
+const projectDir = process.cwd();
+loadEnvConfig(projectDir);
 
 async function initTestData() {
   const { pool } = await getServerContext();
