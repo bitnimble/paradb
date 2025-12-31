@@ -8,8 +8,6 @@ export type EnvVars = {
   pgPassword: string;
   sentryDsn: string;
   sentryEnvironment: string;
-  cookieName: string;
-  cookieSecret: string;
   publicS3BaseUrl: string;
   s3Endpoint: string;
   s3Region: string;
@@ -45,8 +43,6 @@ export function getEnvVars() {
     pgPassword: process.env.PGPASSWORD,
     sentryDsn: process.env.SENTRY_DSN,
     sentryEnvironment: process.env.SENTRY_ENV,
-    cookieName: process.env.COOKIE_NAME,
-    cookieSecret: process.env.COOKIE_SECRET,
     publicS3BaseUrl: process.env.PUBLIC_S3_BASE_URL,
     s3Endpoint: process.env.S3_ENDPOINT,
     s3Region: process.env.S3_REGION,
