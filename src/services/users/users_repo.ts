@@ -89,7 +89,7 @@ export async function createUser(
     const existingEmailResult = await supabase.rpc('check_email_exists', {
       input_email: opts.email,
     });
-    if (existingEmailResult.error || existingEmailResult.data === false) {
+    if (existingEmailResult.error || existingEmailResult.data === true) {
       errorResult.errors.push({ type: CreateUserError.EMAIL_TAKEN });
     }
   } catch (e) {
