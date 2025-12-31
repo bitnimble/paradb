@@ -18,6 +18,10 @@ function hex2ascii(hex: `\\x${string}`): string {
   console.log(`Retrieved ${users.length} user records from users table`);
 
   for (const user of users) {
+    if (user.supabase_id != null) {
+      console.log(`Already processed ${user.id} / ${user.email}, skipping`);
+      continue;
+    }
     // Change $2b to $2a in the bcrypt hash because Supabase expects $2a, and will successfully
     // allow a login attempt but invisible fail random DB crypto calls
     let hash = hex2ascii(user.password);
@@ -27,11 +31,11 @@ function hex2ascii(hex: `\\x${string}`): string {
 
     // Create the user in Supabase auth
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
-      email: user.email,
+      email: user.email.trim(),
       password_hash: hash,
       user_metadata: {
         id: user.id,
-        username: user.username,
+        username: user.username.trim(),
       },
       // No users are currently email confirmed, but Supabase requires confirmed emails for login,
       // even with the setting disabled. Insert them as confirmed and deal with confirmation later
@@ -39,12 +43,21 @@ function hex2ascii(hex: `\\x${string}`): string {
       email_confirm: true,
     });
     if (error) {
-      console.log('--------------- FAILURE ---------------');
-      console.log(
-        `Error when processing user: ${user.id}; ${user.username}; ${user.email}; ${hash}`
-      );
-      console.log(error);
-      return;
+      if (error.code === 'email_exists') {
+        // Duplicate user, probably due to case-insensitivity bugs. Just skip
+        console.log(`Encountered duplicate email: ${user.email}`);
+        continue;
+      } else if (error.code === 'validation_failed') {
+        console.log(`Validation failed for ${user.id}; "${user.email}"; "${user.username}"`);
+        continue;
+      } else {
+        console.log('--------------- FAILURE ---------------');
+        console.log(
+          `Error when processing user: ${user.id}; ${user.username}; ${user.email}; ${hash}`
+        );
+        console.log(error);
+        return;
+      }
     }
     console.log(`Processed ${user.id}; ${user.email}; ${data.user.id}`);
 
