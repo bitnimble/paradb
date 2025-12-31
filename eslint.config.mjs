@@ -16,6 +16,8 @@ const eslintConfig = [
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+      "react/display-name": "off",
+      "import/no-anonymous-default-export": "off"
     }
   }
 ];

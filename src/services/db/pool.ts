@@ -1,9 +1,18 @@
 import pg from 'pg';
 import { getEnvVars } from 'services/env';
 
-const db: { pool: pg.Pool | undefined } = { pool: undefined };
+const db: {
+  pool: pg.Pool | undefined;
+} = { pool: undefined };
 
-export async function initPool(maxConnections?: number) {
+export async function getDbPool(maxConnections?: number) {
+  if (!db.pool) {
+    db.pool = await initPool(maxConnections);
+  }
+  return db.pool;
+}
+
+async function initPool(maxConnections?: number) {
   // Test DB
   const envVars = getEnvVars();
   try {

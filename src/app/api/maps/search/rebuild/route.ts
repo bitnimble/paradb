@@ -1,25 +1,25 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: process.env.ENV_FILE });
-
 import { MeiliSearch } from 'meilisearch';
+import { NextResponse } from 'next/server';
 import { mapSortableAttributes } from 'schema/maps';
-import { initPool } from 'services/db/pool';
 import { getEnvVars } from 'services/env';
-import { MapsRepo, MeilisearchMap, convertToMeilisearchMap } from 'services/maps/maps_repo';
+import { MapsRepo, convertToMeilisearchMap } from 'services/maps/maps_repo';
 
-(async () => {
-  const pool = await initPool();
+const TEMP_MAPS_INDEX_UID = 'maps-new';
 
+export async function GET() {
+  await rebuildMeilisearchIndex();
+  return new NextResponse(null, { status: 200 });
+}
+
+export async function rebuildMeilisearchIndex() {
   const { meilisearchHost, meilisearchKey } = getEnvVars();
   const client = new MeiliSearch({ host: meilisearchHost, apiKey: meilisearchKey });
-  console.log('Deleting old indexes');
-  await client.deleteIndexIfExists('maps');
   console.log('Creating new indexes');
-  await client.waitForTask((await client.createIndex('maps')).taskUid);
+  await client.createIndex(TEMP_MAPS_INDEX_UID).waitTask();
   console.log('Getting index');
-  const mapsIndex = await client.getIndex<MeilisearchMap>('maps');
-
+  const mapsIndex = await client.getIndex(TEMP_MAPS_INDEX_UID);
   const mapsRepo = new MapsRepo(mapsIndex);
+  // TODO: paginate / stream this
   const mapsResult = await mapsRepo.findMaps({ by: 'all' });
   if (!mapsResult.success) {
     throw new Error(JSON.stringify(mapsResult.errors));
@@ -56,11 +56,17 @@ import { MapsRepo, MeilisearchMap, convertToMeilisearchMap } from 'services/maps
   );
   console.log(`Added ${mapsResult.value.length} maps, waiting for tasks to complete...`);
 
-  const [_1, _2, _3, _4, addDataResults] = await client.waitForTasks(
+  const [_1, _2, _3, _4, addDataResults] = await client.tasks.waitForTasks(
     [updateRanking, updateSearch, updateFilters, updateSorts, addData].map((t) => t.taskUid),
-    { timeOutMs: 60000 }
+    { timeout: 60000 }
   );
   console.log(addDataResults.error ? `Error: ${JSON.stringify(addDataResults.error)}` : '');
-  await pool.end();
+
+  console.log('Swapping indexes');
+  // If the index already exists, then do a proper swap - otherwise, just rename the new temp index
+  const rename = (await client.getIndexes()).results.find((i) => i.uid === 'maps') == null;
+  await client.swapIndexes([{ indexes: [TEMP_MAPS_INDEX_UID, 'maps'], rename }]).waitTask();
+  console.log('Deleting old index');
+  await client.deleteIndexIfExists(TEMP_MAPS_INDEX_UID);
   console.log('Done!');
-})();
+}

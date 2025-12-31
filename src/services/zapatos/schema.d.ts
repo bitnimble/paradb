@@ -50,9 +50,9 @@ declare module 'zapatos/schema' {
       /**
       * **difficulties.difficulty_name**
       * - `varchar` in database
-      * - Nullable, no default
+      * - `NOT NULL`, no default
       */
-      difficulty_name: string | null;
+      difficulty_name: string;
     }
     export interface JSONSelectable {
       /**
@@ -76,9 +76,9 @@ declare module 'zapatos/schema' {
       /**
       * **difficulties.difficulty_name**
       * - `varchar` in database
-      * - Nullable, no default
+      * - `NOT NULL`, no default
       */
-      difficulty_name: string | null;
+      difficulty_name: string;
     }
     export interface Whereable {
       /**
@@ -102,7 +102,7 @@ declare module 'zapatos/schema' {
       /**
       * **difficulties.difficulty_name**
       * - `varchar` in database
-      * - Nullable, no default
+      * - `NOT NULL`, no default
       */
       difficulty_name?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
     }
@@ -128,9 +128,9 @@ declare module 'zapatos/schema' {
       /**
       * **difficulties.difficulty_name**
       * - `varchar` in database
-      * - Nullable, no default
+      * - `NOT NULL`, no default
       */
-      difficulty_name?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
+      difficulty_name: string | db.Parameter<string> | db.SQLFragment;
     }
     export interface Updatable {
       /**
@@ -154,9 +154,9 @@ declare module 'zapatos/schema' {
       /**
       * **difficulties.difficulty_name**
       * - `varchar` in database
-      * - Nullable, no default
+      * - `NOT NULL`, no default
       */
-      difficulty_name?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
+      difficulty_name?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
     }
     export type UniqueIndex = never;
     export type Column = keyof Selectable;
@@ -328,6 +328,12 @@ declare module 'zapatos/schema' {
       */
       id: string;
       /**
+      * **maps.map_status**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      map_status: string;
+      /**
       * **maps.submission_date**
       * - `timestamp` in database
       * - `NOT NULL`, no default
@@ -370,29 +376,23 @@ declare module 'zapatos/schema' {
       */
       description: string | null;
       /**
-      * **maps.complexity**
-      * - `int4` in database
-      * - Nullable, no default
-      */
-      complexity: number | null;
-      /**
-      * **maps.album_art**
-      * - `text` in database
-      * - Nullable, no default
-      */
-      album_art: string | null;
-      /**
       * **maps.tags**
       * - `text` in database
       * - Nullable, no default
       */
       tags: string | null;
       /**
-      * **maps.map_status**
-      * - `bpchar` in database
+      * **maps.complexity**
+      * - `int4` in database
       * - `NOT NULL`, no default
       */
-      map_status: string;
+      complexity: number;
+      /**
+      * **maps.album_art**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      album_art: string | null;
     }
     export interface JSONSelectable {
       /**
@@ -407,6 +407,12 @@ declare module 'zapatos/schema' {
       * - `NOT NULL`, no default
       */
       id: string;
+      /**
+      * **maps.map_status**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      map_status: string;
       /**
       * **maps.submission_date**
       * - `timestamp` in database
@@ -450,29 +456,23 @@ declare module 'zapatos/schema' {
       */
       description: string | null;
       /**
-      * **maps.complexity**
-      * - `int4` in database
-      * - Nullable, no default
-      */
-      complexity: number | null;
-      /**
-      * **maps.album_art**
-      * - `text` in database
-      * - Nullable, no default
-      */
-      album_art: string | null;
-      /**
       * **maps.tags**
       * - `text` in database
       * - Nullable, no default
       */
       tags: string | null;
       /**
-      * **maps.map_status**
-      * - `bpchar` in database
+      * **maps.complexity**
+      * - `int4` in database
       * - `NOT NULL`, no default
       */
-      map_status: string;
+      complexity: number;
+      /**
+      * **maps.album_art**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      album_art: string | null;
     }
     export interface Whereable {
       /**
@@ -487,6 +487,12 @@ declare module 'zapatos/schema' {
       * - `NOT NULL`, no default
       */
       id?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **maps.map_status**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      map_status?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
       /**
       * **maps.submission_date**
       * - `timestamp` in database
@@ -530,9 +536,15 @@ declare module 'zapatos/schema' {
       */
       description?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
       /**
+      * **maps.tags**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      tags?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
       * **maps.complexity**
       * - `int4` in database
-      * - Nullable, no default
+      * - `NOT NULL`, no default
       */
       complexity?: number | db.Parameter<number> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, number | db.Parameter<number> | db.SQLFragment | db.ParentColumn>;
       /**
@@ -541,18 +553,6 @@ declare module 'zapatos/schema' {
       * - Nullable, no default
       */
       album_art?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
-      /**
-      * **maps.tags**
-      * - `text` in database
-      * - Nullable, no default
-      */
-      tags?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
-      /**
-      * **maps.map_status**
-      * - `bpchar` in database
-      * - `NOT NULL`, no default
-      */
-      map_status?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
     }
     export interface Insertable {
       /**
@@ -567,6 +567,12 @@ declare module 'zapatos/schema' {
       * - `NOT NULL`, no default
       */
       id: string | db.Parameter<string> | db.SQLFragment;
+      /**
+      * **maps.map_status**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      map_status: string | db.Parameter<string> | db.SQLFragment;
       /**
       * **maps.submission_date**
       * - `timestamp` in database
@@ -610,29 +616,23 @@ declare module 'zapatos/schema' {
       */
       description?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
       /**
-      * **maps.complexity**
-      * - `int4` in database
-      * - Nullable, no default
-      */
-      complexity?: number | db.Parameter<number> | null | db.DefaultType | db.SQLFragment;
-      /**
-      * **maps.album_art**
-      * - `text` in database
-      * - Nullable, no default
-      */
-      album_art?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
-      /**
       * **maps.tags**
       * - `text` in database
       * - Nullable, no default
       */
       tags?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
       /**
-      * **maps.map_status**
-      * - `bpchar` in database
+      * **maps.complexity**
+      * - `int4` in database
       * - `NOT NULL`, no default
       */
-      map_status: string | db.Parameter<string> | db.SQLFragment;
+      complexity: number | db.Parameter<number> | db.SQLFragment;
+      /**
+      * **maps.album_art**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      album_art?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
     }
     export interface Updatable {
       /**
@@ -647,6 +647,12 @@ declare module 'zapatos/schema' {
       * - `NOT NULL`, no default
       */
       id?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
+      /**
+      * **maps.map_status**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      map_status?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
       /**
       * **maps.submission_date**
       * - `timestamp` in database
@@ -690,29 +696,23 @@ declare module 'zapatos/schema' {
       */
       description?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
       /**
-      * **maps.complexity**
-      * - `int4` in database
-      * - Nullable, no default
-      */
-      complexity?: number | db.Parameter<number> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, number | db.Parameter<number> | null | db.DefaultType | db.SQLFragment>;
-      /**
-      * **maps.album_art**
-      * - `text` in database
-      * - Nullable, no default
-      */
-      album_art?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
-      /**
       * **maps.tags**
       * - `text` in database
       * - Nullable, no default
       */
       tags?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
       /**
-      * **maps.map_status**
-      * - `bpchar` in database
+      * **maps.complexity**
+      * - `int4` in database
       * - `NOT NULL`, no default
       */
-      map_status?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
+      complexity?: number | db.Parameter<number> | db.SQLFragment | db.SQLFragment<any, number | db.Parameter<number> | db.SQLFragment>;
+      /**
+      * **maps.album_art**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      album_art?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
     }
     export type UniqueIndex = 'maps_pkey';
     export type Column = keyof Selectable;
@@ -782,6 +782,12 @@ declare module 'zapatos/schema' {
       * - `NOT NULL`, no default
       */
       password_updated: Date;
+      /**
+      * **users.supabase_id**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      supabase_id: string | null;
     }
     export interface JSONSelectable {
       /**
@@ -838,6 +844,12 @@ declare module 'zapatos/schema' {
       * - `NOT NULL`, no default
       */
       password_updated: db.TimestampString;
+      /**
+      * **users.supabase_id**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      supabase_id: string | null;
     }
     export interface Whereable {
       /**
@@ -894,6 +906,12 @@ declare module 'zapatos/schema' {
       * - `NOT NULL`, no default
       */
       password_updated?: (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **users.supabase_id**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      supabase_id?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
     }
     export interface Insertable {
       /**
@@ -950,6 +968,12 @@ declare module 'zapatos/schema' {
       * - `NOT NULL`, no default
       */
       password_updated: (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment;
+      /**
+      * **users.supabase_id**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      supabase_id?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
     }
     export interface Updatable {
       /**
@@ -1006,8 +1030,14 @@ declare module 'zapatos/schema' {
       * - `NOT NULL`, no default
       */
       password_updated?: (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment | db.SQLFragment<any, (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment>;
+      /**
+      * **users.supabase_id**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      supabase_id?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
     }
-    export type UniqueIndex = 'users_email_key' | 'users_pkey' | 'users_username_key';
+    export type UniqueIndex = 'users_email_key' | 'users_pkey' | 'users_supabase_id_key' | 'users_username_key';
     export type Column = keyof Selectable;
     export type OnlyCols<T extends readonly Column[]> = Pick<Selectable, T[number]>;
     export type SQLExpression = Table | db.ColumnNames<Updatable | (keyof Updatable)[]> | db.ColumnValues<Updatable> | Whereable | Column | db.ParentColumn | db.GenericSQLExpression;

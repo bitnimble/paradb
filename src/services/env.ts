@@ -26,6 +26,9 @@ export type EnvVars = {
   dynamicConfigAccessKeyId: string;
   dynamicConfigSecretKey: string;
   dynamicConfigRepoFile: string;
+  supabaseUrl: string;
+  supabasePublishableKey: string;
+  supabaseSecretKey: string;
 };
 
 /**
@@ -60,6 +63,9 @@ export function getEnvVars() {
     dynamicConfigAccessKeyId: process.env.DYNAMIC_CONFIG_ACCESS_KEY_ID,
     dynamicConfigSecretKey: process.env.DYNAMIC_CONFIG_SECRET_KEY,
     dynamicConfigRepoFile: process.env.DYNAMIC_CONFIG_REPO_FILE,
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabasePublishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    supabaseSecretKey: process.env.SUPABASE_SECRET_KEY,
   };
   let fail = false;
   for (const [key, value] of Object.entries(_envVars)) {

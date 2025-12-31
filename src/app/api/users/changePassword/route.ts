@@ -1,4 +1,3 @@
-import { validatePassword } from 'services/crypto/crypto';
 import { error } from 'services/helpers';
 import { ChangePasswordError, changePassword, getUser } from 'services/users/users_repo';
 import { checkBody, getBody } from 'app/api/helpers';
@@ -8,6 +7,7 @@ import {
   deserializeChangePasswordRequest,
   serializeChangePasswordResponse,
 } from 'schema/users';
+import { getServerContext } from 'services/server_context';
 
 const send = (res: ChangePasswordResponse) =>
   new NextResponse<Buffer>(serializeChangePasswordResponse(res));
@@ -29,7 +29,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
   }
   const user = userResult.value;
 
-  if (!(await validatePassword(oldPassword, user.password))) {
+  const { supabase } = await getServerContext();
+  const verifyResponse = await supabase.rpc('confirm_user_password', { password: oldPassword });
+  if (verifyResponse.error || verifyResponse.data == false) {
     return send({
       success: false,
       statusCode: 403,

@@ -10,4 +10,11 @@ RUN echo "Setting up minio"
 RUN wget -P /usr/local/bin/ https://dl.min.io/client/mc/release/linux-amd64/mc
 RUN chmod +x /usr/local/bin/mc
 
-ENTRYPOINT ["tools/docker/dev.sh"]
+# RUN echo "Clearing local S3"
+# RUN mc alias set local http://minio:9000 minioadmin minioadmin
+# RUN mc admin user add local "$S3_ACCESS_KEY_ID" "$S3_ACCESS_KEY_SECRET" || true
+# RUN mc rb --force local/"$S3_MAPS_BUCKET" || true
+# RUN mc mb local/"$S3_MAPS_BUCKET"
+# RUN mc admin policy attach local readwrite --user "$S3_ACCESS_KEY_ID" || true
+
+ENTRYPOINT ["yarn", "next", "dev"]
