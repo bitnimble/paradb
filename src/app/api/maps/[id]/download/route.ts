@@ -15,7 +15,7 @@ export async function GET(_req: NextRequest, props: { params: Promise<{ id: stri
   await mapsRepo.incrementMapDownloadCount(id);
 
   const filename = sanitizeForDownload(result.value.title);
-  redirect(`${getEnvVars().publicS3BaseUrl}/${result.value.id}.zip?title=${filename}.zip`);
+  redirect(`${getEnvVars().publicS3BaseUrl}/maps/${result.value.id}.zip?title=${filename}.zip`);
 }
 
 function sanitizeForDownload(filename: string) {
