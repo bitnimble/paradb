@@ -42,13 +42,15 @@ async function createServerContext() {
   };
 }
 
-let _serverContext: ServerContext | undefined;
+let _serverContext: Promise<ServerContext> | undefined;
 export const getServerContext = async () => {
   if (!_serverContext) {
-    _serverContext = await createServerContext();
+    // Assigning to _serverContext should be synchronous, so that another request doesn't attempt
+    // to recreate the server context at the same time during the await.
+    _serverContext = createServerContext();
   }
   // Supabase client must be re-created on each incoming request as it's dependent on cookies/JWT
-  return { supabase: await createSupabaseServerClient(), ..._serverContext };
+  return { supabase: await createSupabaseServerClient(), ...(await _serverContext) };
 };
 let _flags: Flags | undefined;
 export const getFlags = () => {
