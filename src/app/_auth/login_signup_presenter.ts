@@ -6,6 +6,7 @@ import { RoutePath, routeFor } from 'utils/routes';
 export type LoginSignupField = 'username' | 'password' | 'email' | 'form';
 
 export class LoginSignupStore extends FormStore<LoginSignupField> {
+  submitting = false;
   username = '';
   email = '';
   password = '';
@@ -16,6 +17,7 @@ export class LoginSignupStore extends FormStore<LoginSignupField> {
       username: observable.ref,
       email: observable.ref,
       password: observable.ref,
+      submitting: observable.ref,
       reset: action.bound,
     });
   }
@@ -53,7 +55,9 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
       return;
     }
 
+    runInAction(() => (this.store.submitting = true));
     const resp = await this.api.login({ username, password });
+    runInAction(() => (this.store.submitting = false));
     if (resp.success) {
       await this.api.supabase.auth.setSession({
         access_token: resp.accessToken,
@@ -79,7 +83,9 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
       return;
     }
 
+    runInAction(() => (this.store.submitting = true));
     const resp = await this.api.signup({ username, email, password });
+    runInAction(() => (this.store.submitting = false));
     if (resp.success) {
       if (resp.session) {
         await this.api.supabase.auth.setSession({

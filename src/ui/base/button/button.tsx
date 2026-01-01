@@ -53,24 +53,18 @@ export const Button = (props: ButtonProps) => {
       })}
       onClick={_onClick}
     >
-      <T.Medium>
-        {children}
+      <T.Medium>{children}</T.Medium>
+      <div className={styles.trailingIcon}>
         {style === 'success' ? ' ✔' : null}
         {loading ? (
-          <div
-            className={classNames(
-              loadingStyles.laBallPulse,
-              loadingStyles.laSm,
-              styles.loadingSpinner
-            )}
-          >
+          <div className={classNames(loadingStyles.laBallPulse, loadingStyles.laSm)}>
             {/* These divs are styled via 'loading.css'. */}
             <div></div>
             <div></div>
             <div></div>
           </div>
         ) : undefined}
-      </T.Medium>
+      </div>
     </button>
   );
 };

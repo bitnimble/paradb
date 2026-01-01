@@ -67,6 +67,6 @@
     cursor: not-allowed;
 }
 
-.loadingSpinner {
+.trailingIcon {
     margin-left: gridBaseline;
 }
