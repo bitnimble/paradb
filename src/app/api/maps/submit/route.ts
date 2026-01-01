@@ -1,7 +1,5 @@
-import { getBody } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 import { SubmitMapResponse, serializeSubmitMapResponse } from 'schema/maps';
-import { getEnvVars } from 'services/env';
 import { error } from 'services/helpers';
 import { submitErrorMap } from 'services/maps/maps_repo';
 import { getServerContext } from 'services/server_context';

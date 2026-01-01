@@ -328,11 +328,11 @@ declare module 'zapatos/schema' {
       */
       id: string;
       /**
-      * **maps.map_status**
+      * **maps.visibility**
       * - `bpchar` in database
       * - `NOT NULL`, no default
       */
-      map_status: string;
+      visibility: string;
       /**
       * **maps.submission_date**
       * - `timestamp` in database
@@ -408,11 +408,11 @@ declare module 'zapatos/schema' {
       */
       id: string;
       /**
-      * **maps.map_status**
+      * **maps.visibility**
       * - `bpchar` in database
       * - `NOT NULL`, no default
       */
-      map_status: string;
+      visibility: string;
       /**
       * **maps.submission_date**
       * - `timestamp` in database
@@ -488,11 +488,11 @@ declare module 'zapatos/schema' {
       */
       id?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
       /**
-      * **maps.map_status**
+      * **maps.visibility**
       * - `bpchar` in database
       * - `NOT NULL`, no default
       */
-      map_status?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      visibility?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
       /**
       * **maps.submission_date**
       * - `timestamp` in database
@@ -568,11 +568,11 @@ declare module 'zapatos/schema' {
       */
       id: string | db.Parameter<string> | db.SQLFragment;
       /**
-      * **maps.map_status**
+      * **maps.visibility**
       * - `bpchar` in database
       * - `NOT NULL`, no default
       */
-      map_status: string | db.Parameter<string> | db.SQLFragment;
+      visibility: string | db.Parameter<string> | db.SQLFragment;
       /**
       * **maps.submission_date**
       * - `timestamp` in database
@@ -648,11 +648,11 @@ declare module 'zapatos/schema' {
       */
       id?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
       /**
-      * **maps.map_status**
+      * **maps.visibility**
       * - `bpchar` in database
       * - `NOT NULL`, no default
       */
-      map_status?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
+      visibility?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
       /**
       * **maps.submission_date**
       * - `timestamp` in database

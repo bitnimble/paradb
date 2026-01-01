@@ -6,7 +6,6 @@ import {
 } from '@aws-sdk/client-s3';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result } from 'base/result';
-import * as fs from 'fs/promises';
 import * as path from 'path';
 import { getEnvVars } from 'services/env';
 import * as unzipper from 'unzipper';

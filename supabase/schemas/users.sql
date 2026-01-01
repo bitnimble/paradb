@@ -9,3 +9,5 @@ CREATE TABLE users (
 
 CREATE INDEX idx_users_supabase_id ON users (supabase_id);
 CREATE INDEX idx_users_username ON users (lower(username));
+
+alter table users enable row level security;

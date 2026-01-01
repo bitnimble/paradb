@@ -109,11 +109,11 @@ export type Database = {
           description: string | null
           download_count: number
           id: string
-          map_status: string
           submission_date: string
           tags: string | null
           title: string
           uploader: string
+          visibility: string
         }
         Insert: {
           _id?: number
@@ -124,11 +124,11 @@ export type Database = {
           description?: string | null
           download_count?: number
           id: string
-          map_status: string
           submission_date: string
           tags?: string | null
           title: string
           uploader: string
+          visibility: string
         }
         Update: {
           _id?: number
@@ -139,11 +139,11 @@ export type Database = {
           description?: string | null
           download_count?: number
           id?: string
-          map_status?: string
           submission_date?: string
           tags?: string | null
           title?: string
           uploader?: string
+          visibility?: string
         }
         Relationships: []
       }

@@ -18,7 +18,7 @@ import { getDbPool } from 'services/db/pool';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
 
-export const enum MapStatus {
+export const enum Visibility {
   PUBLIC = 'P',
   HIDDEN = 'H',
   INVALID = 'I',
@@ -108,7 +108,7 @@ export class MapsRepo {
         .select(
           'maps',
           // Only select publicly visible maps.
-          { ...whereable, map_status: MapStatus.PUBLIC },
+          { ...whereable, visibility: Visibility.PUBLIC },
           {
             lateral: {
               difficulties: db.select(
@@ -255,7 +255,7 @@ export class MapsRepo {
       const map = await db
         .selectOne(
           'maps',
-          { id: mapId, map_status: MapStatus.PUBLIC },
+          { id: mapId, visibility: Visibility.PUBLIC },
           {
             lateral: {
               difficulties: db.select(
@@ -299,10 +299,13 @@ export class MapsRepo {
     }
   }
 
-  async changeMapStatus(id: string, status: MapStatus): Promise<Result<undefined, UpdateMapError>> {
+  async changeMapVisibility(
+    id: string,
+    visibility: Visibility
+  ): Promise<Result<undefined, UpdateMapError>> {
     const { pool } = await getServerContext();
     try {
-      await db.update('maps', { map_status: status }, { id }).run(pool);
+      await db.update('maps', { visibility }, { id }).run(pool);
       return { success: true, value: undefined };
     } catch (e) {
       return { success: false, errors: [wrapError(e, UpdateMapError.UNKNOWN_DB_ERROR)] };
@@ -425,7 +428,7 @@ export class MapsRepo {
           'maps',
           snakeCaseKeys({
             id,
-            mapStatus: MapStatus.PUBLIC,
+            visibility: Visibility.PUBLIC,
             submissionDate: now,
             title: title,
             artist: artist,

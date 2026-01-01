@@ -1,7 +1,7 @@
 CREATE TABLE maps (
   _id serial,
   id varchar(16) primary key,
-  map_status char not null,
+  visibility char not null,
   submission_date timestamp not null,
   title varchar(256) not null,
   artist varchar(256) not null,
@@ -20,3 +20,8 @@ CREATE TABLE difficulties (
   difficulty int,
   difficulty_name varchar(256) not null
 );
+
+CREATE INDEX difficulties_map_id_idx ON difficulties USING btree (map_id);
+
+alter table difficulties enable row level security;
+alter table maps enable row level security;
