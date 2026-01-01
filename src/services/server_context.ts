@@ -16,6 +16,7 @@ type ServerContext = {
 };
 
 async function createServerContext() {
+  console.log('Creating server context');
   const envVars = getEnvVars();
 
   const pool = await getDbPool();

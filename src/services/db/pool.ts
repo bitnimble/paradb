@@ -13,6 +13,7 @@ export async function getDbPool(maxConnections?: number) {
 }
 
 async function initPool(maxConnections?: number) {
+  console.log('Initialising pg db pool connection');
   // Test DB
   const envVars = getEnvVars();
   try {
