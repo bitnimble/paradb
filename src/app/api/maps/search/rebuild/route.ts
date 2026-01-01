@@ -8,7 +8,7 @@ const TEMP_MAPS_INDEX_UID = 'maps-new';
 
 export async function GET() {
   await rebuildMeilisearchIndex();
-  return new NextResponse(null, { status: 200 });
+  return new NextResponse('Success', { status: 200 });
 }
 
 export async function rebuildMeilisearchIndex() {
