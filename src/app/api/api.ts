@@ -156,7 +156,7 @@ export class HttpApi implements Api {
 
 function path(...parts: string[]) {
   return [
-    ...parts.slice(0, parts.length - 1).map((part, i) => (part.endsWith('/') ? part : `${part}/`)),
+    ...parts.slice(0, parts.length - 1).map((part) => (part.endsWith('/') ? part : `${part}/`)),
     parts[parts.length - 1],
   ].join('');
 }

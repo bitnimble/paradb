@@ -31,17 +31,17 @@ async function delay(ms: number = DELAY) {
 export class FakeApi implements Api {
   readonly supabase = createClient();
 
-  async changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
+  async changePassword(_req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
     return { success: true };
   }
-  async login(req: LoginRequest): Promise<LoginResponse> {
+  async login(_req: LoginRequest): Promise<LoginResponse> {
     return { success: true, accessToken: '123', refreshToken: '456' };
   }
-  async setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse> {
+  async setFavorites(_req: SetFavoriteMapsRequest): Promise<ApiResponse> {
     return { success: true };
   }
 
-  async signup(req: SignupRequest): Promise<SignupResponse> {
+  async signup(_req: SignupRequest): Promise<SignupResponse> {
     return { success: true, id: 'U123456' };
   }
 
@@ -57,7 +57,7 @@ export class FakeApi implements Api {
     await delay();
     return { success: true, maps: fakeMaps };
   }
-  async searchMaps(req: SearchMapsRequest): Promise<FindMapsResponse> {
+  async searchMaps(_req: SearchMapsRequest): Promise<FindMapsResponse> {
     await delay();
     return { success: true, maps: fakeMaps };
   }
@@ -80,7 +80,7 @@ export class FakeApi implements Api {
     return { success: true };
   }
 
-  async submitMap(req: { id?: string; mapData: Uint8Array }): Promise<SubmitMapResponse> {
+  async submitMap(_req: { id?: string; mapData: Uint8Array }): Promise<SubmitMapResponse> {
     await delay();
     return { success: true, id: allStar.id };
   }

@@ -1,5 +1,6 @@
 import { NextConfig } from 'next';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { withSentryConfig } = require('@sentry/nextjs');
 
 const s3Url = process.env.PUBLIC_S3_BASE_URL;

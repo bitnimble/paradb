@@ -101,7 +101,7 @@ export class ThrottledMapUploader {
     // Kick off initial uploads
     Array(MAX_CONNECTIONS)
       .fill(0)
-      .map((_, i) => this.processQueue(reuploadMapId));
+      .map(() => this.processQueue(reuploadMapId));
     return new Promise<[string[], string[]]>((res) => {
       const intervalHandler = setInterval(() => {
         // Work on the next queue item

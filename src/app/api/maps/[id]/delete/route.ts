@@ -1,9 +1,8 @@
-import { getEnvVars } from 'services/env';
-import { GetMapError } from 'services/maps/maps_repo';
-import { getServerContext } from 'services/server_context';
 import { joinErrors } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 import { DeleteMapResponse, serializeDeleteMapResponse } from 'schema/maps';
+import { GetMapError } from 'services/maps/maps_repo';
+import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 
 const send = (res: DeleteMapResponse) => new NextResponse<Buffer>(serializeDeleteMapResponse(res));

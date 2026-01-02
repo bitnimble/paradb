@@ -73,11 +73,11 @@ function createTextClass(className: string) {
   };
 }
 
-export namespace T {
-  export const Tiny = createTextClass(styles.tiny);
-  export const Small = createTextClass(styles.small);
-  export const Medium = createTextClass(styles.medium);
-  export const Large = createTextClass(styles.large);
-  export const ExtraLarge = createTextClass(styles.extraLarge);
-  export const Custom = createTextClass(styles.custom);
-}
+export const T = {
+  Tiny: createTextClass(styles.tiny),
+  Small: createTextClass(styles.small),
+  Medium: createTextClass(styles.medium),
+  Large: createTextClass(styles.large),
+  ExtraLarge: createTextClass(styles.extraLarge),
+  Custom: createTextClass(styles.custom),
+};

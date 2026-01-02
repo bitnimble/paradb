@@ -82,7 +82,7 @@ async function s3Delete(keys: string[]): PromisedResult<undefined, S3Error> {
       })
     );
     return { success: true, value: undefined };
-  } catch (e) {
+  } catch {
     return { success: false, errors: [{ type: S3Error.S3_DELETE_ERROR }] };
   }
 }
@@ -144,11 +144,12 @@ export async function deleteFiles(opts: { id: string }): Promise<Result<undefine
         Prefix: `albumArt/${opts.id}`,
       })
     );
+    // May throw error if key doesn't exist - that's fine, maybe it was a pre-S3 map
     await s3Delete(
       albumArtFiles.Contents?.map((c) => c.Key).filter((k): k is string => k != null) || []
     );
-  } catch (e) {
-    // TODO: log error to Sentry
+  } catch {
+    // TODO: log error to Sentry?
   }
 
   return { success: true, value: undefined };

@@ -53,7 +53,7 @@ export class Flags {
         },
         forcePathStyle: true,
       });
-    } catch (e) {
+    } catch {
       console.warn('Failed to create S3 client for Flags, dynamic flags will be disabled');
       return null;
     }
