@@ -1,5 +1,3 @@
-import * as msgpackr from 'msgpackr';
-
 export interface Type<T> {
   /**
    * Serializes an input value and returns a string to be sent over-the-wire. For record-like
@@ -209,7 +207,7 @@ class RecordType<S extends RecordSchema> extends TypeImpl<Reify<S>> {
       throw new InvalidTypeError(this.name, 'object', u);
     }
     const ignoredKeySet = new Set(ignoredKeys);
-    let result: Partial<Reify<S>> = {};
+    const result: Partial<Reify<S>> = {};
     // Test all property constraints
     for (const [key, validator] of Object.entries(this.schema)) {
       if (ignoredKeySet.has(key)) {
@@ -300,7 +298,7 @@ class UnionRecordType<
       try {
         s.validate(u, ignoredKeys);
         return true;
-      } catch (e) {
+      } catch {
         return false;
       }
     });
