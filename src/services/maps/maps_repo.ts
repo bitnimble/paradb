@@ -1,28 +1,22 @@
-import { camelCaseKeys, DbError, snakeCaseKeys } from 'services/db/helpers';
-import { generateId, IdDomain } from 'services/db/id_gen';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
-import { getServerContext } from 'services/server_context';
 import { Index } from 'meilisearch';
 import { MapSortableAttributes, PDMap } from 'schema/maps';
-import * as db from 'zapatos/db';
-import { deleteFiles, S3Error, uploadFiles } from './s3_handler';
+import { AdvancedSearchMapRequest, MapValidity, MapVisibility } from 'schema/maps_zod';
+import { camelCaseKeys, DbError, snakeCaseKeys } from 'services/db/helpers';
+import { generateId, IdDomain } from 'services/db/id_gen';
+import { getDbPool } from 'services/db/pool';
+import { getEnvVars } from 'services/env';
 import {
   validateMap,
   ValidateMapDifficultyError,
   ValidateMapError,
 } from 'services/maps/map_validator';
-import { getEnvVars } from 'services/env';
-import { AdvancedSearchMapRequest } from 'schema/maps_zod';
-import { getDbPool } from 'services/db/pool';
+import { getServerContext } from 'services/server_context';
+import * as db from 'zapatos/db';
+import { deleteFiles, S3Error, uploadFiles } from './s3_handler';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
-
-export const enum Visibility {
-  PUBLIC = 'P',
-  HIDDEN = 'H',
-  INVALID = 'I',
-}
 
 export type MeilisearchMap = {
   id: string;
@@ -108,7 +102,7 @@ export class MapsRepo {
         .select(
           'maps',
           // Only select publicly visible maps.
-          { ...whereable, visibility: Visibility.PUBLIC },
+          { ...whereable, visibility: MapVisibility.PUBLIC },
           {
             lateral: {
               difficulties: db.select(
@@ -146,6 +140,8 @@ export class MapsRepo {
             },
             columns: [
               'id',
+              'visibility',
+              'validity',
               'submission_date',
               'title',
               'artist',
@@ -255,7 +251,7 @@ export class MapsRepo {
       const map = await db
         .selectOne(
           'maps',
-          { id: mapId, visibility: Visibility.PUBLIC },
+          { id: mapId, visibility: MapVisibility.PUBLIC },
           {
             lateral: {
               difficulties: db.select(
@@ -269,6 +265,8 @@ export class MapsRepo {
             },
             columns: [
               'id',
+              'visibility',
+              'validity',
               'submission_date',
               'title',
               'artist',
@@ -301,7 +299,7 @@ export class MapsRepo {
 
   async changeMapVisibility(
     id: string,
-    visibility: Visibility
+    visibility: MapVisibility
   ): Promise<Result<undefined, UpdateMapError>> {
     const { pool } = await getServerContext();
     try {
@@ -428,7 +426,8 @@ export class MapsRepo {
           'maps',
           snakeCaseKeys({
             id,
-            visibility: Visibility.PUBLIC,
+            visibility: MapVisibility.PUBLIC,
+            validity: MapValidity.VALID,
             submissionDate: now,
             title: title,
             artist: artist,

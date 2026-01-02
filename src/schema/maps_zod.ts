@@ -2,9 +2,25 @@
 import { z } from 'zod';
 import { PaginatedApiRequest, PaginatedApiResponse, useTypedParse } from 'schema/api_zod';
 
+export enum MapVisibility {
+  PUBLIC = 'P',
+  HIDDEN = 'H',
+  INVALID = 'I',
+}
+
+export enum MapValidity {
+  PENDING_UPLOAD = 'pending_upload',
+  UPLOADED = 'uploaded',
+  VALIDATING = 'validating',
+  INVALID = 'invalid',
+  VALID = 'valid',
+}
+
 // TODO: rename to pdMap once the non-zod schema types have been migrated fully.
 export const pdMapZod = z.object({
   id: z.string(),
+  visibility: z.enum(MapVisibility),
+  validity: z.enum(MapValidity),
   submissionDate: z.date(),
   title: z.string(),
   artist: z.string(),

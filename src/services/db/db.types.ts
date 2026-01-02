@@ -113,6 +113,7 @@ export type Database = {
           tags: string | null
           title: string
           uploader: string
+          validity: string
           visibility: string
         }
         Insert: {
@@ -128,6 +129,7 @@ export type Database = {
           tags?: string | null
           title: string
           uploader: string
+          validity: string
           visibility: string
         }
         Update: {
@@ -143,6 +145,7 @@ export type Database = {
           tags?: string | null
           title?: string
           uploader?: string
+          validity?: string
           visibility?: string
         }
         Relationships: []

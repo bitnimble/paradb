@@ -2,6 +2,7 @@ CREATE TABLE maps (
   _id serial,
   id varchar(16) primary key,
   visibility char not null,
+  validity text not null,
   submission_date timestamp not null,
   title varchar(256) not null,
   artist varchar(256) not null,

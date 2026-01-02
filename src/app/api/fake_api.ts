@@ -88,6 +88,8 @@ export class FakeApi implements Api {
 
 const allStar: PDMap = {
   id: '1',
+  visibility: 'P',
+  validity: 'valid',
   submissionDate: '2021-06-01T00:00:00',
   title: 'All Star',
   artist: 'Smash Mouth',
@@ -109,6 +111,8 @@ const allStar: PDMap = {
 
 const californication: PDMap = {
   id: '2',
+  visibility: 'P',
+  validity: 'valid',
   submissionDate: '2021-06-01T00:00:00',
   title: 'Californication',
   artist: 'Red Hot Chili Peppers',

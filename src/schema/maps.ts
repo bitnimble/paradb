@@ -19,6 +19,8 @@ export const { serialize: serializeMapUserProjection, deserialize: deserializeMa
 export type PDMap = Reify<typeof serializeMap>;
 export const pdMap = rec('map', {
   id: str('id'),
+  visibility: str('visibility'),
+  validity: str('validity'),
   submissionDate: str('submissionDate'),
   title: str('title'),
   artist: str('artist'),
