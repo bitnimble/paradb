@@ -1,5 +1,3 @@
-@value gridBaseline from "ui/base/metrics/metrics.module.css";
-
 .formError {
-    margin-top: calc(gridBaseline * 2);
+    margin-top: calc(var(--gridBaseline) * 2);
 }

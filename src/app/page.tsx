@@ -9,7 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useState } from 'react';
 import { Difficulty, PDMap } from 'schema/maps';
 import { Button } from 'ui/base/button/button';
-import metrics from 'ui/base/metrics/metrics.module.css';
+import { metrics } from 'ui/base/design_system/design_tokens';
 import { Row, Table } from 'ui/base/table/table';
 import { TableSortStore, TableStore } from 'ui/base/table/table_presenter';
 import { RouteLink } from 'ui/base/text/link';
@@ -42,17 +42,17 @@ const Home = observer(() => {
           {
             content: <T.Small weight="bold">Favorites</T.Small>,
             sortLabel: 'favorites',
-            style: { width: `calc(${metrics.gridBaseline} * 15)` },
+            style: { width: `${metrics.gridBaseline * 15}px` },
           },
           {
             content: <T.Small weight="bold">Downloads</T.Small>,
             sortLabel: 'downloadCount',
-            style: { width: `calc(${metrics.gridBaseline} * 15)` },
+            style: { width: `${metrics.gridBaseline * 15}px` },
           },
           {
             content: <T.Small weight="bold">Upload date</T.Small>,
             sortLabel: 'submissionDate',
-            style: { width: `calc(${metrics.gridBaseline} * 20)` },
+            style: { width: `${metrics.gridBaseline * 20}px` },
           },
         ],
         6,
