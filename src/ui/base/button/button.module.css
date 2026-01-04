@@ -14,6 +14,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: gridBaseline;
 
     color: inherit;
     padding: gridBaseline calc(gridBaseline * 2);
