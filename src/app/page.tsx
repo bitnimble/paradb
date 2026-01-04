@@ -65,6 +65,7 @@ const Home = observer(() => {
   const [presenter] = useState(() => new MapListPresenter(api, store));
 
   const skeletonRef = useSkeletonRef();
+
   useInfiniteScroll(skeletonRef, () => {
     if (store.hasMore && !store.loadingMore) {
       presenter.onLoadMore();

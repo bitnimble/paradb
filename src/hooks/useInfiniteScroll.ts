@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { RefObject, useEffect, useEffectEvent, useRef } from 'react';
 
 /**
  * The space in pixels from the bottom of the container to trigger the callback.
@@ -34,6 +34,8 @@ const useInfiniteScroll = (
   const { threshold = DEFAULT_THRESHOLD, debounceMs = DEFAULT_DEBOUNCE_MS } = options;
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const handleScrollCallback = useEffectEvent(callback);
+
   useEffect(() => {
     const target =
       typeof scrollContainerRef === 'function' ? scrollContainerRef() : scrollContainerRef.current;
@@ -53,8 +55,7 @@ const useInfiniteScroll = (
         const clientHeight = target.clientHeight;
 
         if (scrollHeight - scrollTop <= clientHeight + threshold) {
-          console.log('Infinite scroll triggered');
-          callback();
+          handleScrollCallback();
         }
       }, debounceMs);
     };
@@ -67,7 +68,7 @@ const useInfiniteScroll = (
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [scrollContainerRef, callback, threshold, debounceMs]);
+  }, [scrollContainerRef, threshold, debounceMs]);
 };
 
 export default useInfiniteScroll;
