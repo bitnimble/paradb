@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
-      "command": "yarn next dev --webpack"
+      "command": "yarn next dev"
     }
   ]
 }

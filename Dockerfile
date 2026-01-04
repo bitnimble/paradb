@@ -9,6 +9,6 @@ ARG SENTRY_AUTH_TOKEN
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install ca-certificates -y
 RUN yarn install
-RUN yarn next build --webpack
+RUN yarn next build
 
 ENTRYPOINT ["tools/docker/start.sh"]
