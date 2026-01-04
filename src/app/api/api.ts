@@ -53,7 +53,7 @@ export interface Api {
   searchMaps(req: SearchMapsRequest): Promise<FindMapsResponse>;
   getMap(id: string): Promise<GetMapResponse>;
   deleteMap(id: string): Promise<DeleteMapResponse>;
-  submitMap(req: { id?: string }): Promise<SubmitMapResponse>;
+  submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse>;
 }
 
 export class HttpApi implements Api {
@@ -126,9 +126,8 @@ export class HttpApi implements Api {
     return deserializeDeleteMapResponse(resp);
   }
 
-  async submitMap(req: { id?: string }): Promise<SubmitMapResponse> {
-    const bsonReq = SubmitMapRequest.parse(req);
-    const resp = await post(path(this.apiBase, 'maps', 'submit'), JSON.stringify(bsonReq));
+  async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
+    const resp = await post(path(this.apiBase, 'maps', 'submit'), JSON.stringify(req));
     return deserializeSubmitMapResponse(resp);
   }
 }

@@ -19,6 +19,7 @@ import {
 } from 'schema/users';
 import { Api } from './api';
 import { createClient } from 'services/session/supabase_client';
+import { SubmitMapRequest } from 'schema/maps_zod';
 
 const DELAY = 500;
 
@@ -80,7 +81,7 @@ export class FakeApi implements Api {
     return { success: true };
   }
 
-  async submitMap(_req: { id?: string }): Promise<SubmitMapResponse> {
+  async submitMap(_req: SubmitMapRequest): Promise<SubmitMapResponse> {
     await delay();
     return { success: true, id: allStar.id, url: '' };
   }

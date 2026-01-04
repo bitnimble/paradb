@@ -5,6 +5,7 @@ import { error } from 'services/helpers';
 import { mintUploadUrl } from 'services/maps/s3_handler';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
+import { string } from 'zod';
 
 const send = (res: SubmitMapResponse) => new NextResponse<Buffer>(serializeSubmitMapResponse(res));
 /**
@@ -60,7 +61,10 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     id = submitMapReq.id;
     await mapsRepo.setValidity(id, MapValidity.PENDING_REUPLOAD);
   } else {
-    const createMapResult = await mapsRepo.createNewMap({ uploader: session.id });
+    const createMapResult = await mapsRepo.createNewMap({
+      title: submitMapReq.title,
+      uploader: session.id,
+    });
     if (!createMapResult.success) {
       return error({
         statusCode: 500,

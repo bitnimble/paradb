@@ -67,7 +67,10 @@ export class ThrottledMapUploader {
     const mapData = new Uint8Array(await upload.file.arrayBuffer());
     try {
       // Get map ID and presigned S3 upload URL
-      const submitMapResp = await this.api.submitMap({ id: reuploadMapId });
+      const submitMapResp = await this.api.submitMap({
+        id: reuploadMapId,
+        title: upload.file.name,
+      });
       if (!submitMapResp.success) {
         runInAction(() => {
           upload.state = 'error';

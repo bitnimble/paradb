@@ -61,8 +61,10 @@ export const AdvancedSearchMapResponse = useTypedParse(
 );
 
 export const SubmitMapRequest = z.object({
+  title: z.string(),
   id: z.string().optional(),
 });
+export type SubmitMapRequest = z.infer<typeof SubmitMapRequest>;
 
 export type AdvancedSearchMapRequest = z.infer<typeof AdvancedSearchMapRequest>;
 export type AdvancedSearchMapsResponse = z.infer<typeof AdvancedSearchMapResponse>;

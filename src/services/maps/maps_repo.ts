@@ -390,8 +390,10 @@ export class MapsRepo {
   }
 
   async createNewMap({
+    title,
     uploader,
   }: {
+    title: string;
     uploader: string;
   }): PromisedResult<{ id: string }, CreateMapError | DbError> {
     const pool = await getDbPool();
@@ -412,7 +414,7 @@ export class MapsRepo {
             validity: MapValidity.PENDING_UPLOAD,
             uploader,
             submissionDate: new Date(),
-            title: '',
+            title,
             artist: '',
             complexity: 0,
           }),
