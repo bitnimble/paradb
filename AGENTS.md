@@ -28,9 +28,9 @@ The codebase uses Docker to run third-party services locally (Meilisearch for se
 
 If you're receiving a request through an issue or PR comment, always:
 
-- Think hard about the question and problem scope, and gather any essential requirements that are critical to solving the problem. Respond with these as questions first before continuing.
+- Think hard about the question and problem scope, and gather any essential requirements that are critical to solving the problem. Respond with these as questions first before continuing. This step is optional and you should only need to ask questions for things that might be controversial, or that would be high-impact/sweeping/drastic changes. If this doesn't apply, just continue to the next step.
 - Think hard and come up with a plan on how to solve the problem. Respond with this for confirmation before continuing.
-- After confirming implement the solution in code. Always:
+- After confirming, implement the solution in code. Always:
   - Always look at how other components and functions are implemented to understand the patterns in the codebase and how code, interfaces and types are structured.
   - Ensure that anything renamed is correctly refactored in any usage
   - Always look around the rest of the codebase first to see if a similar problem is solved elsewhere, and either copy the strategy and adjust where necessary, or refactor it to be shared.
@@ -40,8 +40,11 @@ If you're receiving a request through an issue or PR comment, always:
   - Output code is correctly formatted with Prettier, imports are organised, and both typechecking and lint passes
   - Before finishing, remove all of your bias and clear your context as much as possible, and pretend to be another agent and review your own code. Make note of any review comments or suggestions, and then apply them.
   - If this is a request on an issue, commit the result and raise a PR, and add the person who requested the task as a reviewer. Come up with a very short and descriptive PR description.
+  - You should actually create the actual PR using `gh pr create`, and link to the created PR. Do not make a PR creation link that the requester would have to click to create the PR.
   - If this is a follow up comment on a PR, commit the result and push to the PR branch, and then ping the person who requested it to re-review, along with a very short and descriptive comment describing the latest commit changes.
   - Use basic semantic/conventional commit styling, e.g. "feat: allow XYZ" or "chore: implement foo"
+  - If the request came from an issue and you are making edits and have a branch and need further guidance, just create the PR anyway, link to it, and ping the requester in the PR description. Further guidance about the implementation should be in the PR, not the issue.
+  - To reiterate: issue comments should primarily be about intention and planning. Any questions or feedback about implementation details should be in a PR.
 - Based on your max turn limit, you may need to break up your proposal into multiple steps. If so, report back to the requester with these multiple proposed stages and implement them one by one instead, after confirmation from the requester.
 
 Most important - if the request is (verbatim and exactly) "test" with no other words other than the trigger phrase ping itself, respond with ONLY "meow", with no other words, context, or punctuation.
