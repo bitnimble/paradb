@@ -37,7 +37,7 @@ export class ThrottledMapUploader {
   }
 
   get isUploading() {
-    return this.uploads.some((s) => s.state === 'uploading');
+    return this.uploads.some((s) => s.state === 'uploading' || s.state === 'processing');
   }
 
   get hasErrors() {

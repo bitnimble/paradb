@@ -19,7 +19,7 @@ let s3: { client: S3Client; bucket: string } | undefined;
 // TODO: this won't be safe for collisions if the same user reuploads against the same map multiple
 // times at the same time
 const mapKey = (id: string, temp: boolean) => `maps/${id}.zip` + (temp ? '.temp' : '');
-const albumArtPrefix = (id: string, temp: boolean) => `albumArt/${id}` + (temp ? '_temp' : '');
+const albumArtPrefix = (id: string, temp: boolean) => `albumArt/${id}` + (temp ? '_temp/' : '/');
 
 export const enum S3Error {
   S3_GET_ERROR = 's3_get_error',
@@ -113,6 +113,9 @@ async function s3Put(
 }
 
 async function s3Delete(keys: string[]): PromisedResult<undefined, S3Error> {
+  if (keys.length === 0) {
+    return { success: true, value: undefined };
+  }
   try {
     const s3 = getS3Client();
     await s3.client.send(
@@ -189,7 +192,7 @@ export async function uploadAlbumArtFiles(
       const albumArt = checkExists(a, 'albumArt');
       const buffer = await albumArt.buffer();
       const filename = path.basename(albumArt.path);
-      return s3Put(`${albumArtPrefix(id, temp)}/${filename}`, buffer, guessContentType(filename));
+      return s3Put(`${albumArtPrefix(id, temp)}${filename}`, buffer, guessContentType(filename));
     })
   );
 
