@@ -120,7 +120,7 @@ export class ThrottledMapUploader {
     return new Promise<[string[], string[]]>((res) => {
       const intervalHandler = setInterval(() => {
         // Work on the next queue item
-        if (!this.uploads.some((u) => u.state === 'pending' || u.state === 'uploading')) {
+        if (this.uploads.every((u) => u.state === 'error' || u.state === 'success')) {
           clearInterval(intervalHandler);
           res([
             this.uploads.filter((u): u is UploadSuccess => u.state === 'success').map((u) => u.id),
