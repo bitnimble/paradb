@@ -12,6 +12,7 @@ import {
   deserializeGetMapResponse,
   deserializeSubmitMapResponse,
 } from 'schema/maps';
+import { SubmitMapRequest } from 'schema/maps_zod';
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
@@ -52,11 +53,7 @@ export interface Api {
   searchMaps(req: SearchMapsRequest): Promise<FindMapsResponse>;
   getMap(id: string): Promise<GetMapResponse>;
   deleteMap(id: string): Promise<DeleteMapResponse>;
-  submitMap(
-    req: { id?: string; mapData: Uint8Array },
-    onProgress: (e: ProgressEvent) => void,
-    onUploadFinish: () => void
-  ): Promise<SubmitMapResponse>;
+  submitMap(req: { id?: string }): Promise<SubmitMapResponse>;
 }
 
 export class HttpApi implements Api {
@@ -129,28 +126,10 @@ export class HttpApi implements Api {
     return deserializeDeleteMapResponse(resp);
   }
 
-  async submitMap(
-    req: { id?: string; mapData: Uint8Array },
-    onProgress: (e: ProgressEvent) => void,
-    onUploadFinish: () => void
-  ): Promise<SubmitMapResponse> {
-    return new Promise((res, rej) => {
-      const xhr = new XMLHttpRequest();
-      const formData = new FormData();
-      formData.append('mapData', new Blob([req.mapData]));
-      formData.append('id', req.id || '');
-      xhr.open('POST', path(this.apiBase, 'maps', 'submit'), true);
-      xhr.responseType = 'text';
-      xhr.upload.addEventListener('progress', onProgress);
-      xhr.upload.addEventListener('load', onUploadFinish);
-      xhr.onload = () => {
-        res(deserializeSubmitMapResponse(xhr.responseText));
-      };
-      xhr.onerror = () => {
-        rej();
-      };
-      xhr.send(formData);
-    });
+  async submitMap(req: { id?: string }): Promise<SubmitMapResponse> {
+    const bsonReq = SubmitMapRequest.parse(req);
+    const resp = await post(path(this.apiBase, 'maps', 'submit'), JSON.stringify(bsonReq));
+    return deserializeSubmitMapResponse(resp);
   }
 }
 

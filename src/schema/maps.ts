@@ -84,6 +84,7 @@ export type SearchMapsRequest = {
 export type SubmitMapSuccess = Reify<typeof submitMapSuccess>;
 const submitMapSuccess = extend('submitMapSuccess', apiSuccess, {
   id: str('id'),
+  url: str('url'),
 });
 
 const submitMapError = extend('submitMapError', apiError, {});

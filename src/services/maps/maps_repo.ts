@@ -3,18 +3,17 @@ import { PromisedResult, Result, wrapError } from 'base/result';
 import { Index } from 'meilisearch';
 import { MapSortableAttributes, PDMap } from 'schema/maps';
 import { AdvancedSearchMapRequest, MapValidity, MapVisibility } from 'schema/maps_zod';
-import { camelCaseKeys, DbError, snakeCaseKeys } from 'services/db/helpers';
-import { generateId, IdDomain } from 'services/db/id_gen';
+import { DbError, camelCaseKeys, snakeCaseKeys } from 'services/db/helpers';
+import { IdDomain, generateId } from 'services/db/id_gen';
 import { getDbPool } from 'services/db/pool';
-import { getEnvVars } from 'services/env';
 import {
-  validateMap,
   ValidateMapDifficultyError,
   ValidateMapError,
+  validateMap,
 } from 'services/maps/map_validator';
 import { getServerContext } from 'services/server_context';
 import * as db from 'zapatos/db';
-import { deleteFiles, S3Error, uploadFiles } from './s3_handler';
+import { S3Error, deleteFiles, promoteTempMapFiles, uploadAlbumArtFiles } from './s3_handler';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
 
@@ -71,12 +70,11 @@ export const enum DeleteMapError {
   MISSING_MAP = 'missing_map',
 }
 
-type UpsertMapOpts = {
-  // a map ID that this upsert will replace (if the mapFile is valid)
-  id?: string;
+type ProcessMapOpts = {
+  id: string;
   uploader: string;
   // zip file of the map
-  mapFile: ArrayBuffer;
+  mapFile: Buffer;
 };
 export const enum CreateMapError {
   TOO_MANY_ID_GEN_ATTEMPTS = 'too_many_id_gen_attempts',
@@ -310,6 +308,16 @@ export class MapsRepo {
     }
   }
 
+  async setValidity(id: string, validity: MapValidity): PromisedResult<undefined, UpdateMapError> {
+    const pool = await getDbPool();
+    try {
+      await db.update('maps', { validity }, { id }).run(pool);
+      return { success: true, value: undefined };
+    } catch (e) {
+      return { success: false, errors: [wrapError(e, UpdateMapError.UNKNOWN_DB_ERROR)] };
+    }
+  }
+
   private async updateMeilisearchMap(
     map: Partial<PDMap> & { id: string }
   ): PromisedResult<void, MeilisearchError> {
@@ -373,14 +381,51 @@ export class MapsRepo {
         return { success: false, errors: [{ type: DeleteMapError.MISSING_MAP }] };
       }
       await this.meilisearchMaps.deleteDocument(id);
-      return deleteFiles({ id });
+      // Attempt to delete any orphaned S3 temp files just in case
+      await Promise.all([deleteFiles(id, true), deleteFiles(id, false)]);
+      return { success: true, value: undefined };
     } catch (e) {
       return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
     }
   }
 
-  async upsertMap(
-    opts: UpsertMapOpts
+  async createNewMap({
+    uploader,
+  }: {
+    uploader: string;
+  }): PromisedResult<{ id: string }, CreateMapError | DbError> {
+    const pool = await getDbPool();
+    const id = await generateId(
+      IdDomain.MAPS,
+      async (id) => !!(await db.selectOne('maps', { id }).run(pool))
+    );
+    if (id == null) {
+      return { success: false, errors: [{ type: CreateMapError.TOO_MANY_ID_GEN_ATTEMPTS }] };
+    }
+
+    try {
+      await db
+        .insert('maps', [
+          snakeCaseKeys({
+            id,
+            visibility: MapVisibility.HIDDEN,
+            validity: MapValidity.PENDING_UPLOAD,
+            uploader,
+            submissionDate: new Date(),
+            title: '',
+            artist: '',
+            complexity: 0,
+          }),
+        ])
+        .run(pool);
+      return { success: true, value: { id } };
+    } catch (e) {
+      return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
+    }
+  }
+
+  async validateUploadedMap(
+    opts: ProcessMapOpts
   ): PromisedResult<
     PDMap,
     | S3Error
@@ -390,14 +435,8 @@ export class MapsRepo {
     | ValidateMapDifficultyError
     | MeilisearchError
   > {
-    const { pool } = await getServerContext();
-    const id =
-      opts.id ?? (await generateId(IdDomain.MAPS, async (id) => (await this.getMap(id)).success));
-    if (id == null) {
-      return { success: false, errors: [{ type: CreateMapError.TOO_MANY_ID_GEN_ATTEMPTS }] };
-    }
-
-    const buffer = Buffer.from(opts.mapFile);
+    const { id, mapFile: buffer, uploader } = opts;
+    await this.setValidity(id, MapValidity.VALIDATING);
     const validatedMapResult = await validateMap({ id, buffer });
     if (!validatedMapResult.success) {
       return validatedMapResult;
@@ -407,19 +446,16 @@ export class MapsRepo {
       validatedMapResult.value;
 
     // We are updating a map; delete the old file off S3 first
-    if (opts.id) {
-      const deleteResult = await deleteFiles({ id });
-      if (!deleteResult.success) {
-        return deleteResult;
-      }
-    }
-    const uploadResult = await uploadFiles({ id, buffer, albumArtFiles });
+    const existingMap = await this.getMap(id);
+    const isExistingMap = existingMap.success && existingMap.value.validity === MapValidity.VALID;
+    const uploadResult = await uploadAlbumArtFiles(id, albumArtFiles, true);
     if (!uploadResult.success) {
       return uploadResult;
     }
     const albumArt = uploadResult.value;
 
     const now = new Date();
+    const pool = await getDbPool();
     try {
       const insertedMap = await db
         .upsert(
@@ -432,7 +468,7 @@ export class MapsRepo {
             title: title,
             artist: artist,
             author: author || null,
-            uploader: opts.uploader,
+            uploader,
             albumArt: albumArt || null,
             description: description || null,
             complexity: checkExists(complexity, 'complexity'),
@@ -440,7 +476,7 @@ export class MapsRepo {
           ['id']
         )
         .run(pool);
-      if (opts.id) {
+      if (isExistingMap) {
         await db.deletes('difficulties', snakeCaseKeys({ mapId: id })).run(pool);
       }
       const insertedDifficulties = await db
@@ -455,12 +491,18 @@ export class MapsRepo {
           )
         )
         .run(pool);
+
+      await promoteTempMapFiles(id);
+
       const mapResult = camelCaseKeys({
         ...insertedMap,
         difficulties: insertedDifficulties,
-        // A newly created map will never be favorited
-        favorites: 0,
-        userProjection: { isFavorited: false },
+        favorites: (existingMap.success && existingMap.value.favorites) || 0,
+        userProjection: {
+          isFavorited: !!(await db
+            .selectOne('favorites', { map_id: id, user_id: uploader })
+            .run(pool)),
+        },
       });
       const meilisearchResp = await this.updateMeilisearchMap(mapResult);
       if (!meilisearchResp.success) {
@@ -470,27 +512,6 @@ export class MapsRepo {
     } catch (e) {
       return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
     }
-  }
-
-  async revalidateMap(
-    id: string
-  ): Promise<Result<undefined, ValidateMapError | ValidateMapDifficultyError>> {
-    // Download the map from S3
-    const ab = await fetch(`${getEnvVars().publicS3BaseUrl}/${id}.zip`).then((r) =>
-      r.arrayBuffer()
-    );
-    const buffer = Buffer.from(ab);
-    const validateResult = await validateMap({ id, buffer });
-
-    // Re-spread the result object to strip out anything else from the valdiator that we don't care
-    // about, e.g. albumArtFiles
-    if (!validateResult.success) {
-      return {
-        success: false,
-        errors: validateResult.errors,
-      };
-    }
-    return { success: true, value: undefined };
   }
 }
 
@@ -504,6 +525,7 @@ export const submitErrorMap: Record<
   | MeilisearchError,
   [number, string]
 > = {
+  [S3Error.S3_GET_ERROR]: internalError,
   [S3Error.S3_WRITE_ERROR]: internalError,
   [S3Error.S3_DELETE_ERROR]: internalError,
   [DbError.UNKNOWN_DB_ERROR]: internalError,

@@ -13,7 +13,8 @@
     "test": "sudo docker compose -f docker/docker-compose.test.yml --env-file .env.test up --build --abort-on-container-exit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.414.0",
+    "@aws-sdk/client-s3": "^3.958.0",
+    "@aws-sdk/s3-request-presigner": "^3.958.0",
     "@sentry/nextjs": "^10.25.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
@@ -21,6 +22,7 @@
     "@types/react": "19.2.5",
     "@types/react-dom": "19.2.3",
     "@types/sanitize-html": "^2.9.0",
+    "@vercel/functions": "^3.3.4",
     "bcrypt": "^5.1.1",
     "camelcase-keys-recursive": "^1.0.0",
     "classnames": "^2.3.2",

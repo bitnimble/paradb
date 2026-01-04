@@ -87,7 +87,7 @@ export const SubmitMapPage = observer((props: SubmitMapPageProps) => {
           Error: {uploadState.errorMessage}
         </div>
       );
-    } else if (uploadState.progress === 1) {
+    } else if (uploadState.state === 'processing') {
       return <div className={styles.progressContainer}>Processing map...</div>;
     }
     return (

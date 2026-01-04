@@ -10,6 +10,7 @@ export enum MapVisibility {
 
 export enum MapValidity {
   PENDING_UPLOAD = 'pending_upload',
+  PENDING_REUPLOAD = 'pending_reupload',
   UPLOADED = 'uploaded',
   VALIDATING = 'validating',
   INVALID = 'invalid',
@@ -58,6 +59,10 @@ export const AdvancedSearchMapResponse = useTypedParse(
     })
   )
 );
+
+export const SubmitMapRequest = z.object({
+  id: z.string().optional(),
+});
 
 export type AdvancedSearchMapRequest = z.infer<typeof AdvancedSearchMapRequest>;
 export type AdvancedSearchMapsResponse = z.infer<typeof AdvancedSearchMapResponse>;

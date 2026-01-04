@@ -80,9 +80,9 @@ export class FakeApi implements Api {
     return { success: true };
   }
 
-  async submitMap(_req: { id?: string; mapData: Uint8Array }): Promise<SubmitMapResponse> {
+  async submitMap(_req: { id?: string }): Promise<SubmitMapResponse> {
     await delay();
-    return { success: true, id: allStar.id };
+    return { success: true, id: allStar.id, url: '' };
   }
 }
 
