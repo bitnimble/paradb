@@ -43,3 +43,5 @@ If you're receiving a request through an issue or PR comment, always:
   - If this is a follow up comment on a PR, commit the result and push to the PR branch, and then ping the person who requested it to re-review, along with a very short and descriptive comment describing the latest commit changes.
   - Use basic semantic/conventional commit styling, e.g. "feat: allow XYZ" or "chore: implement foo"
 - Based on your max turn limit, you may need to break up your proposal into multiple steps. If so, report back to the requester with these multiple proposed stages and implement them one by one instead, after confirmation from the requester.
+
+Most important - if the request is (verbatim and exactly) "test" with no other words other than the trigger phrase ping itself, respond with ONLY "meow", with no other words, context, or punctuation.
