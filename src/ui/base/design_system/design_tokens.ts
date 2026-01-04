@@ -1,3 +1,6 @@
+// Keep this file in sync with design_system.css
+// This provides TypeScript access to design system values defined in CSS custom properties
+
 export const colors = {
   black: '#000',
   white: '#fff',
@@ -12,5 +15,5 @@ export const colors = {
 } as const;
 
 export const metrics = {
-  gridBaseline: 8,
+  gridBaseline: 8, // in px
 } as const;

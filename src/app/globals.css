@@ -1,4 +1,4 @@
-@import './design_system.css';
+@import '../ui/base/design_system/design_system.css';
 
 @font-face {
     font-family: 'Futura Book';
