@@ -1,7 +1,7 @@
 import { MeiliSearch } from 'meilisearch';
 import { Pool } from 'pg';
 import { getDbPool } from 'services/db/pool';
-import { getEnvVars } from 'services/env';
+import { getEnvVars, getSingleton } from 'services/env';
 import { Flags } from 'services/flags';
 import { MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
 import { FavoritesRepo } from 'services/users/favorites_repo';
@@ -15,7 +15,7 @@ type ServerContext = {
   favoritesRepo: FavoritesRepo;
 };
 
-async function createServerContext() {
+async function createServerContext(): Promise<ServerContext> {
   console.log('Creating server context');
   const envVars = getEnvVars();
 
@@ -42,20 +42,14 @@ async function createServerContext() {
   };
 }
 
-let _serverContext: Promise<ServerContext> | undefined;
 export const getServerContext = async () => {
-  if (!_serverContext) {
-    // Assigning to _serverContext should be synchronous, so that another request doesn't attempt
-    // to recreate the server context at the same time during the await.
-    _serverContext = createServerContext();
-  }
+  const serverContext = await getSingleton('_serverContext', createServerContext);
   // Supabase client must be re-created on each incoming request as it's dependent on cookies/JWT
-  return { supabase: await createSupabaseServerClient(), ...(await _serverContext) };
+  return {
+    supabase: await createSupabaseServerClient(),
+    ...serverContext,
+  };
 };
-let _flags: Flags | undefined;
 export const getFlags = () => {
-  if (!_flags) {
-    _flags = new Flags();
-  }
-  return _flags;
+  return getSingleton('_flags', () => new Flags());
 };

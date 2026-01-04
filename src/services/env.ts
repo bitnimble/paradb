@@ -1,3 +1,12 @@
+export function getSingleton<T>(name: string, factory: () => T): T {
+  // Assigning to globalThis should be synchronous, so that another request doesn't attempt
+  // to recreate the singleton at the same time during the await.
+  if (!(globalThis as any)[name]) {
+    (globalThis as any)[name] = factory();
+  }
+  return (globalThis as any)[name];
+}
+
 /** Keep in sync with the test env vars in `jest_setup.ts` */
 export type EnvVars = {
   baseUrl: string;
@@ -26,15 +35,15 @@ export type EnvVars = {
   supabaseSecretKey: string;
 };
 
-let envVars: EnvVars | undefined;
 /**
  * Retrieves and validates the environment variables.
  */
 export function getEnvVars() {
-  if (envVars) {
-    return envVars;
-  }
-  const _envVars: { [K in keyof EnvVars]: EnvVars[K] | undefined } = {
+  return getSingleton('_envVars', createEnvVars);
+}
+
+function createEnvVars(): EnvVars {
+  const envVars: { [K in keyof EnvVars]: EnvVars[K] | undefined } = {
     baseUrl: process.env.BASE_URL,
     pgHost: process.env.PGHOST,
     pgPort: Number(process.env.PGPORT || undefined),
@@ -61,7 +70,7 @@ export function getEnvVars() {
     supabaseSecretKey: process.env.SUPABASE_SECRET_KEY,
   };
   let fail = false;
-  for (const [key, value] of Object.entries(_envVars)) {
+  for (const [key, value] of Object.entries(envVars)) {
     if (
       value == null ||
       (typeof value === 'string' && value.trim() === '') ||
@@ -74,7 +83,6 @@ export function getEnvVars() {
   if (fail) {
     throw new Error('One or more environment variables were missing, see above.');
   }
-  envVars = _envVars as EnvVars;
 
-  return envVars;
+  return envVars as EnvVars;
 }
