@@ -44,4 +44,4 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ steps.app-token.outputs.token }}
           trigger_phrase: "@intern"
-          claude_args: --max-turns 100 --model sonnet --allowedTools "Bash(yarn:*),Bash(bun:*),Bash(gh pr create:*),Bash(gh pr checkout:*),Bash(git fetch:*),Bash(git rebase:*)"
+          claude_args: --max-turns 100 --model sonnet --allowedTools "Bash(yarn:*),Bash(bun:*),Bash(gh pr create:*),Bash(gh pr checkout:*),Bash(git fetch:*),Bash(git rebase:*),Bash(git show:*),Bash(git restore:*),Bash(git reset:*)"
