@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
-          
+
       - name: Generate GitHub App token
         id: app-token
         uses: actions/create-github-app-token@v1
@@ -44,3 +44,4 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ steps.app-token.outputs.token }}
           trigger_phrase: "@intern"
+          claude_args: --max-turns 100 --model sonnet --allowedTools "Bash(yarn *)"
