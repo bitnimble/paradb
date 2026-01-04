@@ -19,6 +19,7 @@ import { RoutePath, routeFor } from 'utils/routes';
 import styles from './page.module.css';
 import { Search } from './search';
 import useInfiniteScroll from 'hooks/useInfiniteScroll';
+import { useSkeletonRef } from 'app/skeleton_provider';
 
 export default function Page() {
   return (
@@ -63,7 +64,8 @@ const Home = observer(() => {
   );
   const [presenter] = useState(() => new MapListPresenter(api, store));
 
-  useInfiniteScroll(() => {
+  const skeletonRef = useSkeletonRef();
+  useInfiniteScroll(skeletonRef, () => {
     if (store.hasMore && !store.loadingMore) {
       presenter.onLoadMore();
     }

@@ -1,40 +1,73 @@
-import { useEffect } from 'react';
+import { RefObject, useEffect, useRef } from 'react';
 
 /**
- * The space in pixels from the bottom of the page to trigger the callback.
+ * The space in pixels from the bottom of the container to trigger the callback.
  */
 export const DEFAULT_THRESHOLD = 100;
 
 /**
- * Hook to handle infinite scrolling.
- * It calls the provided callback when the user scrolls near the bottom of the page.
- * @param callback - The function to call when the user scrolls near the bottom.
- * @param threshold - The distance from the bottom of the page to trigger the callback.
+ * Default debounce delay in milliseconds.
  */
-const useInfiniteScroll = (callback: () => void, threshold: number = DEFAULT_THRESHOLD) => {
+export const DEFAULT_DEBOUNCE_MS = 150;
+
+export type ScrollContainerRef = RefObject<HTMLElement | null> | (() => HTMLElement | null);
+
+export interface UseInfiniteScrollOptions {
+  /** The distance from the bottom of the container to trigger the callback. */
+  threshold?: number;
+  /** Debounce delay in milliseconds. */
+  debounceMs?: number;
+}
+
+/**
+ * Hook to handle infinite scrolling on a scrollable container.
+ * It calls the provided callback when the user scrolls near the bottom of the container.
+ * @param scrollContainerRef - A ref or getter function for the scrollable container element.
+ * @param callback - The function to call when the user scrolls near the bottom.
+ * @param options - Optional configuration (threshold).
+ */
+const useInfiniteScroll = (
+  scrollContainerRef: ScrollContainerRef,
+  callback: () => void,
+  options: UseInfiniteScrollOptions = {}
+) => {
+  const { threshold = DEFAULT_THRESHOLD, debounceMs = DEFAULT_DEBOUNCE_MS } = options;
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
-    const target = document.getElementById('skeleton');
+    const target =
+      typeof scrollContainerRef === 'function' ? scrollContainerRef() : scrollContainerRef.current;
 
     if (!target) {
-      return () => {};
+      return;
     }
 
     const handleScroll = () => {
-      const scrollTop = target.scrollTop;
-      const scrollHeight = target.scrollHeight;
-      const clientHeight = target.clientHeight;
-
-      if (scrollHeight - scrollTop <= clientHeight + threshold) {
-        callback();
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
+
+      timeoutRef.current = setTimeout(() => {
+        const scrollTop = target.scrollTop;
+        const scrollHeight = target.scrollHeight;
+        const clientHeight = target.clientHeight;
+
+        if (scrollHeight - scrollTop <= clientHeight + threshold) {
+          console.log('Infinite scroll triggered');
+          callback();
+        }
+      }, debounceMs);
     };
 
     target.addEventListener('scroll', handleScroll);
 
     return () => {
       target.removeEventListener('scroll', handleScroll);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, [callback, threshold]);
+  }, [scrollContainerRef, callback, threshold, debounceMs]);
 };
 
 export default useInfiniteScroll;

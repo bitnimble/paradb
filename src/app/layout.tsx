@@ -7,6 +7,7 @@ import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
 import { MaintenanceBanner } from 'app/maintenance_banner';
+import { SkeletonProvider } from 'app/skeleton_provider';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
@@ -26,13 +27,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ApiProvider>
           <SessionProvider>
-            <div id="skeleton" className={styles.skeleton}>
+            <SkeletonProvider className={styles.skeleton}>
               {flags.get('showMaintenanceBanner') ? (
                 <MaintenanceBanner message={flags.get('maintenanceBannerMessage')} />
               ) : null}
               <NavBar />
               <div className={styles.content}>{children}</div>
-            </div>
+            </SkeletonProvider>
           </SessionProvider>
         </ApiProvider>
       </body>
