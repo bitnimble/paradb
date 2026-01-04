@@ -6,6 +6,7 @@
     "dev": "sudo docker compose -f docker/docker-compose.dev.yml --env-file .env up --build",
     "build": "sudo docker compose -f docker/docker-compose.yml --env-file .env build",
     "start": "sudo docker compose -f docker/docker-compose.yml --env-file .env up --build",
+    "check": "yarn tsc && yarn eslint .",
     "lint": "eslint .",
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",
