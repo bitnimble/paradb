@@ -2,60 +2,34 @@ services:
   paradb:
     build:
       context: ..
+      args:
+        - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
     container_name: paradb_server
     environment:
-      - PGHOST=postgres
-      - PGPORT=5432
-      - PGUSER=paradb
-      - PGDATABASE=paradb
+      - PGHOST=${PGHOST}
+      - PGPORT=${PGPORT}
+      - PGUSER=${PGUSER}
+      - PGDATABASE=${PGDATABASE}
       - PGPASSWORD=${PGPASSWORD}
-      - SENTRY_DSN=${SENTRY_DSN}
-      - SENTRY_ENV=${SENTRY_ENV}
-      - COOKIE_NAME=${COOKIE_NAME}
-      - COOKIE_SECRET=${COOKIE_SECRET}
-      - PUBLIC_S3_BASE_URL=${PUBLIC_S3_BASE_URL}
-      - S3_ENDPOINT=${S3_ENDPOINT}
-      - S3_REGION=${S3_REGION}
-      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
-      - S3_ACCESS_KEY_SECRET=${S3_ACCESS_KEY_SECRET}
-      - S3_MAPS_BUCKET=${S3_MAPS_BUCKET}
-      - MAPS_DIR=/etc/paradb/maps
       - MEILISEARCH_HOST=meilisearch:7700
-    volumes:
-      - ${PARADB_MAPS_DIR}:/etc/paradb/maps
     ports:
       - 3000:3000
     restart: unless-stopped
     depends_on:
       meilisearch:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
   meilisearch:
-    image: getmeili/meilisearch:v1.13
+    image: getmeili/meilisearch:v1.31
     container_name: paradb_meilisearch
     environment:
       - MEILI_MASTER_KEY=${MEILISEARCH_KEY}
     volumes:
       - ${MEILISEARCH_DATA_DIR}:/meili_data
+    ports:
+      - 7700:7700
     restart: unless-stopped
     healthcheck:
       test: set -o pipefail;curl -fsS http://localhost:7700/health | grep -q '{"status":"available"}'
-      retries: 5
-      timeout: 60s
-      start_period: 10s
-  postgres:
-    image: postgres:12-alpine
-    container_name: paradb_postgres
-    environment:
-      - POSTGRES_DB=paradb
-      - POSTGRES_USER=paradb
-      - POSTGRES_PASSWORD=${PGPASSWORD}
-    volumes:
-      - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ['CMD-SHELL', 'su', '-c', 'pg_isready -U paradb -d paradb', 'postgres']
       retries: 5
       timeout: 60s
       start_period: 10s

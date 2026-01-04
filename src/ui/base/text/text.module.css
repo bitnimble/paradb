@@ -1,6 +1,6 @@
-@value colorBlack, colorGreyA5, colorRed, colorWhite, colorGrey, colorPurple from "ui/base/colors/colors.module.css";
-@value weightValueSemibold: 600;
-@value gridBaseline from "ui/base/metrics/metrics.module.css";
+:root {
+  --weightValueSemibold: 600;
+}
 
 .text {
     margin: 0;
@@ -20,16 +20,16 @@
 .styleCode {
     font-family: 'Courier Prime', monospace;
     letter-spacing: -0.03em;
-    background-color: colorGreyA5;
-    border: 1px solid colorPurple;
-    border-radius: calc(gridBaseline / 2);
+    background-color: var(--colorGreyA5);
+    border: 1px solid var(--colorPurple);
+    border-radius: calc(var(--gridBaseline) / 2);
 }
 
 .weightRegular {
     font-weight: 400;
 }
 .weightSemibold {
-    font-weight: weightValueSemibold;
+    font-weight: var(--weightValueSemibold);
 }
 .weightBold {
     font-weight: 700;
@@ -63,28 +63,28 @@
 }
 
 .textColorBlack {
-    color: colorBlack;
+    color: var(--colorBlack);
 }
 .textColorRed {
-    color: colorRed;
+    color: var(--colorRed);
 }
 .textColorWhite {
-    color: colorWhite;
+    color: var(--colorWhite);
 }
 .textColorGrey {
-    color: colorGrey;
+    color: var(--colorGrey);
 }
 .textColorPurple {
-    color: colorPurple;
+    color: var(--colorPurple);
 }
 
 .displayInline.styleCode {
-    padding: calc(gridBaseline / 6) calc(gridBaseline);
+    padding: calc(var(--gridBaseline) / 6) calc(var(--gridBaseline));
 }
 .displayBlock.styleCode {
     white-space: pre;
-    padding: calc(gridBaseline);
-    margin: calc(gridBaseline) 0;
+    padding: calc(var(--gridBaseline));
+    margin: calc(var(--gridBaseline)) 0;
 }
 
 .custom {

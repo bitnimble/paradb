@@ -1,9 +1,7 @@
-@value gridBaseline from "ui/base/metrics/metrics.module.css";
-
 .settings {
-    max-width: calc(gridBaseline * 80);
-    margin: calc(gridBaseline * 10) auto auto auto;
+    max-width: calc(var(--gridBaseline) * 80);
+    margin: calc(var(--gridBaseline) * 10) auto auto auto;
     display: flex;
     flex-direction: column;
-    gap: calc(gridBaseline * 2);
+    gap: calc(var(--gridBaseline) * 2);
 }

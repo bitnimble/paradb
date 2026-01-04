@@ -3,7 +3,7 @@ import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import React from 'react';
 import styles from './table.module.css';
-import { SortDirection, TablePresenter, TableStore } from './table_presenter';
+import { TablePresenter, TableSortStore, TableStore } from './table_presenter';
 
 type Tuple<T, N extends number> = [T, ...T[]] & { length: N };
 
@@ -21,7 +21,8 @@ export type Column<T> = {
 export type Columns<T, N extends number> = Tuple<Column<T>, N>;
 
 type TableProps<T, N extends number> = {
-  store: TableStore<T, N>;
+  store: TableStore<T>;
+  sortStore: TableSortStore<T, N>;
   tableClassname?: string;
   rowClassname?: string;
   cellClassname?: string;
@@ -55,9 +56,10 @@ const RowMemo = observer(<T, N extends number>(props: RowMemoProps<T, N>) => {
 export const Table = observer(
   <T extends { id: string }, N extends number>(props: TableProps<T, N>) => {
     const { store, tableClassname, cellClassname, rowClassname, rowMapper, onSortChange } = props;
-    const { columns, data: _data, sortColumn, sortDirection } = store;
+    const { data: _data } = store;
+    const { columns, sortColumn, sortDirection } = props.sortStore;
     const data = _data.get();
-    const presenter = new TablePresenter(store, onSortChange);
+    const [presenter] = React.useState(() => new TablePresenter(props.sortStore, onSortChange));
 
     const Rows = observer(() => {
       if (!data) {

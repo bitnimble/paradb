@@ -1,9 +1,8 @@
-@value colorWhite, colorPurple, colorGreen, colorGrey, colorRed from "ui/base/colors/colors.module.css";
-@value gridBaseline from "ui/base/metrics/metrics.module.css";
-
-@value regularColor: colorPurple;
-@value errorColor: colorRed;
-@value successColor: colorGreen;
+:root {
+  --regularColor: var(--colorPurple);
+  --errorColor: var(--colorRed);
+  --successColor: var(--colorGreen);
+}
 
 .a {
     text-decoration: none;
@@ -14,47 +13,48 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--gridBaseline);
 
     color: inherit;
-    padding: gridBaseline calc(gridBaseline * 2);
+    padding: var(--gridBaseline) calc(var(--gridBaseline) * 2);
     text-decoration: none;
-    background: colorWhite;
+    background: var(--colorWhite);
     transition:
         background 0.15s ease,
         color 0.15s ease;
     cursor: pointer;
-    border: 1px solid regularColor;
+    border: 1px solid var(--regularColor);
 }
 
 .button:hover:not(.disabled) {
-    color: colorWhite;
+    color: var(--colorWhite);
 }
 
 .regular.button {
-    color: regularColor;
+    color: var(--regularColor);
 }
 .regular.button:hover:not(.disabled) {
-    background: regularColor;
+    background: var(--regularColor);
 }
 
 .active {
-    background: regularColor;
+    background: var(--regularColor);
     color: white;
 }
 
 .error.button {
-    border-color: errorColor;
-    color: errorColor;
+    border-color: var(--errorColor);
+    color: var(--errorColor);
 }
 .error.button:hover:not(.disabled) {
-    background: errorColor;
+    background: var(--errorColor);
 }
 
 .success.button {
     position: relative;
-    border-color: successColor;
-    background: successColor;
-    color: colorWhite;
+    border-color: var(--successColor);
+    background: var(--successColor);
+    color: var(--colorWhite);
 }
 .success.button:hover:not(.disabled) {
     margin: -1px;
@@ -62,11 +62,11 @@
 }
 
 .button.disabled {
-    border-color: colorGrey;
-    color: colorGrey;
+    border-color: var(--colorGrey);
+    color: var(--colorGrey);
     cursor: not-allowed;
 }
 
-.loadingSpinner {
-    margin-left: gridBaseline;
+.trailingIcon {
+    margin-left: var(--gridBaseline);
 }

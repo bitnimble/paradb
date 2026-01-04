@@ -1,15 +1,14 @@
-@value gridBaseline from "ui/base/metrics/metrics.module.css";
-@value colorGrey, colorGreyA15, colorGreyA30 from "ui/base/colors/colors.module.css";
-
-@value margins: calc(gridBaseline * 3);
-@value albumArtMaxWidth: 300px;
-@value gap: calc(gridBaseline * 3);
-@value minContentWidth: calc(gridBaseline * 80);
-@value breakpoint: calc(albumArtMaxWidth + gap + minContentWidth + margins);
+:root {
+  --margins: calc(var(--gridBaseline) * 3);
+  --albumArtMaxWidth: 300px;
+  --gap: calc(var(--gridBaseline) * 3);
+  --minContentWidth: calc(var(--gridBaseline) * 80);
+  --breakpoint: calc(var(--albumArtMaxWidth) + var(--gap) + var(--minContentWidth) + var(--margins));
+}
 
 .mapPage {
     height: 100%;
-    padding: margins;
+    padding: var(--margins);
     box-sizing: border-box;
 
     display: flex;
@@ -18,22 +17,23 @@
 }
 
 .albumArt {
+    position: relative;
     flex-shrink: 0;
-    height: albumArtMaxWidth;
-    width: albumArtMaxWidth;
+    height: var(--albumArtMaxWidth);
+    width: var(--albumArtMaxWidth);
     margin: auto;
-    margin-bottom: calc(gridBaseline * 3);
+    margin-bottom: calc(var(--gridBaseline) * 3);
     animation: 2s infinite loadingAlbumArt;
 }
 @keyframes loadingAlbumArt {
     0% {
-        background-color: colorGreyA15;
+        background-color: var(--colorGreyA15);
     }
     50% {
-        background-color: colorGreyA30;
+        background-color: var(--colorGreyA30);
     }
     100% {
-        background-color: colorGreyA15;
+        background-color: var(--colorGreyA15);
     }
 }
 
@@ -46,20 +46,20 @@
 .mapContent {
     display: flex;
     flex-direction: column;
-    gap: gridBaseline;
+    gap: var(--gridBaseline);
     height: 100%;
-    min-width: min(100%, calc(gridBaseline * 100));
-    max-width: max(calc(gridBaseline * 140));
+    min-width: min(100%, calc(var(--gridBaseline) * 100));
+    max-width: max(calc(var(--gridBaseline) * 140));
 }
 
 .difficulties {
     display: flex;
-    gap: gridBaseline;
+    gap: var(--gridBaseline);
 }
 .difficultyPill {
-    background: colorGrey;
-    padding: calc(gridBaseline * 0.5) calc(gridBaseline * 2);
-    border-radius: calc(gridBaseline * 2);
+    background: var(--colorGrey);
+    padding: calc(var(--gridBaseline) * 0.5) calc(var(--gridBaseline) * 2);
+    border-radius: calc(var(--gridBaseline) * 2);
 }
 
 .description {
@@ -73,13 +73,13 @@
 
 .actions {
     display: grid;
-    gap: gridBaseline;
+    gap: var(--gridBaseline);
     grid-auto-flow: column;
     width: min-content;
-    margin: gridBaseline 0;
+    margin: var(--gridBaseline) 0;
 }
 
-@media screen and (min-width: breakpoint) {
+@media screen and (min-width: var(--breakpoint)) {
     .mapPage {
         flex-direction: row;
         align-items: flex-start;
@@ -87,6 +87,6 @@
 
     .albumArt {
         margin: inherit;
-        margin-right: calc(gridBaseline * 3);
+        margin-right: calc(var(--gridBaseline) * 3);
     }
 }

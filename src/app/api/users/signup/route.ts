@@ -1,5 +1,4 @@
 import { DbError } from 'services/db/helpers';
-import { setUserSession } from 'services/session/session';
 import { CreateUserError, createUser } from 'services/users/users_repo';
 import { checkBody, getBody } from 'app/api/helpers';
 import { UnreachableError } from 'base/unreachable';
@@ -23,8 +22,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
 
   const result = await createUser({ username, email, password });
   if (result.success) {
-    await setUserSession(result.value);
-    return send({ success: true });
+    return send(result.value);
   }
 
   // Error defaults

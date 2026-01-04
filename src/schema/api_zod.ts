@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { z } from 'zod';
 
 type TypedParseSchema<Schema extends z.ZodSchema> = Omit<Schema, 'parse'> & {

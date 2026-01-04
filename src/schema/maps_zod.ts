@@ -1,9 +1,27 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { z } from 'zod';
 import { PaginatedApiRequest, PaginatedApiResponse, useTypedParse } from 'schema/api_zod';
+
+export enum MapVisibility {
+  PUBLIC = 'P',
+  HIDDEN = 'H',
+  INVALID = 'I',
+}
+
+export enum MapValidity {
+  PENDING_UPLOAD = 'pending_upload',
+  PENDING_REUPLOAD = 'pending_reupload',
+  UPLOADED = 'uploaded',
+  VALIDATING = 'validating',
+  INVALID = 'invalid',
+  VALID = 'valid',
+}
 
 // TODO: rename to pdMap once the non-zod schema types have been migrated fully.
 export const pdMapZod = z.object({
   id: z.string(),
+  visibility: z.enum(MapVisibility),
+  validity: z.enum(MapValidity),
   submissionDate: z.date(),
   title: z.string(),
   artist: z.string(),
@@ -41,6 +59,12 @@ export const AdvancedSearchMapResponse = useTypedParse(
     })
   )
 );
+
+export const SubmitMapRequest = z.object({
+  title: z.string(),
+  id: z.string().optional(),
+});
+export type SubmitMapRequest = z.infer<typeof SubmitMapRequest>;
 
 export type AdvancedSearchMapRequest = z.infer<typeof AdvancedSearchMapRequest>;
 export type AdvancedSearchMapsResponse = z.infer<typeof AdvancedSearchMapResponse>;

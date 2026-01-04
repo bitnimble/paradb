@@ -1,4 +1,4 @@
-import { action, computed, makeObservable, observable } from 'mobx';
+import { computed, makeObservable, observable } from 'mobx';
 
 // Some simple regexes for quick validation. Non exhaustive.
 const basicUrlRegex =

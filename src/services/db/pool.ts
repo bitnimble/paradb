@@ -1,29 +1,38 @@
+import { attachDatabasePool } from '@vercel/functions';
 import pg from 'pg';
-import { getEnvVars } from 'services/env';
+import { getEnvVars, getSingleton } from 'services/env';
 
-const db: { pool: pg.Pool | undefined } = { pool: undefined };
+export async function getDbPool(maxConnections?: number) {
+  return getSingleton('_dbPool', async () => {
+    const pool = initPool(maxConnections);
+    try {
+      // Quickly test connection to check that DB is running
+      const client = await pool.connect();
+      client.release();
+    } catch (e) {
+      const envVars = getEnvVars();
+      throw new Error(
+        'Could not connect to database, is it running? Connection string: ' +
+          `postgresql://${envVars.pgUser}:<password>@${envVars.pgHost}:${envVars.pgPort}/${envVars.pgDatabase}\n${e}`
+      );
+    }
+    return pool;
+  });
+}
 
-export async function initPool(maxConnections?: number) {
+function initPool(maxConnections?: number) {
+  console.log('Initialising pg db pool connection');
   // Test DB
   const envVars = getEnvVars();
-  try {
-    db.pool = new pg.Pool({
-      host: envVars.pgHost,
-      port: envVars.pgPort,
-      database: envVars.pgDatabase,
-      user: envVars.pgUser,
-      password: envVars.pgPassword,
-      min: maxConnections,
-      max: maxConnections,
-    });
-    db.pool.on('error', (err) => console.error(err));
-
-    // Quickly test connection to check that DB is running
-    const client = await db.pool.connect();
-    client.release();
-  } catch (e) {
-    throw new Error('Could not connect to database, is it running?');
-  }
-
-  return db.pool;
+  const pool = new pg.Pool({
+    host: envVars.pgHost,
+    port: envVars.pgPort,
+    database: envVars.pgDatabase,
+    user: envVars.pgUser,
+    password: envVars.pgPassword,
+    max: maxConnections,
+  });
+  pool.on('error', (err) => console.error(err));
+  attachDatabasePool(pool);
+  return pool;
 }

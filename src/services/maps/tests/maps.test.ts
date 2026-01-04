@@ -1,25 +1,28 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { deserializeApiSuccess } from 'schema/api';
-import {
-  deserializeGetMapResponse,
-  deserializeSubmitMapResponse,
-  serializeSubmitMapRequest,
-} from 'schema/maps';
+import { deserializeGetMapResponse, deserializeSubmitMapResponse } from 'schema/maps';
 import { serializeSetFavoriteMapsRequest } from 'schema/users';
-import { testAuthenticate, testGet, testPost, testUser2 } from 'services/jest_helpers';
+import { testAuthenticate, testGet, testPost, testServer, testUser2 } from 'services/jest_helpers';
 
 describe('maps handler', () => {
   const testMapUpload = async (mapPath: string, id?: string, cookieOverride?: string) => {
     const cookie = cookieOverride ?? (await testAuthenticate());
     const testMap = await fs.readFile(path.resolve(__dirname, mapPath));
-    const response = await testPost(
-      '/api/maps/submit',
-      serializeSubmitMapRequest,
-      deserializeSubmitMapResponse,
-      { id, mapData: new Uint8Array(testMap.buffer) },
-      cookie
-    );
+    const req = testServer().post('/api/maps/submit');
+    if (cookie != null) {
+      req.set('Cookie', cookie);
+    }
+    if (id != null) {
+      req.field('id', id);
+    }
+    req.attach('mapData', testMap, {
+      filename: 'map.zip',
+      contentType: 'application/zip',
+    });
+    const resp = await req.responseType('application/json');
+    const response = deserializeSubmitMapResponse(resp.body);
+
     return { response, cookie };
   };
 
@@ -88,15 +91,8 @@ describe('maps handler', () => {
     const id = (response as Extract<typeof response, { success: true }>).id;
 
     const cookie = await testAuthenticate(testUser2);
-    const newMap = await fs.readFile(path.resolve(__dirname, 'files/Test_valid2.zip'));
-    const resp = await testPost(
-      '/api/maps/submit',
-      serializeSubmitMapRequest,
-      deserializeSubmitMapResponse,
-      { id, mapData: new Uint8Array(newMap.buffer) },
-      cookie
-    );
-    expect(resp).toEqual({
+    const resp = await testMapUpload('files/Test_valid2.zip', id, cookie);
+    expect(resp.response).toEqual({
       success: false,
       errorMessage: `Not authorized to modify the specified map: ${id}`,
       statusCode: 403,

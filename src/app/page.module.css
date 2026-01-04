@@ -1,24 +1,23 @@
-@value gridBaseline from "ui/base/metrics/metrics.module.css";
-@value colorGreyA30, colorGreyA15, colorPurple from "ui/base/colors/colors.module.css";
-
-@value gutter: calc(gridBaseline * 2);
+:root {
+  --gutter: calc(var(--gridBaseline) * 2);
+}
 
 .filter {
     position: sticky;
     top: 0;
     background: white;
     z-index: 1;
-    border-bottom: 1px solid colorGreyA15;
+    border-bottom: 1px solid var(--colorGreyA15);
 
     display: grid;
     grid-template-columns: 1fr;
     grid-auto-flow: column;
-    gap: gridBaseline;
-    padding: gridBaseline gutter;
+    gap: var(--gridBaseline);
+    padding: var(--gridBaseline) var(--gutter);
 }
 
 .tableContainer {
-    padding-bottom: calc(gridBaseline * 2);
+    padding-bottom: calc(var(--gridBaseline) * 2);
     display: flex;
     flex-direction: column;
 }
@@ -28,7 +27,7 @@
 }
 
 .isScrollable .mapListRow {
-    box-shadow: 0 0 0 1px colorGreyA15;
+    box-shadow: 0 0 0 1px var(--colorGreyA15);
 }
 
 .loadMoreButton {
@@ -37,7 +36,7 @@
 }
 
 .mapListTable {
-    padding: 0 gutter;
+    padding: 0 var(--gutter);
     color: #666;
 }
 
@@ -49,11 +48,11 @@
 
 .mapListRow:hover,
 .bulkSelectEnabled .mapListRow:hover {
-    box-shadow: 0 0 0 1px colorPurple;
+    box-shadow: 0 0 0 1px var(--colorPurple);
 }
 
 .bulkSelectEnabled .mapListRow {
-    box-shadow: 0 0 0 1px colorGreyA15;
+    box-shadow: 0 0 0 1px var(--colorGreyA15);
 }
 
 .bulkSelectEnabled .mapListRow::after {
@@ -63,25 +62,25 @@
     align-items: center;
     position: absolute;
     top: 50%;
-    right: gridBaseline;
+    right: var(--gridBaseline);
     transform: translateY(-50%);
-    width: calc(gridBaseline * 3);
-    height: calc(gridBaseline * 3);
-    border: 1px solid colorGreyA15;
+    width: calc(var(--gridBaseline) * 3);
+    height: calc(var(--gridBaseline) * 3);
+    border: 1px solid var(--colorGreyA15);
     pointer-events: none;
 }
 
 .bulkSelectEnabled .mapListRow.mapListRowSelected::after {
     content: '✔';
-    color: colorPurple;
+    color: var(--colorPurple);
     font-weight: bolder;
     font-size: 20px;
-    border: 2px solid colorPurple;
+    border: 2px solid var(--colorPurple);
 }
 
 .bulkSelectEnabled .mapListRowSelected,
 .bulkSelectEnabled .mapListRowSelected:hover {
-    box-shadow: 0 0 0 2px colorPurple;
+    box-shadow: 0 0 0 2px var(--colorPurple);
 }
 
 .mapListCell {
@@ -90,7 +89,7 @@
 
 .routeLink {
     display: block;
-    padding: calc(gridBaseline * 1.5) gridBaseline;
+    padding: calc(var(--gridBaseline) * 1.5) var(--gridBaseline);
 }
 
 .centeredCell {
@@ -106,7 +105,7 @@
     right: 0;
     display: flex;
     flex-direction: column;
-    border-radius: calc(gridBaseline * 0.5);
+    border-radius: calc(var(--gridBaseline) * 0.5);
     overflow: hidden;
 }
 
@@ -116,10 +115,10 @@
 }
 
 .greyPill {
-    background-color: colorGreyA15;
+    background-color: var(--colorGreyA15);
 }
 .greyPill + .greyPill {
-    border-top: 1px solid colorGreyA30;
+    border-top: 1px solid var(--colorGreyA30);
 }
 
 @media (max-width: 640px) {

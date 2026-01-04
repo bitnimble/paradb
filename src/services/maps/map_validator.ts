@@ -33,7 +33,7 @@ export async function validateMap(opts: {
   let map: unzipper.CentralDirectory;
   try {
     map = await unzipper.Open.buffer(opts.buffer);
-  } catch (e) {
+  } catch {
     // Failed to open zip -- corrupted, or incorrect format
     return { success: false, errors: [{ type: ValidateMapError.NO_DATA }] };
   }
@@ -156,7 +156,7 @@ function validateMapDifficulty(
   let map: any;
   try {
     map = parseJsonBuffer(mapBuffer);
-  } catch (e) {
+  } catch {
     return { success: false, errors: [{ type: ValidateMapDifficultyError.INVALID_FORMAT }] };
   }
   // Validate metadata fields

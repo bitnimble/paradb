@@ -1,20 +1,23 @@
-import { getBody } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  SubmitMapResponse,
-  deserializeSubmitMapRequest,
-  serializeSubmitMapResponse,
-} from 'schema/maps';
-import { getEnvVars } from 'services/env';
+import { SubmitMapResponse, serializeSubmitMapResponse } from 'schema/maps';
+import { MapValidity, SubmitMapRequest } from 'schema/maps_zod';
 import { error } from 'services/helpers';
-import { submitErrorMap } from 'services/maps/maps_repo';
+import { mintUploadUrl } from 'services/maps/s3_handler';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 
 const send = (res: SubmitMapResponse) => new NextResponse<Buffer>(serializeSubmitMapResponse(res));
+/**
+ * Handles a request for uploading a new map or reuploading an existing map.
+ * If it is a new map, it creates a new temporary hidden Map record in the DB.
+ *
+ * This endpoint will return a presigned S3 upload URL and the map ID.
+ * The client is expected to then upload to the specified URL and then call
+ * /api/maps/submit/complete, which will process/validate the map and publish it.
+ */
 export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
-  const user = await getUserSession();
-  if (!user) {
+  const session = await getUserSession();
+  if (!session) {
     return error({
       statusCode: 403,
       message: 'You must be logged in to submit maps.',
@@ -23,20 +26,21 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     });
   }
 
-  const submitMapReq = await getBody(req, deserializeSubmitMapRequest);
-
-  if (submitMapReq.mapData.byteLength > 1024 * 1024 * 100) {
-    // 40MiB. We use MiB because that's what Windows displays in Explorer and therefore what users will expect.
+  const submitMapReqResult = SubmitMapRequest.safeParse(await req.json());
+  if (!submitMapReqResult.success) {
+    console.log(JSON.stringify(submitMapReqResult.error));
     return error({
       statusCode: 400,
-      message: 'File is over the filesize limit (100MB)',
+      message: 'Invalid submit map request.',
       errorBody: {},
       errorSerializer: serializeSubmitMapResponse,
     });
   }
+  const submitMapReq = submitMapReqResult.data;
 
   const { mapsRepo } = await getServerContext();
-  if (submitMapReq.id) {
+  let id;
+  if (submitMapReq.id != null) {
     const mapResult = await mapsRepo.getMap(submitMapReq.id);
     if (!mapResult.success) {
       return error({
@@ -46,7 +50,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
         errorSerializer: serializeSubmitMapResponse,
       });
     }
-    if (mapResult.value.uploader !== user.id) {
+    if (mapResult.value.uploader !== session.id) {
       return error({
         statusCode: 403,
         message: `Not authorized to modify the specified map: ${submitMapReq.id}`,
@@ -54,23 +58,36 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
         errorSerializer: serializeSubmitMapResponse,
       });
     }
+    id = submitMapReq.id;
+    await mapsRepo.setValidity(id, MapValidity.PENDING_REUPLOAD);
+  } else {
+    const createMapResult = await mapsRepo.createNewMap({
+      title: submitMapReq.title,
+      uploader: session.id,
+    });
+    if (!createMapResult.success) {
+      return error({
+        statusCode: 500,
+        message: 'Could not create placeholder map when preparing for upload.',
+        errorBody: {},
+        errorSerializer: serializeSubmitMapResponse,
+        resultError: createMapResult,
+      });
+    }
+    id = createMapResult.value.id;
   }
-
-  const submitMapResult = await mapsRepo.upsertMap(getEnvVars().mapsDir, {
-    id: submitMapReq.id,
-    uploader: user.id,
-    mapFile: submitMapReq.mapData,
-  });
-  if (!submitMapResult.success) {
-    // TODO: report all errors back to the client and not just the first one
-    const [statusCode, message] = submitErrorMap[submitMapResult.errors[0].type];
+  const urlResp = await mintUploadUrl(id);
+  if (!urlResp.success) {
     return error({
-      statusCode,
-      message: submitMapResult.errors[0].userMessage || message,
+      statusCode: 500,
+      message: 'Could not create the URL for uploading the map.',
       errorBody: {},
       errorSerializer: serializeSubmitMapResponse,
-      resultError: submitMapResult,
     });
   }
-  return send({ success: true, id: submitMapResult.value.id });
+  return send({
+    success: true,
+    id,
+    url: urlResp.value,
+  });
 }

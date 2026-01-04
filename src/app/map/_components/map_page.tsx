@@ -4,6 +4,7 @@ import { Difficulty, PDMap } from 'schema/maps';
 import { T } from 'ui/base/text/text';
 import { difficultyColors, difficultyMap, parseDifficulty } from 'utils/difficulties';
 import styles from './map_page.module.css';
+import Image from 'next/image';
 
 const allowedTags: typeof sanitizeHtml.defaults.allowedTags = [
   ...sanitizeHtml.defaults.allowedTags,
@@ -57,7 +58,13 @@ export const MapPage = (props: Props) => {
   return (
     <div className={styles.mapPage}>
       <div className={styles.albumArt}>
-        <img className={styles.albumArtImg} src={getAlbumArtUrl(map)}></img>
+        <Image
+          unoptimized={true}
+          fill={true}
+          className={styles.albumArtImg}
+          src={getAlbumArtUrl(map)}
+          alt={`Album art for ${map.title}`}
+        ></Image>
       </div>
       <div className={styles.mapContent}>
         <T.ExtraLarge display="block" style="title">

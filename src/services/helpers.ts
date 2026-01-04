@@ -6,7 +6,7 @@ import { ApiError, serializeApiError } from 'schema/api';
 
 export function error<P, T extends ApiError & P, E extends string>(opts: {
   statusCode: number;
-  errorSerializer(o: T): Uint8Array;
+  errorSerializer(o: T): string;
   errorBody: P;
   message: string;
   resultError?: ResultError<E>;
@@ -33,6 +33,32 @@ export function error<P, T extends ApiError & P, E extends string>(opts: {
   return new NextResponse(errorSerializer(errorResponse), {
     status: statusCode,
   });
+}
+
+export function actionError<P, E extends string>(opts: {
+  errorBody: P;
+  message: string;
+  resultError?: ResultError<E>;
+}) {
+  const { errorBody, message, resultError } = opts;
+
+  // Attach error message and tags for Sentry. Just pick the details out of the first error for now.
+  const details = resultError?.errors[0];
+  const internalMessage = details?.internalMessage;
+  const error = new Error(
+    internalMessage ? `Internal message: ${internalMessage}\n${message}` : message
+  );
+  if (details?.stack) {
+    error.stack = details.stack;
+  }
+  if (details) {
+    Sentry.setTag('type', details.type);
+    console.error(details.type);
+  }
+  Sentry.captureException(error);
+  console.error(error);
+
+  return { success: false, errorMessage: message, ...errorBody } as const;
 }
 
 export function badRequest(message: string) {

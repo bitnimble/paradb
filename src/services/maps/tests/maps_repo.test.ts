@@ -1,5 +1,4 @@
 import { _unwrap } from 'base/result';
-import { getEnvVars } from 'services/env';
 import { GetMapError } from 'services/maps/maps_repo';
 import { getServerContext } from 'services/server_context';
 import { createUser } from 'services/users/users_repo';
@@ -43,10 +42,9 @@ describe('maps repo', () => {
   });
 
   it('can delete a map', async () => {
-    const env = getEnvVars();
     const { mapsRepo } = await getServerContext();
 
-    const deleteResult = await mapsRepo.deleteMap({ mapsDir: env.mapsDir, id: '2' });
+    const deleteResult = await mapsRepo.deleteMap({ id: '2' });
     expect(deleteResult.success).toBe(true);
 
     const getResult = await mapsRepo.getMap('2');
@@ -61,7 +59,6 @@ describe('maps repo', () => {
   });
 
   it('can delete a map that has favorites', async () => {
-    const env = getEnvVars();
     const { mapsRepo, favoritesRepo } = await getServerContext();
 
     const userResult = await _unwrap(
@@ -73,7 +70,7 @@ describe('maps repo', () => {
     );
     const favoriteResult = await favoritesRepo.setFavorites(userResult.id, ['2'], true);
     expect(favoriteResult.success).toBe(true);
-    const deleteResult = await mapsRepo.deleteMap({ mapsDir: env.mapsDir, id: '2' });
+    const deleteResult = await mapsRepo.deleteMap({ id: '2' });
     expect(deleteResult.success).toBe(true);
 
     const getResult = await mapsRepo.getMap('2');

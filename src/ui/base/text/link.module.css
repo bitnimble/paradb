@@ -1,5 +1,3 @@
-@value colorPurple from "ui/base/colors/colors.module.css";
-
 .link {
     cursor: pointer;
     color: inherit;
@@ -7,5 +5,5 @@
 }
 
 .link:hover {
-    color: colorPurple;
+    color: var(--colorPurple);
 }

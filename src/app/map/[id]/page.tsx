@@ -5,11 +5,10 @@ import { Metadata } from 'next';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { id: string };
+export async function generateMetadata(props: {
+  params: Promise<{ id: string }>;
 }): Promise<Metadata | undefined> {
+  const params = await props.params;
   const { mapsRepo } = await getServerContext();
   const result = await mapsRepo.getMap(params.id);
   if (!result.success) {
@@ -27,7 +26,8 @@ export async function generateMetadata({
   };
 }
 
-export default async ({ params }: { params: { id: string } }) => {
+export default async (props: { params: Promise<{ id: string }> }) => {
+  const params = await props.params;
   const { mapsRepo } = await getServerContext();
   const user = await getUserSession();
   const userId = user?.id;

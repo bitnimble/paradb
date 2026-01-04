@@ -4,7 +4,6 @@ import { FormError } from 'ui/base/form/form_error';
 import { RouteLink } from 'ui/base/text/link';
 import { Button } from 'ui/base/button/button';
 import { Textbox } from 'ui/base/textbox/textbox';
-import React from 'react';
 import styles from './login_signup.module.css';
 import { routeFor, RoutePath } from 'utils/routes';
 
@@ -13,6 +12,7 @@ type LoginSignupProps = {
   username: string;
   email: string;
   password: string;
+  submitting: boolean;
   errors: Map<LoginSignupField, string>;
   onChangeUsername(value: string): void;
   onChangeEmail(value: string): void;
@@ -28,6 +28,7 @@ export const LoginSignup = observer(
     username,
     email,
     password,
+    submitting,
     errors,
     onChangeUsername,
     onChangeEmail,
@@ -57,7 +58,9 @@ export const LoginSignup = observer(
           <RouteLink href={routeFor([RoutePath.SIGNUP])} onClick={onNavigateClick}>
             Signup instead
           </RouteLink>
-          <Button onClick={login}>Login</Button>
+          <Button loading={submitting} onClick={login}>
+            Login
+          </Button>
         </div>
         <FormError error={errors.get('form')} />
       </div>
@@ -92,7 +95,9 @@ export const LoginSignup = observer(
           <RouteLink href={routeFor([RoutePath.LOGIN])} onClick={onNavigateClick}>
             Login instead
           </RouteLink>
-          <Button onClick={signup}>Signup</Button>
+          <Button loading={submitting} onClick={signup}>
+            Signup
+          </Button>
         </div>
         <FormError error={errors.get('form')} />
       </div>

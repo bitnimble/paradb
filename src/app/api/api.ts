@@ -1,3 +1,4 @@
+import { SupabaseClient } from '@supabase/supabase-js';
 import * as qs from 'qs';
 import { ApiResponse, apiResponse } from 'schema/api';
 import {
@@ -5,14 +6,13 @@ import {
   FindMapsResponse,
   GetMapResponse,
   SearchMapsRequest,
-  SubmitMapRequest,
   SubmitMapResponse,
   deserializeDeleteMapResponse,
   deserializeFindMapsResponse,
   deserializeGetMapResponse,
   deserializeSubmitMapResponse,
-  serializeSubmitMapRequest,
 } from 'schema/maps';
+import { SubmitMapRequest } from 'schema/maps_zod';
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
@@ -31,8 +31,11 @@ import {
   serializeSetFavoriteMapsRequest,
   serializeSignupRequest,
 } from 'schema/users';
+import { createClient } from 'services/session/supabase_client';
 
 export interface Api {
+  readonly supabase: SupabaseClient;
+
   /* Auth */
   login(req: LoginRequest): Promise<LoginResponse>;
   signup(req: SignupRequest): Promise<SignupResponse>;
@@ -50,15 +53,12 @@ export interface Api {
   searchMaps(req: SearchMapsRequest): Promise<FindMapsResponse>;
   getMap(id: string): Promise<GetMapResponse>;
   deleteMap(id: string): Promise<DeleteMapResponse>;
-  submitMap(
-    req: SubmitMapRequest,
-    onProgress: (e: ProgressEvent) => void,
-    onUploadFinish: () => void
-  ): Promise<SubmitMapResponse>;
+  submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse>;
 }
 
 export class HttpApi implements Api {
   private apiBase = '/api';
+  readonly supabase = createClient();
 
   async login(req: LoginRequest): Promise<LoginResponse> {
     const bsonReq = serializeLoginRequest(req);
@@ -126,55 +126,31 @@ export class HttpApi implements Api {
     return deserializeDeleteMapResponse(resp);
   }
 
-  async submitMap(
-    req: SubmitMapRequest,
-    onProgress: (e: ProgressEvent) => void,
-    onUploadFinish: () => void
-  ): Promise<SubmitMapResponse> {
-    return new Promise((res, rej) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', path(this.apiBase, 'maps', 'submit'), true);
-      xhr.setRequestHeader('Content-Type', contentType);
-      xhr.responseType = 'arraybuffer';
-      xhr.upload.addEventListener('progress', onProgress);
-      xhr.upload.addEventListener('load', onUploadFinish);
-      xhr.onload = () => {
-        const resp = new Uint8Array(xhr.response);
-        res(deserializeSubmitMapResponse(resp));
-      };
-      xhr.onerror = () => {
-        rej();
-      };
-      const serialized = serializeSubmitMapRequest(req);
-      xhr.send(serialized);
-    });
+  async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
+    const resp = await post(path(this.apiBase, 'maps', 'submit'), JSON.stringify(req));
+    return deserializeSubmitMapResponse(resp);
   }
 }
 
 function path(...parts: string[]) {
   return [
-    ...parts.slice(0, parts.length - 1).map((part, i) => (part.endsWith('/') ? part : `${part}/`)),
+    ...parts.slice(0, parts.length - 1).map((part) => (part.endsWith('/') ? part : `${part}/`)),
     parts[parts.length - 1],
   ].join('');
 }
 
-async function get(path: string, queryParams?: string): Promise<Uint8Array> {
+async function get(path: string, queryParams?: string): Promise<string> {
   const search = queryParams ? `?${queryParams}` : '';
   const resp = await fetch(path + search);
-  const buf = await resp.arrayBuffer();
-  return new Uint8Array(buf);
+  return resp.text();
 }
-async function post(path: string, body?: Uint8Array): Promise<Uint8Array> {
+async function post(path: string, body?: string): Promise<string> {
   const resp = await fetch(path, {
     method: 'POST',
     headers: { ['Content-Type']: contentType },
     body,
   });
-  const buf = await resp.arrayBuffer();
-  return new Uint8Array(buf);
+  return resp.text();
 }
 
-// Set MIME type for requests and responses to 'application/x-protobuf' to allow Cloudflare to use
-// brotli / gzip encoding over the wire. We don't actually use protobuf but Cloudflare doesn't let
-// you force compression for 'application/octet-stream', so this is the closest.
-const contentType = 'application/x-protobuf';
+const contentType = 'application/json';

@@ -4,7 +4,6 @@ import {
   SearchMapsRequest,
   GetMapResponse,
   DeleteMapResponse,
-  SubmitMapRequest,
   SubmitMapResponse,
   PDMap,
 } from 'schema/maps';
@@ -19,6 +18,8 @@ import {
   User,
 } from 'schema/users';
 import { Api } from './api';
+import { createClient } from 'services/session/supabase_client';
+import { SubmitMapRequest } from 'schema/maps_zod';
 
 const DELAY = 500;
 
@@ -29,18 +30,20 @@ async function delay(ms: number = DELAY) {
 }
 
 export class FakeApi implements Api {
-  async changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
+  readonly supabase = createClient();
+
+  async changePassword(_req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
     return { success: true };
   }
-  async login(req: LoginRequest): Promise<LoginResponse> {
-    return { success: true };
+  async login(_req: LoginRequest): Promise<LoginResponse> {
+    return { success: true, accessToken: '123', refreshToken: '456' };
   }
-  async setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse> {
+  async setFavorites(_req: SetFavoriteMapsRequest): Promise<ApiResponse> {
     return { success: true };
   }
 
-  async signup(req: SignupRequest): Promise<SignupResponse> {
-    return { success: true };
+  async signup(_req: SignupRequest): Promise<SignupResponse> {
+    return { success: true, id: 'U123456' };
   }
 
   async getSession(): Promise<User> {
@@ -55,7 +58,7 @@ export class FakeApi implements Api {
     await delay();
     return { success: true, maps: fakeMaps };
   }
-  async searchMaps(req: SearchMapsRequest): Promise<FindMapsResponse> {
+  async searchMaps(_req: SearchMapsRequest): Promise<FindMapsResponse> {
     await delay();
     return { success: true, maps: fakeMaps };
   }
@@ -78,14 +81,16 @@ export class FakeApi implements Api {
     return { success: true };
   }
 
-  async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
+  async submitMap(_req: SubmitMapRequest): Promise<SubmitMapResponse> {
     await delay();
-    return { success: true, id: allStar.id };
+    return { success: true, id: allStar.id, url: '' };
   }
 }
 
 const allStar: PDMap = {
   id: '1',
+  visibility: 'P',
+  validity: 'valid',
   submissionDate: '2021-06-01T00:00:00',
   title: 'All Star',
   artist: 'Smash Mouth',
@@ -107,6 +112,8 @@ const allStar: PDMap = {
 
 const californication: PDMap = {
   id: '2',
+  visibility: 'P',
+  validity: 'valid',
   submissionDate: '2021-06-01T00:00:00',
   title: 'Californication',
   artist: 'Red Hot Chili Peppers',

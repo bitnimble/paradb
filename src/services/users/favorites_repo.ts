@@ -45,7 +45,7 @@ export class FavoritesRepo {
       await this.meilisearchMaps.updateDocuments(
         mapFavorites.map((m) => convertToMeilisearchMap(camelCaseKeys(m)))
       );
-    } catch (e) {
+    } catch {
       // TODO: better favorites error handling
       return { success: false, errors: [{ type: DbError.UNKNOWN_DB_ERROR }] };
     }
@@ -61,7 +61,7 @@ export class FavoritesRepo {
       const ids = favorites.map((f) => f.map_id);
       const mapsResult = await this.mapsRepo.findMaps({ by: 'id', ids });
       return mapsResult;
-    } catch (e) {
+    } catch {
       return { success: false, errors: [{ type: DbError.UNKNOWN_DB_ERROR }] };
     }
   }

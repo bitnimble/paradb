@@ -1,6 +1,3 @@
-@value colorBlack, colorWhite from "ui/base/colors/colors.module.css";
-@value gridBaseline from "ui/base/metrics/metrics.module.css";
-
 .dialogContainer {
     position: fixed;
     top: 0;
@@ -16,24 +13,24 @@
 
 .dialog {
     position: relative;
-    background-color: colorWhite;
-    padding: calc(gridBaseline * 2);
-    border: 1px dotted colorBlack;
+    background-color: var(--colorWhite);
+    padding: calc(var(--gridBaseline) * 2);
+    border: 1px dotted var(--colorBlack);
 }
 
 .close {
     position: absolute;
-    top: calc(gridBaseline * -4);
-    right: calc(gridBaseline * -4);
+    top: calc(var(--gridBaseline) * -4);
+    right: calc(var(--gridBaseline) * -4);
 
-    width: calc(gridBaseline * 4);
-    height: calc(gridBaseline * 4);
-    line-height: calc(gridBaseline * 4);
+    width: calc(var(--gridBaseline) * 4);
+    height: calc(var(--gridBaseline) * 4);
+    line-height: calc(var(--gridBaseline) * 4);
 
     background: rgba(0, 0, 0, 0.4);
-    color: colorWhite;
+    color: var(--colorWhite);
     border-radius: 50%;
     border: none;
     cursor: pointer;
-    font-size: calc(gridBaseline * 2);
+    font-size: calc(var(--gridBaseline) * 2);
 }

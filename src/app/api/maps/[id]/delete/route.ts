@@ -1,18 +1,18 @@
-import { getEnvVars } from 'services/env';
-import { GetMapError } from 'services/maps/maps_repo';
-import { getServerContext } from 'services/server_context';
-import { getUserSession } from 'services/session/session';
 import { joinErrors } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 import { DeleteMapResponse, serializeDeleteMapResponse } from 'schema/maps';
+import { GetMapError } from 'services/maps/maps_repo';
+import { getServerContext } from 'services/server_context';
+import { getUserSession } from 'services/session/session';
 
 const send = (res: DeleteMapResponse) => new NextResponse<Buffer>(serializeDeleteMapResponse(res));
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<Buffer>> {
-  const user = await getUserSession();
-  if (!user) {
+  const params = await props.params;
+  const session = await getUserSession();
+  if (!session) {
     return send({
       success: false,
       statusCode: 403,
@@ -32,7 +32,7 @@ export async function POST(
       errorMessage: isMissing ? 'Map not found' : 'Could not delete map: ' + joinErrors(getResult),
     });
   }
-  if (user.id !== getResult.value.uploader) {
+  if (session.id !== getResult.value.uploader) {
     return send({
       success: false,
       statusCode: 403,
@@ -40,7 +40,7 @@ export async function POST(
     });
   }
 
-  const deleteResult = await mapsRepo.deleteMap({ id, mapsDir: getEnvVars().mapsDir });
+  const deleteResult = await mapsRepo.deleteMap({ id });
   if (deleteResult.success === false) {
     return send({
       success: false,

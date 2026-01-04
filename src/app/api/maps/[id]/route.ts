@@ -8,8 +8,9 @@ import { GetMapResponse, serializeGetMapResponse } from 'schema/maps';
 const send = (res: GetMapResponse) => new NextResponse<Buffer>(serializeGetMapResponse(res));
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<Buffer>> {
+  const params = await props.params;
   const { id } = params;
   const user = await getUserSession();
   const userId = user?.id;

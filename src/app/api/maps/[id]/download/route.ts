@@ -1,8 +1,10 @@
 import { getEnvVars } from 'services/env';
 import { getServerContext } from 'services/server_context';
 import { NextRequest, NextResponse } from 'next/server';
+import { redirect } from 'next/navigation';
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const { id } = params;
   const { mapsRepo } = await getServerContext();
   const result = await mapsRepo.getMap(id);
@@ -13,9 +15,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   await mapsRepo.incrementMapDownloadCount(id);
 
   const filename = sanitizeForDownload(result.value.title);
-  return NextResponse.redirect(
-    `${getEnvVars().publicS3BaseUrl}/${result.value.id}.zip?title=${filename}.zip`
-  );
+  redirect(`${getEnvVars().publicS3BaseUrl}/maps/${result.value.id}.zip?title=${filename}.zip`);
 }
 
 function sanitizeForDownload(filename: string) {

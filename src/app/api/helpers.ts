@@ -3,10 +3,8 @@ import { ResultError } from 'base/result';
 import { NextRequest } from 'next/server';
 import { serializeApiError } from 'schema/api';
 
-export async function getBody<T>(req: NextRequest, deserializer: (u8: Uint8Array) => T) {
-  const arrayBuffer = await req.arrayBuffer();
-  const u8 = new Uint8Array(arrayBuffer);
-  return deserializer(u8);
+export async function getBody<T>(req: NextRequest, deserializer: (s: string) => T) {
+  return deserializer(await req.text());
 }
 
 export function checkBody(req: NextRequest, message: string) {

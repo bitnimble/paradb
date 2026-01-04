@@ -23,5 +23,5 @@ export async function POST(
       errorMessage: 'Could not retrieve map: ' + joinErrors(result),
     });
   }
-  return NextResponse.json(AdvancedSearchMapResponse.parse(result));
+  return NextResponse.json(AdvancedSearchMapResponse.parse(result as any));
 }

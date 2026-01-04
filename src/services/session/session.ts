@@ -1,60 +1,21 @@
-import { getEnvVars } from 'services/env';
-import { User } from 'services/users/users_repo';
-import { sealData, unsealData } from 'iron-session';
-import { cookies } from 'next/headers';
-import { UserSession, deserializeUserSession, serializeUserSession } from 'schema/users';
-
-type IronSessionData = {
-  paradbSession: {
-    userSession: UserSession;
-  };
-};
-
-export function createSessionFromUser(user: User): UserSession {
-  const { id, username, accountStatus, email } = user;
-  return { id, username, accountStatus, email };
-}
+import { UserSession } from 'schema/users';
+import { getServerContext } from 'services/server_context';
 
 export async function getUserSession(): Promise<UserSession | undefined> {
-  try {
-    const envVars = getEnvVars();
-    const cookieName = envVars.cookieName;
-    const cookie = cookies().get(cookieName);
-
-    if (!cookie) {
-      return;
-    }
-
-    const { paradbSession } = await unsealData<IronSessionData>(cookie.value, {
-      password: envVars.cookieSecret,
-    });
-    if (paradbSession == null) {
-      return;
-    }
-
-    // Round-trip it through the schema serializers to validate and strip excess properties
-    return deserializeUserSession(serializeUserSession(paradbSession.userSession));
-  } catch (e) {
+  const { supabase } = await getServerContext();
+  const user = await supabase.auth.getUser();
+  if (user.error || !user.data.user.email) {
     return undefined;
   }
+  const metadata = user.data.user.user_metadata;
+  return {
+    id: metadata.id,
+    email: user.data.user.email,
+    username: metadata.username,
+  };
 }
 
-export async function setUserSession(_session: UserSession) {
-  const envVars = getEnvVars();
-  const cookieName = envVars.cookieName;
-
-  // Round-trip it through the schema serializers to validate and strip excess properties
-  const userSession = deserializeUserSession(serializeUserSession(_session));
-  const data: IronSessionData = { paradbSession: { userSession } };
-  const cookieValue = await sealData(data, {
-    password: envVars.cookieSecret,
-  });
-
-  cookies().set(cookieName, cookieValue);
-}
-
-export function clearUserSession() {
-  const envVars = getEnvVars();
-  const cookieName = envVars.cookieName;
-  cookies().delete(cookieName);
+export async function clearUserSession() {
+  const { supabase } = await getServerContext();
+  await supabase.auth.signOut({ scope: 'local' });
 }

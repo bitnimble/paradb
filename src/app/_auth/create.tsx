@@ -1,7 +1,6 @@
+import { Api } from 'app/api/api';
 import { observer } from 'mobx-react';
 import { LoginSignup } from './login_signup';
-import { Api } from 'app/api/api';
-import React from 'react';
 import { LoginSignupPresenter, LoginSignupStore } from './login_signup_presenter';
 
 export function createLoginSignupPage(api: Api) {
@@ -15,6 +14,7 @@ export function createLoginSignupPage(api: Api) {
         username={store.username}
         email={store.email}
         password={store.password}
+        submitting={store.submitting}
         errors={store.errors}
         onChangeUsername={presenter.onChangeUsername}
         onChangeEmail={presenter.onChangeEmail}
