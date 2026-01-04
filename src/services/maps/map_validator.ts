@@ -1,6 +1,6 @@
 import { PromisedResult, Result, ResultError } from 'base/result';
 import { PDMap } from 'schema/maps';
-// @ts-ignore
+// @ts-expect-error - encoding types are incorrect
 import * as encoding from 'encoding';
 import path from 'path';
 import * as unzipper from 'unzipper';

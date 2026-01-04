@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error - camelcase-keys-recursive types are incorrect
 import _camelcaseKeys from 'camelcase-keys-recursive';
 import _snakecaseKeys from 'snakecase-keys';
 import { ByteArrayString, toBuffer } from 'zapatos/db';
@@ -85,7 +85,9 @@ export type SnakeCase<T> = {
     : T[K];
 };
 
-export function snakeCaseKeys<T extends object>(data: T): SnakeCase<T> {
+export function snakeCaseKeys<T extends readonly any[] | Record<string, unknown>>(
+  data: T,
+): SnakeCase<T> {
   return _snakecaseKeys(data) as unknown as SnakeCase<T>;
 }
 
