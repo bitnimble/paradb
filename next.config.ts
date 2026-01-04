@@ -7,9 +7,6 @@ const s3Url = process.env.PUBLIC_S3_BASE_URL;
 const nextConfig: NextConfig = {
   distDir: process.env.BUILD_DIR || '.next',
   reactStrictMode: true,
-  experimental: {
-    proxyClientMaxBodySize: '100mb',
-  },
   images: {
     // Album art s3 buckets
     remotePatterns: [

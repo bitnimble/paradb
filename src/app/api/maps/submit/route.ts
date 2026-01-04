@@ -5,7 +5,6 @@ import { error } from 'services/helpers';
 import { mintUploadUrl } from 'services/maps/s3_handler';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
-import { string } from 'zod';
 
 const send = (res: SubmitMapResponse) => new NextResponse<Buffer>(serializeSubmitMapResponse(res));
 /**
@@ -27,8 +26,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     });
   }
 
-  const submitMapReqResult = SubmitMapRequest.safeParse(req.body);
+  const submitMapReqResult = SubmitMapRequest.safeParse(await req.json());
   if (!submitMapReqResult.success) {
+    console.log(JSON.stringify(submitMapReqResult.error));
     return error({
       statusCode: 400,
       message: 'Invalid submit map request.',
