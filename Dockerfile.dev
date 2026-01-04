@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7-labs
-FROM node:lts-bookworm-slim
+FROM oven/bun:1
 
 WORKDIR /etc/paradb/paradb
 
@@ -17,4 +17,4 @@ RUN chmod +x /usr/local/bin/mc
 # RUN mc mb local/"$S3_MAPS_BUCKET"
 # RUN mc admin policy attach local readwrite --user "$S3_ACCESS_KEY_ID" || true
 
-ENTRYPOINT ["yarn", "next", "dev"]
+ENTRYPOINT ["bun", "next", "dev"]

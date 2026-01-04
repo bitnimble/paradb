@@ -23,11 +23,11 @@ The codebase uses Docker to run third-party services locally (Meilisearch for se
 
 # Commands
 
-- `yarn dev` will start local services on Docker
-- `yarn supabase start` will start Supabase locally
-- `yarn next dev` will run Next.js in dev mode
-- `yarn format` will format the codebase with Prettier
-- `yarn check` will typecheck and lint
+- `bun dev` will start local services on Docker
+- `bun supabase start` will start Supabase locally
+- `bun next dev` will run Next.js in dev mode
+- `bun format` will format the codebase with Prettier
+- `bun check` will typecheck and lint
 
 # How you should work
 
