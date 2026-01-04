@@ -2,7 +2,7 @@ import { ApiProvider } from 'app/api/api_provider';
 import type { Metadata } from 'next';
 import { getFlags } from 'services/server_context';
 import { SessionProvider } from 'session/session_provider';
-import colorStyles from 'ui/base/colors/colors.module.css';
+import { colors } from 'ui/base/design_system/design_tokens';
 import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: colorStyles.colorPurple,
+  themeColor: colors.purple,
 };
 
 export const dynamic = 'force-dynamic';

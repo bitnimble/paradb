@@ -1,22 +1,19 @@
-@value colorRed, colorGrey from "ui/base/colors/colors.module.css";
-@value gridBaseline from "ui/base/metrics/metrics.module.css";
-
 .container {
-    margin-top: gridBaseline;
+    margin-top: var(--gridBaseline);
     display: flex;
     flex-direction: column;
 }
 
 .label {
     font-size: 16px;
-    margin-bottom: calc(gridBaseline * 0.5);
+    margin-bottom: calc(var(--gridBaseline) * 0.5);
 }
 
 .numeric {
     outline: none;
 
-    border: 1px solid colorGrey;
-    padding: calc(gridBaseline * 0.5) gridBaseline;
+    border: 1px solid var(--colorGrey);
+    padding: calc(var(--gridBaseline) * 0.5) var(--gridBaseline);
 
     font-family: 'Futura Light';
     font-size: 20px;
@@ -25,5 +22,5 @@
 }
 
 .errorContainer .numeric {
-    border: 1px solid colorRed;
+    border: 1px solid var(--colorRed);
 }

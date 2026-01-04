@@ -1,8 +1,6 @@
-@value gridBaseline from "ui/base/metrics/metrics.module.css";
-
 .table {
     width: 100%;
-    border-spacing: 0 gridBaseline;
+    border-spacing: 0 var(--gridBaseline);
 }
 
 .header .cell.sortable {

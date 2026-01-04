@@ -1,15 +1,14 @@
 import React from 'react';
-import colorStyles from 'ui/base/colors/colors.module.css';
-import { gridBaseline } from 'ui/base/metrics/metrics';
+import { colors, metrics } from 'ui/base/design_system/design_tokens';
 
 export const MaintenanceBanner = (props: { message: string }) => {
   return (
     <div
       style={{
-        backgroundColor: colorStyles.colorRed,
-        color: colorStyles.colorWhite,
+        backgroundColor: colors.red,
+        color: colors.white,
         width: '100vw',
-        height: gridBaseline * 6,
+        height: metrics.gridBaseline * 6,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',

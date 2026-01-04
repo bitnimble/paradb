@@ -1,0 +1,16 @@
+:root {
+  /* Colors */
+  --colorBlack: #000;
+  --colorWhite: #fff;
+  --colorDarkGrey: #292929;
+  --colorGrey: #666;
+  --colorGreyA30: rgba(102, 102, 102, 0.3);
+  --colorGreyA15: rgba(102, 102, 102, 0.15);
+  --colorGreyA5: rgba(102, 102, 102, 0.05);
+  --colorGreen: #4c4;
+  --colorRed: #f00;
+  --colorPurple: #9b15f1;
+
+  /* Metrics */
+  --gridBaseline: 8px;
+}
