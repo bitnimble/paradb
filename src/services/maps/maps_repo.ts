@@ -3,7 +3,8 @@ import { PromisedResult, Result, wrapError } from 'base/result';
 import { Index } from 'meilisearch';
 import { MapSortableAttributes, PDMap } from 'schema/maps';
 import { AdvancedSearchMapRequest, MapValidity, MapVisibility } from 'schema/maps_zod';
-import { DbError, camelCaseKeys, snakeCaseKeys } from 'services/db/helpers';
+import { DbError, camelCaseKeys } from 'services/db/helpers';
+import snakeCaseKeys from 'snakecase-keys';
 import { IdDomain, generateId } from 'services/db/id_gen';
 import { getDbPool } from 'services/db/pool';
 import {

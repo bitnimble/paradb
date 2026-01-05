@@ -1,7 +1,8 @@
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, ResultError, wrapError } from 'base/result';
 import { SignupSuccess } from 'schema/users';
-import { CamelCase, DbError, camelCaseKeys, snakeCaseKeys } from 'services/db/helpers';
+import { CamelCase, DbError, camelCaseKeys } from 'services/db/helpers';
+import snakeCaseKeys from 'snakecase-keys';
 import { IdDomain, generateId } from 'services/db/id_gen';
 import { getServerContext } from 'services/server_context';
 import * as db from 'zapatos/db';
