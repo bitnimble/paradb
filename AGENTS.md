@@ -16,6 +16,11 @@ The codebase uses Docker to run third-party services locally (Meilisearch for se
 - Vanilla CSS modules
 - Zod for schemas
 
+# Typescript
+
+- Use `== null` (double equals null) instead of either `=== null` or `=== undefined` (triple equals null / undefined), and the same for `!=`. This is to make `null` and `undefined` mean the same thing everywhere in our codebase to avoid any potential serialisation/deserialisation confusion or issues.
+- Avoid use of `any` unless absolutely necessary.
+
 # Commands
 
 - `yarn dev` will start local services on Docker
