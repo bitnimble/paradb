@@ -1,7 +1,7 @@
 :root {
-  --regularColor: var(--colorPurple);
-  --errorColor: var(--colorRed);
-  --successColor: var(--colorGreen);
+    --regularColor: var(--colorPurple);
+    --errorColor: var(--colorRed);
+    --successColor: var(--colorGreen);
 }
 
 .a {

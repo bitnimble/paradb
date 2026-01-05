@@ -1,9 +1,11 @@
 :root {
-  --margins: calc(var(--gridBaseline) * 3);
-  --albumArtMaxWidth: 300px;
-  --gap: calc(var(--gridBaseline) * 3);
-  --minContentWidth: calc(var(--gridBaseline) * 80);
-  --breakpoint: calc(var(--albumArtMaxWidth) + var(--gap) + var(--minContentWidth) + var(--margins));
+    --margins: calc(var(--gridBaseline) * 3);
+    --albumArtMaxWidth: 300px;
+    --gap: calc(var(--gridBaseline) * 3);
+    --minContentWidth: calc(var(--gridBaseline) * 80);
+    --breakpoint: calc(
+        var(--albumArtMaxWidth) + var(--gap) + var(--minContentWidth) + var(--margins)
+    );
 }
 
 .mapPage {

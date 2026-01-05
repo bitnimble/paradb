@@ -41,19 +41,20 @@ type OmitOptionals<Schema extends Record<string, Type<any>>> = OmitValues<
 >;
 type ReifyType<T extends Type<any>> = ReturnType<T['validate']>;
 
-export type Reify<Schema> = Schema extends Record<string, Type<any>>
-  ? { [K in keyof PickOptionals<Schema>]?: ReifyType<PickOptionals<Schema>[K]> } & {
-      [K in keyof OmitOptionals<Schema>]: ReifyType<OmitOptionals<Schema>[K]>;
-    }
-  : Schema extends Type<infer T>
-  ? T extends (infer I)[]
-    ? I[]
-    : T
-  : Schema extends (t: infer T) => string
-  ? T
-  : Schema extends (s: string) => infer T
-  ? T
-  : never;
+export type Reify<Schema> =
+  Schema extends Record<string, Type<any>>
+    ? { [K in keyof PickOptionals<Schema>]?: ReifyType<PickOptionals<Schema>[K]> } & {
+        [K in keyof OmitOptionals<Schema>]: ReifyType<OmitOptionals<Schema>[K]>;
+      }
+    : Schema extends Type<infer T>
+      ? T extends (infer I)[]
+        ? I[]
+        : T
+      : Schema extends (t: infer T) => string
+        ? T
+        : Schema extends (s: string) => infer T
+          ? T
+          : never;
 
 class InvalidTypeError extends Error {
   constructor(name: string, expectedType: string, value: any) {

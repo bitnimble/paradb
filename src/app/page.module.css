@@ -1,5 +1,5 @@
 :root {
-  --gutter: calc(var(--gridBaseline) * 2);
+    --gutter: calc(var(--gridBaseline) * 2);
 }
 
 .filter {
