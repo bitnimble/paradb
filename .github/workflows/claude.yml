@@ -43,5 +43,6 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ steps.app-token.outputs.token }}
-          trigger_phrase: "@intern"
-          claude_args: --max-turns 200 --model sonnet --allowedTools "Bash(yarn:*),Bash(bun:*),Bash(gh pr create:*),Bash(gh pr checkout:*),Bash(git fetch:*),Bash(git rebase:*),Bash(git show:*),Bash(git restore:*),Bash(git reset:*)"
+          trigger_phrase: '@intern'
+          # Do not add these to .claude/settings.json - branch protections on GH allows these to be run safely for the GH bot, but these aren't necessarily safe when running locally
+          claude_args: --max-turns 200 --model sonnet --allowedTools "Bash(yarn:*),Bash(bun:*),Bash(gh pr create:*),Bash(gh pr checkout:*),Bash(gh pr edit:*),Bash(git fetch:*),Bash(git rebase:*),Bash(git show:*),Bash(git restore:*),Bash(git reset:*)"
