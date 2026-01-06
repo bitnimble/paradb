@@ -1,0 +1,69 @@
+import { Axiom } from '@axiomhq/js';
+import { configure, getConsoleSink, getLogger } from '@logtape/logtape';
+import { getEnvVars } from './env';
+
+let isConfigured = false;
+
+export function configureLogger() {
+  if (isConfigured) {
+    return;
+  }
+
+  const isServer = typeof window === 'undefined';
+
+  if (isServer) {
+    const envVars = getEnvVars();
+    const axiom = new Axiom({
+      token: envVars.axiomApiToken,
+    });
+
+    configure({
+      sinks: {
+        console: getConsoleSink(),
+        axiom: (record) => {
+          axiom.ingest(envVars.axiomDataset, [
+            {
+              _time: record.timestamp,
+              level: record.level,
+              category: record.category.join('.'),
+              message: record.message
+                .map((m) => (typeof m === 'string' ? m : JSON.stringify(m)))
+                .join(' '),
+              properties: record.properties,
+            },
+          ]);
+        },
+      },
+      filters: {},
+      loggers: [
+        {
+          category: ['paradb'],
+          lowestLevel: 'debug',
+          sinks: ['console', 'axiom'],
+        },
+      ],
+    });
+  } else {
+    // Client-side: only use console sink, as we can't expose API tokens
+    configure({
+      sinks: {
+        console: getConsoleSink(),
+      },
+      filters: {},
+      loggers: [
+        {
+          category: ['paradb'],
+          lowestLevel: 'debug',
+          sinks: ['console'],
+        },
+      ],
+    });
+  }
+
+  isConfigured = true;
+}
+
+export function getLog(category: string[]) {
+  configureLogger();
+  return getLogger(['paradb', ...category]);
+}
