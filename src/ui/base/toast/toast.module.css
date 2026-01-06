@@ -1,0 +1,69 @@
+.toastContainer {
+    position: fixed;
+    top: calc(var(--gridBaseline) * 2);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gridBaseline);
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--gridBaseline) * 2);
+    padding: calc(var(--gridBaseline) * 1.5) calc(var(--gridBaseline) * 2);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: auto;
+    animation: slideIn 0.2s ease-out;
+    min-width: 200px;
+    max-width: 400px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.default {
+    background: var(--colorWhite);
+    border: 1px solid var(--colorPurple);
+    color: var(--colorBlack);
+}
+
+.success {
+    background: var(--colorGreen);
+    border: 1px solid var(--colorGreen);
+    color: var(--colorWhite);
+}
+
+.error {
+    background: var(--colorRed);
+    border: 1px solid var(--colorRed);
+    color: var(--colorWhite);
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: auto;
+    color: inherit;
+    opacity: 0.7;
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.closeButton:hover {
+    opacity: 1;
+}

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { getFlags } from 'services/server_context';
 import { SessionProvider } from 'session/session_provider';
 import { colors } from 'ui/base/design_system/design_tokens';
+import { ToastContainer } from 'ui/base/toast';
 import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ApiProvider>
           <SessionProvider>
+            <ToastContainer />
             <div className={styles.skeleton}>
               {flags.get('showMaintenanceBanner') ? (
                 <MaintenanceBanner message={flags.get('maintenanceBannerMessage')} />
