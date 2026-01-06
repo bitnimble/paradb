@@ -1,18 +1,13 @@
 import { Axiom } from '@axiomhq/js';
 import { configure, getConsoleSink, getLogger } from '@logtape/logtape';
-
-let isConfigured = false;
+import { getSingleton } from '../singleton';
 
 function configureLogger() {
-  if (isConfigured) {
-    return;
-  }
-
-  const publicToken = process.env.NEXT_PUBLIC_AXIOM_API_TOKEN;
-  const dataset = process.env.NEXT_PUBLIC_AXIOM_DATASET;
-
-  if (publicToken && dataset) {
+  return getSingleton('_clientLogger', () => {
+    const publicToken = process.env.NEXT_PUBLIC_AXIOM_API_TOKEN!;
+    const dataset = process.env.NEXT_PUBLIC_AXIOM_DATASET!;
     const axiom = new Axiom({ token: publicToken });
+
     configure({
       sinks: {
         console: getConsoleSink(),
@@ -39,24 +34,9 @@ function configureLogger() {
         },
       ],
     });
-  } else {
-    // No public token configured, only use console
-    configure({
-      sinks: {
-        console: getConsoleSink(),
-      },
-      filters: {},
-      loggers: [
-        {
-          category: ['paradb'],
-          lowestLevel: 'debug',
-          sinks: ['console'],
-        },
-      ],
-    });
-  }
 
-  isConfigured = true;
+    return true;
+  });
 }
 
 export function getLog(category: string[]) {
