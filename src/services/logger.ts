@@ -44,20 +44,54 @@ export function configureLogger() {
       ],
     });
   } else {
-    // Client-side: only use console sink, as we can't expose API tokens
-    configure({
-      sinks: {
-        console: getConsoleSink(),
-      },
-      filters: {},
-      loggers: [
-        {
-          category: ['paradb'],
-          lowestLevel: 'debug',
-          sinks: ['console'],
+    // Client-side: use public API token if available
+    const publicToken = process.env.NEXT_PUBLIC_AXIOM_API_TOKEN;
+    const dataset = process.env.NEXT_PUBLIC_AXIOM_DATASET;
+
+    if (publicToken && dataset) {
+      const axiom = new Axiom({ token: publicToken });
+      configure({
+        sinks: {
+          console: getConsoleSink(),
+          axiom: (record) => {
+            axiom.ingest(dataset, [
+              {
+                _time: record.timestamp,
+                level: record.level,
+                category: record.category.join('.'),
+                message: record.message
+                  .map((m) => (typeof m === 'string' ? m : JSON.stringify(m)))
+                  .join(' '),
+                properties: record.properties,
+              },
+            ]);
+          },
         },
-      ],
-    });
+        filters: {},
+        loggers: [
+          {
+            category: ['paradb'],
+            lowestLevel: 'debug',
+            sinks: ['console', 'axiom'],
+          },
+        ],
+      });
+    } else {
+      // No public token configured, only use console
+      configure({
+        sinks: {
+          console: getConsoleSink(),
+        },
+        filters: {},
+        loggers: [
+          {
+            category: ['paradb'],
+            lowestLevel: 'debug',
+            sinks: ['console'],
+          },
+        ],
+      });
+    }
   }
 
   isConfigured = true;

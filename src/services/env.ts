@@ -35,6 +35,8 @@ export type EnvVars = {
   supabaseSecretKey: string;
   axiomApiToken: string;
   axiomDataset: string;
+  axiomPublicApiToken: string;
+  axiomPublicDataset: string;
 };
 
 /**
@@ -72,6 +74,8 @@ function createEnvVars(): EnvVars {
     supabaseSecretKey: process.env.SUPABASE_SECRET_KEY,
     axiomApiToken: process.env.AXIOM_API_TOKEN,
     axiomDataset: process.env.AXIOM_DATASET,
+    axiomPublicApiToken: process.env.NEXT_PUBLIC_AXIOM_API_TOKEN,
+    axiomPublicDataset: process.env.NEXT_PUBLIC_AXIOM_DATASET,
   };
   let fail = false;
   for (const [key, value] of Object.entries(envVars)) {
