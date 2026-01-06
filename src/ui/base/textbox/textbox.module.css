@@ -14,11 +14,11 @@
     border-color: var(--colorGrey);
 }
 .borderPurple {
-    border-color: var(--colorPurple);
+    border-color: var(--colorAccent);
 }
 
 .readOnly {
-    background-color: var(--colorGreyA15);
+    background-color: var(--colorBackgroundSecondary);
 }
 
 .textbox {
@@ -29,6 +29,8 @@
 
     font-family: 'Futura Light';
     font-size: 20px;
+    background: var(--colorBackground);
+    color: var(--colorForeground);
 
     height: 100%;
     resize: vertical;

@@ -23,7 +23,7 @@
 }
 
 .fileContainer.hasMapData {
-    border-color: var(--colorPurple);
+    border-color: var(--colorAccent);
 }
 
 .fileContainer.isSubmitting {
@@ -76,7 +76,7 @@
     height: 100%;
     left: 0;
     top: 0;
-    background: var(--colorPurple);
+    background: var(--colorAccent);
 }
 
 .progressError {

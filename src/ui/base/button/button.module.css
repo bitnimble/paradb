@@ -18,7 +18,7 @@
     color: inherit;
     padding: var(--gridBaseline) calc(var(--gridBaseline) * 2);
     text-decoration: none;
-    background: var(--colorWhite);
+    background: var(--colorBackground);
     transition:
         background 0.15s ease,
         color 0.15s ease;
