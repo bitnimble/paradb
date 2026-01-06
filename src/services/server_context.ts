@@ -1,7 +1,8 @@
 import { MeiliSearch } from 'meilisearch';
 import { Pool } from 'pg';
 import { getDbPool } from 'services/db/pool';
-import { getEnvVars, getSingleton } from 'services/env';
+import { getEnvVars } from 'services/env';
+import { getSingleton } from 'services/singleton';
 import { Flags } from 'services/flags';
 import { MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
 import { FavoritesRepo } from 'services/users/favorites_repo';

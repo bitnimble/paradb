@@ -1,7 +1,5 @@
 import { getSingleton } from './singleton';
 
-export { getSingleton };
-
 /** Keep in sync with the test env vars in `jest_setup.ts` */
 export type EnvVars = {
   baseUrl: string;
