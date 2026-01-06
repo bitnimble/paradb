@@ -17,7 +17,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     statusCode: 401,
     errorMessage: 'Invalid credentials',
   } as const;
-  const { username, password } = LoginRequest.parse(req.json());
+  const { username, password } = LoginRequest.parse(await req.json());
   const { supabase } = await getServerContext();
   const user = await getUser({ by: 'username', username });
   if (!user.success || !user.value.supabaseId) {

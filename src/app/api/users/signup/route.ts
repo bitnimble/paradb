@@ -13,7 +13,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return bodyCheckError;
   }
 
-  const { username, email, password } = SignupRequest.parse(req.json());
+  const { username, email, password } = SignupRequest.parse(await req.json());
 
   const result = await createUser({ username, email, password });
   if (result.success) {
