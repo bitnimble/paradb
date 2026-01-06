@@ -20,10 +20,12 @@ export enum MapValidity {
 export const mapValidityEnum = z.enum(MapValidity);
 
 /* Structs */
+// Note: use `nullish` instead of `optional` for primitives that might be retrieved directly from
+// the DB, as the DB driver may return `null` for columns not present in the query.
 export const Difficulty = z.object({
-  difficulty: z.number().optional(),
+  difficulty: z.number().nullish(),
   // Difficulty name is temporarily `optional` while we perform the migration and rescan all rlrr's.
-  difficultyName: z.string().optional(),
+  difficultyName: z.string().nullish(),
 });
 export type Difficulty = z.infer<typeof Difficulty>;
 
@@ -36,7 +38,7 @@ export const PDMap = z.object({
   id: z.string(),
   visibility: mapVisibilityEnum,
   validity: mapValidityEnum,
-  submissionDate: z.iso.datetime(),
+  submissionDate: z.iso.datetime({ local: true }),
   title: z.string(),
   artist: z.string(),
   author: z.string().nullish(),
