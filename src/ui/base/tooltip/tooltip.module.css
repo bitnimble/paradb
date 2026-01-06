@@ -1,0 +1,86 @@
+.container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    position: absolute;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.content {
+    background-color: var(--colorDarkGrey);
+    color: var(--colorWhite);
+    padding: calc(var(--gridBaseline) * 0.5) calc(var(--gridBaseline) * 1);
+    border-radius: calc(var(--gridBaseline) * 0.5);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* Arrow base styles */
+.content::after {
+    content: '';
+    position: absolute;
+    border: calc(var(--gridBaseline) * 0.75) solid transparent;
+}
+
+/* Position: top */
+.top {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-bottom: calc(var(--gridBaseline) * 1);
+}
+
+.top .content::after {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-top-color: var(--colorDarkGrey);
+}
+
+/* Position: bottom */
+.bottom {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-top: calc(var(--gridBaseline) * 1);
+}
+
+.bottom .content::after {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-bottom-color: var(--colorDarkGrey);
+}
+
+/* Position: left */
+.left {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    padding-right: calc(var(--gridBaseline) * 1);
+}
+
+.left .content::after {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left-color: var(--colorDarkGrey);
+}
+
+/* Position: right */
+.right {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    padding-left: calc(var(--gridBaseline) * 1);
+}
+
+.right .content::after {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-right-color: var(--colorDarkGrey);
+}
