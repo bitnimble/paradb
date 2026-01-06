@@ -1,6 +1,6 @@
 'use server';
 
-import { MapValidity } from 'schema/maps_zod';
+import { MapValidity } from 'schema/maps';
 import { actionError } from 'services/helpers';
 import { submitErrorMap } from 'services/maps/maps_repo';
 import { deleteFiles, getMapFile } from 'services/maps/s3_handler';

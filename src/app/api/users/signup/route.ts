@@ -1,24 +1,19 @@
-import { DbError } from 'services/db/helpers';
-import { CreateUserError, createUser } from 'services/users/users_repo';
-import { checkBody, getBody } from 'app/api/helpers';
+import { checkBody } from 'app/api/helpers';
 import { UnreachableError } from 'base/unreachable';
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from 'schema/api';
-import {
-  SignupError,
-  SignupResponse,
-  deserializeSignupRequest,
-  serializeSignupResponse,
-} from 'schema/users';
+import { SignupError, SignupRequest, SignupResponse } from 'schema/users';
+import { DbError } from 'services/db/helpers';
+import { CreateUserError, createUser } from 'services/users/users_repo';
 
-const send = (res: SignupResponse) => new NextResponse<Buffer>(serializeSignupResponse(res));
-export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
+const send = (res: SignupResponse) => NextResponse.json(SignupResponse.parse(res));
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const bodyCheckError = checkBody(req, 'missing signup request');
   if (bodyCheckError) {
     return bodyCheckError;
   }
 
-  const { username, email, password } = await getBody(req, deserializeSignupRequest);
+  const { username, email, password } = SignupRequest.parse(await req.json());
 
   const result = await createUser({ username, email, password });
   if (result.success) {

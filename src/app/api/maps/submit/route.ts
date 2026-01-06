@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SubmitMapResponse, serializeSubmitMapResponse } from 'schema/maps';
-import { MapValidity, SubmitMapRequest } from 'schema/maps_zod';
+import { MapValidity, SubmitMapRequest, SubmitMapResponse } from 'schema/maps';
 import { error } from 'services/helpers';
 import { mintUploadUrl } from 'services/maps/s3_handler';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 
-const send = (res: SubmitMapResponse) => new NextResponse<Buffer>(serializeSubmitMapResponse(res));
+const send = (res: SubmitMapResponse) => NextResponse.json(SubmitMapResponse.parse(res));
 /**
  * Handles a request for uploading a new map or reuploading an existing map.
  * If it is a new map, it creates a new temporary hidden Map record in the DB.
@@ -15,14 +14,14 @@ const send = (res: SubmitMapResponse) => new NextResponse<Buffer>(serializeSubmi
  * The client is expected to then upload to the specified URL and then call
  * /api/maps/submit/complete, which will process/validate the map and publish it.
  */
-export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const session = await getUserSession();
   if (!session) {
     return error({
       statusCode: 403,
       message: 'You must be logged in to submit maps.',
       errorBody: {},
-      errorSerializer: serializeSubmitMapResponse,
+      errorSerializer: SubmitMapResponse.parse,
     });
   }
 
@@ -33,7 +32,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
       statusCode: 400,
       message: 'Invalid submit map request.',
       errorBody: {},
-      errorSerializer: serializeSubmitMapResponse,
+      errorSerializer: SubmitMapResponse.parse,
     });
   }
   const submitMapReq = submitMapReqResult.data;
@@ -47,7 +46,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
         statusCode: 404,
         message: `Could not find specified map to resubmit: ${submitMapReq.id}`,
         errorBody: {},
-        errorSerializer: serializeSubmitMapResponse,
+        errorSerializer: SubmitMapResponse.parse,
       });
     }
     if (mapResult.value.uploader !== session.id) {
@@ -55,7 +54,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
         statusCode: 403,
         message: `Not authorized to modify the specified map: ${submitMapReq.id}`,
         errorBody: {},
-        errorSerializer: serializeSubmitMapResponse,
+        errorSerializer: SubmitMapResponse.parse,
       });
     }
     id = submitMapReq.id;
@@ -70,8 +69,8 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
         statusCode: 500,
         message: 'Could not create placeholder map when preparing for upload.',
         errorBody: {},
-        errorSerializer: serializeSubmitMapResponse,
         resultError: createMapResult,
+        errorSerializer: SubmitMapResponse.parse,
       });
     }
     id = createMapResult.value.id;
@@ -82,7 +81,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
       statusCode: 500,
       message: 'Could not create the URL for uploading the map.',
       errorBody: {},
-      errorSerializer: serializeSubmitMapResponse,
+      errorSerializer: SubmitMapResponse.parse,
     });
   }
   return send({

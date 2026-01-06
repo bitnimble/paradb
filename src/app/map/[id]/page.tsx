@@ -21,7 +21,7 @@ export async function generateMetadata(props: {
       siteName: 'ParaDB',
       title: `${map.title}`,
       images: [getAlbumArtUrl(map)],
-      description: map.description && getMapDescription(map.description),
+      description: map.description ? getMapDescription(map.description) : undefined,
     },
   };
 }

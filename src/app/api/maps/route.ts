@@ -3,15 +3,10 @@ import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 import { getQueryParams, joinErrors } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  FindMapsResponse,
-  MapSortableAttributes,
-  mapSortableAttributes,
-  serializeFindMapsResponse,
-} from 'schema/maps';
+import { FindMapsResponse, MapSortableAttributes, mapSortableAttributes } from 'schema/maps';
 
-const send = (res: FindMapsResponse) => new NextResponse<Buffer>(serializeFindMapsResponse(res));
-export async function GET(req: NextRequest): Promise<NextResponse<Buffer>> {
+const send = (res: FindMapsResponse) => NextResponse.json(FindMapsResponse.parse(res));
+export async function GET(req: NextRequest): Promise<NextResponse> {
   const { query, sort: _sort, sortDirection: _sortDirection } = getQueryParams(req);
   if (_sort && !mapSortableAttributes.includes(_sort as MapSortableAttributes)) {
     return send({ success: false, statusCode: 400, errorMessage: `Invalid sort column: ${_sort}` });

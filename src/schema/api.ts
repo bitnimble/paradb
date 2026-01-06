@@ -1,18 +1,28 @@
-import { bool, num, rec, Reify, str, union } from './builder';
+import { z } from 'zod';
 
-export type ApiSuccess = Reify<typeof apiSuccess>;
-export const apiSuccess = rec('apiSuccess', {
-  success: bool('success', true),
+export const ApiSuccess = z.object({
+  success: z.literal(true),
 });
-export const { serialize: serializeApiSuccess, deserialize: deserializeApiSuccess } = apiSuccess;
 
-export type ApiError = Reify<typeof serializeApiError>;
-export const apiError = rec('apiError', {
-  success: bool('success', false),
-  statusCode: num('statusCode'),
-  errorMessage: str('errorMessage'),
+export type ApiSuccess = z.infer<typeof ApiSuccess>;
+
+export const ApiError = z.object({
+  success: z.literal(false),
+  statusCode: z.number(),
+  errorMessage: z.string(),
 });
-export const { serialize: serializeApiError, deserialize: deserializeApiError } = apiError;
 
-export type ApiResponse = Reify<typeof apiResponse>;
-export const apiResponse = union('apiResponse', 'success', [apiSuccess, apiError]);
+export type ApiError = z.infer<typeof ApiError>;
+
+export const ApiResponse = z.discriminatedUnion('success', [ApiSuccess, ApiError]);
+export type ApiResponse = z.infer<typeof ApiResponse>;
+
+export const PaginatedApiRequest = z.object({
+  limitPerPage: z.number().nullish(),
+  page: z.number().nullish(),
+});
+
+export const PaginatedApiResponse = z.object({
+  totalCount: z.number(),
+  page: z.number(),
+});

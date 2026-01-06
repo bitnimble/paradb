@@ -1,17 +1,12 @@
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
-import { getBody } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
-import { ApiResponse, apiResponse } from 'schema/api';
-import {
-  GetFavoriteMapsResponse,
-  deserializeSetFavoriteMapsRequest,
-  serializeGetFavoriteMapsResponse,
-} from 'schema/users';
+import { ApiResponse } from 'schema/api';
+import { GetFavoriteMapsResponse, SetFavoriteMapsRequest } from 'schema/users';
 
 export async function GET() {
   const send = (res: GetFavoriteMapsResponse) =>
-    new NextResponse(serializeGetFavoriteMapsResponse(res));
+    NextResponse.json(GetFavoriteMapsResponse.parse(res));
 
   const user = await getUserSession();
   if (!user) {
@@ -35,7 +30,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const send = (res: ApiResponse) => new NextResponse(apiResponse.serialize(res));
+  const send = (res: ApiResponse) => NextResponse.json(ApiResponse.parse(res));
 
   const user = await getUserSession();
   if (!user) {
@@ -46,7 +41,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const setFavoriteMapsReq = await getBody(req, deserializeSetFavoriteMapsRequest);
+  const setFavoriteMapsReq = SetFavoriteMapsRequest.parse(await req.json());
 
   const { favoritesRepo } = await getServerContext();
   const result = await favoritesRepo.setFavorites(

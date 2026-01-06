@@ -1,11 +1,14 @@
 import { ApiResponse } from 'schema/api';
 import {
-  FindMapsResponse,
-  SearchMapsRequest,
-  GetMapResponse,
   DeleteMapResponse,
-  SubmitMapResponse,
+  FindMapsResponse,
+  GetMapResponse,
+  MapValidity,
+  MapVisibility,
   PDMap,
+  SearchMapsRequest,
+  SubmitMapRequest,
+  SubmitMapResponse,
 } from 'schema/maps';
 import {
   ChangePasswordRequest,
@@ -17,9 +20,8 @@ import {
   SignupResponse,
   User,
 } from 'schema/users';
-import { Api } from './api';
 import { createClient } from 'services/session/supabase_client';
-import { SubmitMapRequest } from 'schema/maps_zod';
+import { Api } from './api';
 
 const DELAY = 500;
 
@@ -89,8 +91,8 @@ export class FakeApi implements Api {
 
 const allStar: PDMap = {
   id: '1',
-  visibility: 'P',
-  validity: 'valid',
+  visibility: MapVisibility.PUBLIC,
+  validity: MapValidity.VALID,
   submissionDate: '2021-06-01T00:00:00',
   title: 'All Star',
   artist: 'Smash Mouth',
@@ -112,8 +114,8 @@ const allStar: PDMap = {
 
 const californication: PDMap = {
   id: '2',
-  visibility: 'P',
-  validity: 'valid',
+  visibility: MapVisibility.PUBLIC,
+  validity: MapValidity.VALID,
   submissionDate: '2021-06-01T00:00:00',
   title: 'Californication',
   artist: 'Red Hot Chili Peppers',

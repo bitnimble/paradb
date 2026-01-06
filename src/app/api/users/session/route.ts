@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { serializeGetUserResponse } from 'schema/users';
+import { GetUserResponse } from 'schema/users';
 import { getUserSession } from 'services/session/session';
 
 export const dynamic = 'force-dynamic';
@@ -14,5 +14,5 @@ export async function GET() {
     return new NextResponse('403 unauthorized', { status: 403 });
   }
 
-  return new NextResponse(serializeGetUserResponse({ success: true, user: session }));
+  return NextResponse.json(GetUserResponse.parse({ success: true, user: session }));
 }
