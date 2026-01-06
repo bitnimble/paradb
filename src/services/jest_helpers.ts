@@ -1,13 +1,14 @@
-import { deserializeSignupResponse, serializeSignupRequest } from 'schema/users';
+import { SignupRequest, SignupResponse } from 'schema/users';
 import supertest from 'supertest';
+import { z } from 'zod';
 
 // It's a function in order to defer execution until after the beforeAll() step has run
 export const testServer = () => supertest('http://localhost:3000');
 
 export const testPost = async <Req, Res>(
   url: string,
-  serializer: (t: Req) => string,
-  deserializer: (s: string) => Res,
+  requestSchema: z.ZodType<Req>,
+  responseSchema: z.ZodType<Res>,
   body: Req,
   cookie?: string
 ) => {
@@ -18,14 +19,14 @@ export const testPost = async <Req, Res>(
   const resp = await req
     .type('application/json')
     .responseType('application/json')
-    .send(serializer(body));
+    .send(JSON.stringify(requestSchema.parse(body)));
 
-  return deserializer(resp.body);
+  return responseSchema.parse(JSON.parse(resp.body));
 };
 
 export const testGet = async <Res>(
   url: string,
-  deserialize: (s: string) => Res,
+  responseSchema: z.ZodType<Res>,
   cookie?: string
 ) => {
   const req = testServer().get(url);
@@ -33,7 +34,7 @@ export const testGet = async <Res>(
     req.set('Cookie', cookie);
   }
   const resp = await req.type('application/json').responseType('application/json');
-  return deserialize(resp.body);
+  return responseSchema.parse(JSON.parse(resp.body));
 };
 
 /**
@@ -56,19 +57,21 @@ export const testAuthenticate = async (user?: {
 }) => {
   const resp = await testServer()
     .post('/api/users/signup')
-    .type('application/octet-stream')
-    .responseType('application/octet-stream')
+    .type('application/json')
+    .responseType('application/json')
     .send(
-      serializeSignupRequest(
-        user ?? {
-          email: testUser.email,
-          password: testUser.password,
-          username: testUser.username,
-        }
+      JSON.stringify(
+        SignupRequest.parse(
+          user ?? {
+            email: testUser.email,
+            password: testUser.password,
+            username: testUser.username,
+          }
+        )
       )
     );
 
-  expect(deserializeSignupResponse(resp.body)).toEqual({ success: true });
+  expect(SignupResponse.parse(JSON.parse(resp.body))).toEqual({ success: true });
 
   return resp.headers['set-cookie'];
 };

@@ -1,12 +1,12 @@
-import { checkBody, getBody } from 'app/api/helpers';
+import { checkBody } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
-import { LoginResponse, deserializeLoginRequest, serializeLoginResponse } from 'schema/users';
+import { LoginRequest, LoginResponse } from 'schema/users';
 import { getServerContext } from 'services/server_context';
 import { _unsafeCreateAdminSupabaseServerClient } from 'services/session/supabase_server';
 import { getUser } from 'services/users/users_repo';
 
-const send = (res: LoginResponse) => new NextResponse<Buffer>(serializeLoginResponse(res));
-export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
+const send = (res: LoginResponse) => NextResponse.json(LoginResponse.parse(res));
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const bodyCheckError = checkBody(req, 'missing login request');
   if (bodyCheckError) {
     return bodyCheckError;
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     statusCode: 401,
     errorMessage: 'Invalid credentials',
   } as const;
-  const { username, password } = await getBody(req, deserializeLoginRequest);
+  const { username, password } = LoginRequest.parse(req.json());
   const { supabase } = await getServerContext();
   const user = await getUser({ by: 'username', username });
   if (!user.success || !user.value.supabaseId) {

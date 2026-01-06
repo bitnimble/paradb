@@ -2,16 +2,16 @@ import * as Sentry from '@sentry/nextjs';
 import { getQueryParams } from 'app/api/helpers';
 import { ResultError } from 'base/result';
 import { NextRequest, NextResponse } from 'next/server';
-import { ApiError, serializeApiError } from 'schema/api';
+import { ApiError } from 'schema/api';
 
 export function error<P, T extends ApiError & P, E extends string>(opts: {
   statusCode: number;
-  errorSerializer(o: T): string;
   errorBody: P;
   message: string;
   resultError?: ResultError<E>;
-}): NextResponse<Buffer> {
-  const { errorSerializer, errorBody, statusCode, message, resultError } = opts;
+  errorSerializer: (value: unknown) => unknown;
+}): NextResponse {
+  const { errorBody, statusCode, message, resultError, errorSerializer } = opts;
 
   // Attach error message and tags for Sentry. Just pick the details out of the first error for now.
   const details = resultError?.errors[0];
@@ -30,7 +30,7 @@ export function error<P, T extends ApiError & P, E extends string>(opts: {
   console.error(error);
 
   const errorResponse = { success: false, statusCode, errorMessage: message, ...errorBody } as T;
-  return new NextResponse(errorSerializer(errorResponse), {
+  return NextResponse.json(errorSerializer(errorResponse), {
     status: statusCode,
   });
 }
@@ -64,9 +64,9 @@ export function actionError<P, E extends string>(opts: {
 export function badRequest(message: string) {
   return error({
     statusCode: 400,
-    errorSerializer: serializeApiError,
     message,
     errorBody: {},
+    errorSerializer: ApiError.parse,
   });
 }
 

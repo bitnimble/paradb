@@ -1,23 +1,18 @@
-import { error } from 'services/helpers';
-import { ChangePasswordError, changePassword, getUser } from 'services/users/users_repo';
-import { checkBody, getBody } from 'app/api/helpers';
+import { checkBody } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  ChangePasswordResponse,
-  deserializeChangePasswordRequest,
-  serializeChangePasswordResponse,
-} from 'schema/users';
+import { ChangePasswordRequest, ChangePasswordResponse } from 'schema/users';
+import { error } from 'services/helpers';
 import { getServerContext } from 'services/server_context';
+import { ChangePasswordError, changePassword, getUser } from 'services/users/users_repo';
 
-const send = (res: ChangePasswordResponse) =>
-  new NextResponse<Buffer>(serializeChangePasswordResponse(res));
-export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
+const send = (res: ChangePasswordResponse) => NextResponse.json(ChangePasswordResponse.parse(res));
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const bodyCheckError = checkBody(req, 'missing change password request');
   if (bodyCheckError) {
     return bodyCheckError;
   }
 
-  const { id, oldPassword, newPassword } = await getBody(req, deserializeChangePasswordRequest);
+  const { id, oldPassword, newPassword } = ChangePasswordRequest.parse(await req.json());
 
   const userResult = await getUser({ by: 'id', id });
   if (!userResult.success) {
@@ -48,19 +43,19 @@ export async function POST(req: NextRequest): Promise<NextResponse<Buffer>> {
     if (insecurePasswordError) {
       return error({
         statusCode: 400,
-        errorSerializer: serializeChangePasswordResponse,
         errorBody: {
           oldPassword: undefined,
           newPassword: insecurePasswordError.userMessage || 'New password is too insecure.',
         },
         message: '',
+        errorSerializer: ChangePasswordResponse.parse,
       });
     } else {
       return error({
         statusCode: 500,
-        errorSerializer: serializeChangePasswordResponse,
         errorBody: { oldPassword: undefined, newPassword: undefined },
         message: 'Unknown DB error',
+        errorSerializer: ChangePasswordResponse.parse,
       });
     }
   }

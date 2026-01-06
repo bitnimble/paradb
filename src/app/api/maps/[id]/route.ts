@@ -3,13 +3,13 @@ import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 import { joinErrors } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
-import { GetMapResponse, serializeGetMapResponse } from 'schema/maps';
+import { GetMapResponse } from 'schema/maps';
 
-const send = (res: GetMapResponse) => new NextResponse<Buffer>(serializeGetMapResponse(res));
+const send = (res: GetMapResponse) => NextResponse.json(GetMapResponse.parse(res));
 export async function GET(
   _req: NextRequest,
   props: { params: Promise<{ id: string }> }
-): Promise<NextResponse<Buffer>> {
+): Promise<NextResponse> {
   const params = await props.params;
   const { id } = params;
   const user = await getUserSession();

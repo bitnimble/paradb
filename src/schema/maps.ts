@@ -1,66 +1,81 @@
-import { bool, extend, list, num, optional, rec, Reify, str, union } from './builder';
-import { apiError, apiSuccess } from './api';
+import { z } from 'zod';
+import { ApiError, ApiSuccess, PaginatedApiRequest, PaginatedApiResponse } from './api';
+
+/* Enums */
+export enum MapVisibility {
+  PUBLIC = 'P',
+  HIDDEN = 'H',
+  INVALID = 'I',
+}
+export const mapVisibilityEnum = z.enum(MapVisibility);
+
+export enum MapValidity {
+  PENDING_UPLOAD = 'pending_upload',
+  PENDING_REUPLOAD = 'pending_reupload',
+  UPLOADED = 'uploaded',
+  VALIDATING = 'validating',
+  INVALID = 'invalid',
+  VALID = 'valid',
+}
+export const mapValidityEnum = z.enum(MapValidity);
 
 /* Structs */
-export type Difficulty = Reify<typeof difficulty>;
-const difficulty = rec('difficulty', {
-  difficulty: optional(num('difficulty')),
+export const Difficulty = z.object({
+  difficulty: z.number().optional(),
   // Difficulty name is temporarily `optional` while we perform the migration and rescan all rlrr's.
-  difficultyName: optional(str('difficultyName')),
+  difficultyName: z.string().optional(),
 });
+export type Difficulty = z.infer<typeof Difficulty>;
 
-export type MapUserProjection = Reify<typeof serializeMapUserProjection>;
-const mapUserProjection = rec('mapUserProjection', {
-  isFavorited: bool('isFavorited'),
+export const MapUserProjection = z.object({
+  isFavorited: z.boolean(),
 });
-export const { serialize: serializeMapUserProjection, deserialize: deserializeMapUserProjection } =
-  mapUserProjection;
+export type MapUserProjection = z.infer<typeof MapUserProjection>;
 
-export type PDMap = Reify<typeof serializeMap>;
-export const pdMap = rec('map', {
-  id: str('id'),
-  visibility: str('visibility'),
-  validity: str('validity'),
-  submissionDate: str('submissionDate'),
-  title: str('title'),
-  artist: str('artist'),
-  author: optional(str('author')),
-  uploader: str('uploader'),
-  downloadCount: num('downloadCount'),
-  albumArt: optional(str('albumArt')),
+export const PDMap = z.object({
+  id: z.string(),
+  visibility: mapVisibilityEnum,
+  validity: mapValidityEnum,
+  submissionDate: z.iso.datetime(),
+  title: z.string(),
+  artist: z.string(),
+  author: z.string().nullish(),
+  uploader: z.string(),
+  downloadCount: z.number(),
+  albumArt: z.string().nullish(),
   // complexity is temporarily `optional` while we perform the migration and rescan all rlrr's.
-  complexity: optional(num('complexity')),
-  difficulties: list('difficulties', difficulty),
-  description: optional(str('description')),
-  favorites: num('favorites'),
-  userProjection: optional(mapUserProjection),
+  complexity: z.number().nullish(),
+  difficulties: z.array(Difficulty),
+  description: z.string().nullish(),
+  favorites: z.number(),
+  userProjection: MapUserProjection.optional(),
 });
-export const { serialize: serializeMap, deserialize: deserializeMap } = pdMap;
+export type PDMap = z.infer<typeof PDMap>;
 
 /* GET getMap */
-export type GetMapResponse = Reify<typeof serializeGetMapResponse>;
-const getMapSuccess = extend('getMapSuccess', apiSuccess, {
-  map: pdMap,
+export const GetMapSuccess = ApiSuccess.extend({
+  map: PDMap,
 });
-export const { serialize: serializeGetMapResponse, deserialize: deserializeGetMapResponse } = union(
-  'getMapResponse',
-  'success',
-  [getMapSuccess, apiError]
-);
+export type GetMapSuccess = z.infer<typeof GetMapSuccess>;
+
+export const GetMapResponse = z.discriminatedUnion('success', [GetMapSuccess, ApiError]);
+export type GetMapResponse = z.infer<typeof GetMapResponse>;
 
 /* GET deleteMap */
-export type DeleteMapResponse = Reify<typeof serializeDeleteMapResponse>;
-const deleteMapSuccess = extend('deleteMapSuccess', apiSuccess, {});
-export const { serialize: serializeDeleteMapResponse, deserialize: deserializeDeleteMapResponse } =
-  union('deleteMapResponse', 'success', [deleteMapSuccess, apiError]);
+export const DeleteMapSuccess = ApiSuccess.extend({});
+export type DeleteMapSuccess = z.infer<typeof DeleteMapSuccess>;
+
+export const DeleteMapResponse = z.discriminatedUnion('success', [DeleteMapSuccess, ApiError]);
+export type DeleteMapResponse = z.infer<typeof DeleteMapResponse>;
 
 /* GET findMaps */
-export type FindMapsResponse = Reify<typeof serializeFindMapsResponse>;
-const findMapsSuccess = extend('findMapsSuccess', apiSuccess, {
-  maps: list('maps', pdMap),
+export const FindMapsSuccess = ApiSuccess.extend({
+  maps: z.array(PDMap),
 });
-export const { serialize: serializeFindMapsResponse, deserialize: deserializeFindMapsResponse } =
-  union('findMapsResponse', 'success', [findMapsSuccess, apiError]);
+export type FindMapsSuccess = z.infer<typeof FindMapsSuccess>;
+
+export const FindMapsResponse = z.discriminatedUnion('success', [FindMapsSuccess, ApiError]);
+export type FindMapsResponse = z.infer<typeof FindMapsResponse>;
 
 /** No serialize/deserialize is provided, as SearchMapsRequest is only intended be used as a GET request via query parameters.  */
 export const mapSortableAttributes = [
@@ -80,16 +95,47 @@ export type SearchMapsRequest = {
   sortDirection?: 'asc' | 'desc';
 };
 
-/* POST submitMap */
-export type SubmitMapSuccess = Reify<typeof submitMapSuccess>;
-const submitMapSuccess = extend('submitMapSuccess', apiSuccess, {
-  id: str('id'),
-  url: str('url'),
-});
+// Fields in this advanced search are AND'ed together
+export const AdvancedSearchMapRequest = z.intersection(
+  PaginatedApiRequest,
+  z.object({
+    title: z.string().nullish(),
+    artist: z.string().nullish(),
+    uploader: z.string().nullish(),
+    submissionDateStart: z.date().nullish(),
+    submissionDateEnd: z.date().nullish(),
+  })
+);
 
-const submitMapError = extend('submitMapError', apiError, {});
-export const { serialize: serializeSubmitMapError, deserialize: deserializeSubmitMapError } =
-  submitMapError;
-export type SubmitMapResponse = Reify<typeof serializeSubmitMapResponse>;
-export const { serialize: serializeSubmitMapResponse, deserialize: deserializeSubmitMapResponse } =
-  union('submitMapResponse', 'success', [submitMapSuccess, submitMapError]);
+export const AdvancedSearchMapResponse = z.intersection(
+  PaginatedApiResponse,
+  z.object({
+    success: z.literal(true),
+    maps: z.array(PDMap),
+  })
+);
+
+export type AdvancedSearchMapRequest = z.infer<typeof AdvancedSearchMapRequest>;
+export type AdvancedSearchMapsResponse = z.infer<typeof AdvancedSearchMapResponse>;
+
+/* POST submitMap */
+export const SubmitMapRequest = z.object({
+  title: z.string(),
+  id: z.string().optional(),
+});
+export type SubmitMapRequest = z.infer<typeof SubmitMapRequest>;
+
+export const SubmitMapSuccess = ApiSuccess.extend({
+  id: z.string(),
+  url: z.string(),
+});
+export type SubmitMapSuccess = z.infer<typeof SubmitMapSuccess>;
+
+export const SubmitMapError = ApiError.extend({});
+export type SubmitMapError = z.infer<typeof SubmitMapError>;
+
+export const SubmitMapResponse = z.discriminatedUnion('success', [
+  SubmitMapSuccess,
+  SubmitMapError,
+]);
+export type SubmitMapResponse = z.infer<typeof SubmitMapResponse>;
