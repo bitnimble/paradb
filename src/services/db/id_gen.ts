@@ -4,6 +4,7 @@ const MAX_ID_GEN_ATTEMPTS = 10;
 export const enum IdDomain {
   USERS = 'U',
   MAPS = 'M',
+  DRUM_LAYOUTS = 'D',
 }
 const ID_LENGTH = 6;
 function idGen(domain: IdDomain) {
