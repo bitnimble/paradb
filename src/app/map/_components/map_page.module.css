@@ -1,6 +1,7 @@
 :root {
     --margins: calc(var(--gridBaseline) * 3);
     --albumArtMaxWidth: 300px;
+
     --gap: calc(var(--gridBaseline) * 3);
     --minContentWidth: calc(var(--gridBaseline) * 80);
     --breakpoint: calc(
@@ -81,7 +82,11 @@
     margin: var(--gridBaseline) 0;
 }
 
-@media screen and (min-width: var(--breakpoint)) {
+/* TODO: use scss or sass instead, since media queries don't support CSS variables. */
+/* gap = gridBaseline * 3 */
+/* minContentWidth = gridBaseline * 80 */
+/* albumArtMaxWidth + gap + minContentWidth + margins */
+@media screen and (min-width: 988px) {
     .mapPage {
         flex-direction: row;
         align-items: flex-start;
