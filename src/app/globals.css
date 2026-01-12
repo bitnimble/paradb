@@ -19,4 +19,6 @@ body {
 body {
     /* TODO: define and import default typography styles from base/text */
     font-family: 'Futura Light';
+    background-color: var(--colorBackground);
+    color: var(--colorForeground);
 }

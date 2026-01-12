@@ -5,5 +5,5 @@
 }
 
 .link:hover {
-    color: var(--colorPurple);
+    color: var(--colorAccent);
 }

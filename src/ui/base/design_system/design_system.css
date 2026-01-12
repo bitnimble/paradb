@@ -10,7 +10,28 @@
     --colorGreen: #4c4;
     --colorRed: #f00;
     --colorPurple: #9b15f1;
+    --colorPurpleDark: #bb77ff;
+
+    /* Theme-aware colors */
+    --colorBackground: #fff;
+    --colorBackgroundSecondary: #f5f5f5;
+    --colorForeground: #000;
+    --colorAutoContrast: #000;
+    --colorAccent: var(--colorPurple);
+    --colorDialogOverlay: rgba(255, 255, 255, 0.9);
 
     /* Metrics */
     --gridBaseline: 8px;
+}
+
+[data-theme='dark'] {
+    --colorBackground: #1a1a1a;
+    --colorBackgroundSecondary: #2a2a2a;
+    --colorForeground: #fff;
+    --colorAutoContrast: #fff;
+    --colorAccent: var(--colorPurpleDark);
+    --colorDialogOverlay: rgba(0, 0, 0, 0.8);
+    --colorGreyA5: rgba(102, 102, 102, 0.15);
+    --colorGreyA15: rgba(102, 102, 102, 0.25);
+    --colorGreyA30: rgba(102, 102, 102, 0.4);
 }

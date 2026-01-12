@@ -17,6 +17,8 @@
 
     font-family: 'Futura Light';
     font-size: 20px;
+    background: var(--colorBackground);
+    color: var(--colorForeground);
 
     flex: 1;
 }

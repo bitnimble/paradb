@@ -1,12 +1,13 @@
 import { ApiProvider } from 'app/api/api_provider';
+import { MaintenanceBanner } from 'app/maintenance_banner';
 import type { Metadata } from 'next';
 import { getFlags } from 'services/server_context';
 import { SessionProvider } from 'session/session_provider';
 import { colors } from 'ui/base/design_system/design_tokens';
+import { ThemeProvider } from 'ui/base/theme';
 import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
-import { MaintenanceBanner } from 'app/maintenance_banner';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
@@ -24,17 +25,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <ApiProvider>
-          <SessionProvider>
-            <div className={styles.skeleton}>
-              {flags.get('showMaintenanceBanner') ? (
-                <MaintenanceBanner message={flags.get('maintenanceBannerMessage')} />
-              ) : null}
-              <NavBar />
-              <div className={styles.content}>{children}</div>
-            </div>
-          </SessionProvider>
-        </ApiProvider>
+        <ThemeProvider>
+          <ApiProvider>
+            <SessionProvider>
+              <div className={styles.skeleton}>
+                {flags.get('showMaintenanceBanner') ? (
+                  <MaintenanceBanner message={flags.get('maintenanceBannerMessage')} />
+                ) : null}
+                <NavBar />
+                <div className={styles.content}>{children}</div>
+              </div>
+            </SessionProvider>
+          </ApiProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
