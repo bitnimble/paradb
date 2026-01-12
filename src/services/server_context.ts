@@ -5,6 +5,7 @@ import { getEnvVars } from 'services/env';
 import { getSingleton } from 'services/singleton';
 import { Flags } from 'services/flags';
 import { MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
+import { DrumLayoutsRepo } from 'services/drum_layouts/drum_layouts_repo';
 import { FavoritesRepo } from 'services/users/favorites_repo';
 import { createSupabaseServerClient } from './session/supabase_server';
 import { rebuildMeilisearchIndex } from 'app/api/maps/search/rebuild/route';
@@ -13,6 +14,7 @@ type ServerContext = {
   pool: Pool;
   flags: Flags;
   mapsRepo: MapsRepo;
+  drumLayoutsRepo: DrumLayoutsRepo;
   favoritesRepo: FavoritesRepo;
 };
 
@@ -32,6 +34,7 @@ async function createServerContext(): Promise<ServerContext> {
   }
   const mapsIndex = await meilisearch.getIndex<MeilisearchMap>('maps');
   const mapsRepo = new MapsRepo(mapsIndex);
+  const drumLayoutsRepo = new DrumLayoutsRepo();
   const favoritesRepo = new FavoritesRepo(mapsRepo, mapsIndex);
   const flags = getFlags();
 
@@ -39,6 +42,7 @@ async function createServerContext(): Promise<ServerContext> {
     pool,
     flags,
     mapsRepo,
+    drumLayoutsRepo,
     favoritesRepo,
   };
 }

@@ -21,6 +21,12 @@ let s3: { client: S3Client; bucket: string } | undefined;
 const mapKey = (id: string, temp: boolean) => `maps/${id}.zip` + (temp ? '.temp' : '');
 const albumArtPrefix = (id: string, temp: boolean) => `albumArt/${id}` + (temp ? '_temp/' : '/');
 
+// Drum layouts use their own key paths
+const drumLayoutKey = (id: string, temp: boolean) =>
+  `drumLayouts/${id}.zip` + (temp ? '.temp' : '');
+const drumLayoutImagePrefix = (id: string, temp: boolean) =>
+  `drumLayoutImages/${id}` + (temp ? '_temp/' : '/');
+
 export const enum S3Error {
   S3_GET_ERROR = 's3_get_error',
   S3_WRITE_ERROR = 's3_write_error',
@@ -279,6 +285,112 @@ export async function promoteTempMapFiles(id: string): PromisedResult<undefined,
     await Promise.all(
       albumArtKeys.map((key) =>
         s3Move(key, key.replace(albumArtPrefix(id, true), albumArtPrefix(id, false)))
+      )
+    );
+  } catch (e) {
+    return {
+      success: false,
+      errors: [
+        {
+          type: S3Error.S3_WRITE_ERROR,
+          internalMessage: (e as Error).message,
+          stack: (e as Error).stack,
+        },
+      ],
+    };
+  }
+
+  return { success: true, value: undefined };
+}
+
+// Drum Layout S3 functions
+export async function getDrumLayoutFile(id: string, temp: boolean) {
+  return s3Get(drumLayoutKey(id, temp));
+}
+
+export async function mintDrumLayoutUploadUrl(id: string) {
+  try {
+    const s3 = getS3Client();
+    const resp = await getSignedUrl(
+      s3.client,
+      new PutObjectCommand({
+        Bucket: s3.bucket,
+        Key: drumLayoutKey(id, true),
+        ContentType: 'application/zip',
+      }),
+      { expiresIn: 3600 } // 1 hour
+    );
+    return { success: true, value: resp } as const;
+  } catch {
+    return { success: false } as const;
+  }
+}
+
+export async function uploadDrumLayoutImage(
+  id: string,
+  imageBuffer: Buffer,
+  filename: string,
+  temp: boolean
+): Promise<Result<string, S3Error>> {
+  const key = `${drumLayoutImagePrefix(id, temp)}${filename}`;
+  const result = await s3Put(key, imageBuffer, guessContentType(filename));
+  if (!result.success) {
+    return result;
+  }
+  return { success: true, value: filename };
+}
+
+export async function deleteDrumLayoutFiles(
+  id: string,
+  temp: boolean
+): Promise<Result<undefined, S3Error>> {
+  const [layoutDeleteResult] = await Promise.all([
+    s3Delete([drumLayoutKey(id, temp)]),
+    (async () => {
+      try {
+        const s3 = getS3Client();
+        const imageFiles = await s3.client.send(
+          new ListObjectsV2Command({
+            Bucket: s3.bucket,
+            Prefix: drumLayoutImagePrefix(id, temp),
+          })
+        );
+        await s3Delete(
+          imageFiles.Contents?.map((c) => c.Key).filter((k): k is string => k != null) || []
+        );
+      } catch {
+        // Ignore - file may not exist
+      }
+    })(),
+  ]);
+
+  if (!layoutDeleteResult.success) {
+    return layoutDeleteResult;
+  }
+  return { success: true, value: undefined };
+}
+
+export async function promoteTempDrumLayoutFiles(id: string): PromisedResult<undefined, S3Error> {
+  await deleteDrumLayoutFiles(id, false);
+
+  const moveResult = await s3Move(drumLayoutKey(id, true), drumLayoutKey(id, false));
+  if (!moveResult.success) {
+    return moveResult;
+  }
+
+  try {
+    const s3 = getS3Client();
+    const imageFiles = await s3.client.send(
+      new ListObjectsV2Command({
+        Bucket: s3.bucket,
+        Prefix: drumLayoutImagePrefix(id, true),
+      })
+    );
+    const imageKeys =
+      imageFiles.Contents?.map((c) => c.Key).filter((k): k is string => k != null) || [];
+    await Promise.all(
+      imageKeys.map((key) =>
+        s3Move(key, key.replace(drumLayoutImagePrefix(id, true), drumLayoutImagePrefix(id, false)))
       )
     );
   } catch (e) {

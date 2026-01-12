@@ -23,6 +23,359 @@ declare module 'zapatos/schema' {
   /* --- tables --- */
 
   /**
+   * **drum_layouts**
+   * - Table in database
+   */
+  export namespace drum_layouts {
+    export type Table = 'drum_layouts';
+    export interface Selectable {
+      /**
+      * **drum_layouts._id**
+      * - `int4` in database
+      * - `NOT NULL`, default: `nextval('drum_layouts__id_seq'::regclass)`
+      */
+      _id: number;
+      /**
+      * **drum_layouts.id**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      id: string;
+      /**
+      * **drum_layouts.visibility**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      visibility: string;
+      /**
+      * **drum_layouts.validity**
+      * - `text` in database
+      * - `NOT NULL`, no default
+      */
+      validity: string;
+      /**
+      * **drum_layouts.submission_date**
+      * - `timestamp` in database
+      * - `NOT NULL`, no default
+      */
+      submission_date: Date;
+      /**
+      * **drum_layouts.name**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      name: string;
+      /**
+      * **drum_layouts.description**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      description: string | null;
+      /**
+      * **drum_layouts.uploader**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      uploader: string;
+      /**
+      * **drum_layouts.image_path**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      image_path: string | null;
+      /**
+      * **drum_layouts.layout_format**
+      * - `jsonb` in database
+      * - `NOT NULL`, default: `'{}'::jsonb`
+      */
+      layout_format: db.JSONValue;
+      /**
+      * **drum_layouts.download_count**
+      * - `int4` in database
+      * - `NOT NULL`, default: `0`
+      */
+      download_count: number;
+    }
+    export interface JSONSelectable {
+      /**
+      * **drum_layouts._id**
+      * - `int4` in database
+      * - `NOT NULL`, default: `nextval('drum_layouts__id_seq'::regclass)`
+      */
+      _id: number;
+      /**
+      * **drum_layouts.id**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      id: string;
+      /**
+      * **drum_layouts.visibility**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      visibility: string;
+      /**
+      * **drum_layouts.validity**
+      * - `text` in database
+      * - `NOT NULL`, no default
+      */
+      validity: string;
+      /**
+      * **drum_layouts.submission_date**
+      * - `timestamp` in database
+      * - `NOT NULL`, no default
+      */
+      submission_date: db.TimestampString;
+      /**
+      * **drum_layouts.name**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      name: string;
+      /**
+      * **drum_layouts.description**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      description: string | null;
+      /**
+      * **drum_layouts.uploader**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      uploader: string;
+      /**
+      * **drum_layouts.image_path**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      image_path: string | null;
+      /**
+      * **drum_layouts.layout_format**
+      * - `jsonb` in database
+      * - `NOT NULL`, default: `'{}'::jsonb`
+      */
+      layout_format: db.JSONValue;
+      /**
+      * **drum_layouts.download_count**
+      * - `int4` in database
+      * - `NOT NULL`, default: `0`
+      */
+      download_count: number;
+    }
+    export interface Whereable {
+      /**
+      * **drum_layouts._id**
+      * - `int4` in database
+      * - `NOT NULL`, default: `nextval('drum_layouts__id_seq'::regclass)`
+      */
+      _id?: number | db.Parameter<number> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, number | db.Parameter<number> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.id**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      id?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.visibility**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      visibility?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.validity**
+      * - `text` in database
+      * - `NOT NULL`, no default
+      */
+      validity?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.submission_date**
+      * - `timestamp` in database
+      * - `NOT NULL`, no default
+      */
+      submission_date?: (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.name**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      name?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.description**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      description?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.uploader**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      uploader?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.image_path**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      image_path?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.layout_format**
+      * - `jsonb` in database
+      * - `NOT NULL`, default: `'{}'::jsonb`
+      */
+      layout_format?: db.JSONValue | db.Parameter<db.JSONValue> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, db.JSONValue | db.Parameter<db.JSONValue> | db.SQLFragment | db.ParentColumn>;
+      /**
+      * **drum_layouts.download_count**
+      * - `int4` in database
+      * - `NOT NULL`, default: `0`
+      */
+      download_count?: number | db.Parameter<number> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, number | db.Parameter<number> | db.SQLFragment | db.ParentColumn>;
+    }
+    export interface Insertable {
+      /**
+      * **drum_layouts._id**
+      * - `int4` in database
+      * - `NOT NULL`, default: `nextval('drum_layouts__id_seq'::regclass)`
+      */
+      _id?: number | db.Parameter<number> | db.DefaultType | db.SQLFragment;
+      /**
+      * **drum_layouts.id**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      id: string | db.Parameter<string> | db.SQLFragment;
+      /**
+      * **drum_layouts.visibility**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      visibility: string | db.Parameter<string> | db.SQLFragment;
+      /**
+      * **drum_layouts.validity**
+      * - `text` in database
+      * - `NOT NULL`, no default
+      */
+      validity: string | db.Parameter<string> | db.SQLFragment;
+      /**
+      * **drum_layouts.submission_date**
+      * - `timestamp` in database
+      * - `NOT NULL`, no default
+      */
+      submission_date: (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment;
+      /**
+      * **drum_layouts.name**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      name: string | db.Parameter<string> | db.SQLFragment;
+      /**
+      * **drum_layouts.description**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      description?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
+      /**
+      * **drum_layouts.uploader**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      uploader: string | db.Parameter<string> | db.SQLFragment;
+      /**
+      * **drum_layouts.image_path**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      image_path?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
+      /**
+      * **drum_layouts.layout_format**
+      * - `jsonb` in database
+      * - `NOT NULL`, default: `'{}'::jsonb`
+      */
+      layout_format?: db.JSONValue | db.Parameter<db.JSONValue> | db.DefaultType | db.SQLFragment;
+      /**
+      * **drum_layouts.download_count**
+      * - `int4` in database
+      * - `NOT NULL`, default: `0`
+      */
+      download_count?: number | db.Parameter<number> | db.DefaultType | db.SQLFragment;
+    }
+    export interface Updatable {
+      /**
+      * **drum_layouts._id**
+      * - `int4` in database
+      * - `NOT NULL`, default: `nextval('drum_layouts__id_seq'::regclass)`
+      */
+      _id?: number | db.Parameter<number> | db.DefaultType | db.SQLFragment | db.SQLFragment<any, number | db.Parameter<number> | db.DefaultType | db.SQLFragment>;
+      /**
+      * **drum_layouts.id**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      id?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
+      /**
+      * **drum_layouts.visibility**
+      * - `bpchar` in database
+      * - `NOT NULL`, no default
+      */
+      visibility?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
+      /**
+      * **drum_layouts.validity**
+      * - `text` in database
+      * - `NOT NULL`, no default
+      */
+      validity?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
+      /**
+      * **drum_layouts.submission_date**
+      * - `timestamp` in database
+      * - `NOT NULL`, no default
+      */
+      submission_date?: (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment | db.SQLFragment<any, (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment>;
+      /**
+      * **drum_layouts.name**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      name?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
+      /**
+      * **drum_layouts.description**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      description?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
+      /**
+      * **drum_layouts.uploader**
+      * - `varchar` in database
+      * - `NOT NULL`, no default
+      */
+      uploader?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
+      /**
+      * **drum_layouts.image_path**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      image_path?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
+      /**
+      * **drum_layouts.layout_format**
+      * - `jsonb` in database
+      * - `NOT NULL`, default: `'{}'::jsonb`
+      */
+      layout_format?: db.JSONValue | db.Parameter<db.JSONValue> | db.DefaultType | db.SQLFragment | db.SQLFragment<any, db.JSONValue | db.Parameter<db.JSONValue> | db.DefaultType | db.SQLFragment>;
+      /**
+      * **drum_layouts.download_count**
+      * - `int4` in database
+      * - `NOT NULL`, default: `0`
+      */
+      download_count?: number | db.Parameter<number> | db.DefaultType | db.SQLFragment | db.SQLFragment<any, number | db.Parameter<number> | db.DefaultType | db.SQLFragment>;
+    }
+    export type UniqueIndex = 'drum_layouts_pkey';
+    export type Column = keyof Selectable;
+    export type OnlyCols<T extends readonly Column[]> = Pick<Selectable, T[number]>;
+    export type SQLExpression = Table | db.ColumnNames<Updatable | (keyof Updatable)[]> | db.ColumnValues<Updatable> | Whereable | Column | db.ParentColumn | db.GenericSQLExpression;
+    export type SQL = SQLExpression | SQLExpression[];
+  }
+
+  /**
    * **difficulties**
    * - Table in database
    */
@@ -926,21 +1279,21 @@ declare module 'zapatos/schema' {
 
   /* --- aggregate types --- */
 
-  export namespace public {  
-    export type Table = difficulties.Table | favorites.Table | maps.Table | users.Table;
-    export type Selectable = difficulties.Selectable | favorites.Selectable | maps.Selectable | users.Selectable;
-    export type JSONSelectable = difficulties.JSONSelectable | favorites.JSONSelectable | maps.JSONSelectable | users.JSONSelectable;
-    export type Whereable = difficulties.Whereable | favorites.Whereable | maps.Whereable | users.Whereable;
-    export type Insertable = difficulties.Insertable | favorites.Insertable | maps.Insertable | users.Insertable;
-    export type Updatable = difficulties.Updatable | favorites.Updatable | maps.Updatable | users.Updatable;
-    export type UniqueIndex = difficulties.UniqueIndex | favorites.UniqueIndex | maps.UniqueIndex | users.UniqueIndex;
-    export type Column = difficulties.Column | favorites.Column | maps.Column | users.Column;
-  
-    export type AllBaseTables = [difficulties.Table, favorites.Table, maps.Table, users.Table];
+  export namespace public {
+    export type Table = drum_layouts.Table | difficulties.Table | favorites.Table | maps.Table | users.Table;
+    export type Selectable = drum_layouts.Selectable | difficulties.Selectable | favorites.Selectable | maps.Selectable | users.Selectable;
+    export type JSONSelectable = drum_layouts.JSONSelectable | difficulties.JSONSelectable | favorites.JSONSelectable | maps.JSONSelectable | users.JSONSelectable;
+    export type Whereable = drum_layouts.Whereable | difficulties.Whereable | favorites.Whereable | maps.Whereable | users.Whereable;
+    export type Insertable = drum_layouts.Insertable | difficulties.Insertable | favorites.Insertable | maps.Insertable | users.Insertable;
+    export type Updatable = drum_layouts.Updatable | difficulties.Updatable | favorites.Updatable | maps.Updatable | users.Updatable;
+    export type UniqueIndex = drum_layouts.UniqueIndex | difficulties.UniqueIndex | favorites.UniqueIndex | maps.UniqueIndex | users.UniqueIndex;
+    export type Column = drum_layouts.Column | difficulties.Column | favorites.Column | maps.Column | users.Column;
+
+    export type AllBaseTables = [drum_layouts.Table, difficulties.Table, favorites.Table, maps.Table, users.Table];
     export type AllForeignTables = [];
     export type AllViews = [];
     export type AllMaterializedViews = [];
-    export type AllTablesAndViews = [difficulties.Table, favorites.Table, maps.Table, users.Table];
+    export type AllTablesAndViews = [drum_layouts.Table, difficulties.Table, favorites.Table, maps.Table, users.Table];
   }
 
 
@@ -968,6 +1321,7 @@ declare module 'zapatos/schema' {
   /* === lookups === */
 
   export type SelectableForTable<T extends Table> = {
+    "drum_layouts": drum_layouts.Selectable;
     "difficulties": difficulties.Selectable;
     "favorites": favorites.Selectable;
     "maps": maps.Selectable;
@@ -975,6 +1329,7 @@ declare module 'zapatos/schema' {
   }[T];
 
   export type JSONSelectableForTable<T extends Table> = {
+    "drum_layouts": drum_layouts.JSONSelectable;
     "difficulties": difficulties.JSONSelectable;
     "favorites": favorites.JSONSelectable;
     "maps": maps.JSONSelectable;
@@ -982,6 +1337,7 @@ declare module 'zapatos/schema' {
   }[T];
 
   export type WhereableForTable<T extends Table> = {
+    "drum_layouts": drum_layouts.Whereable;
     "difficulties": difficulties.Whereable;
     "favorites": favorites.Whereable;
     "maps": maps.Whereable;
@@ -989,6 +1345,7 @@ declare module 'zapatos/schema' {
   }[T];
 
   export type InsertableForTable<T extends Table> = {
+    "drum_layouts": drum_layouts.Insertable;
     "difficulties": difficulties.Insertable;
     "favorites": favorites.Insertable;
     "maps": maps.Insertable;
@@ -996,6 +1353,7 @@ declare module 'zapatos/schema' {
   }[T];
 
   export type UpdatableForTable<T extends Table> = {
+    "drum_layouts": drum_layouts.Updatable;
     "difficulties": difficulties.Updatable;
     "favorites": favorites.Updatable;
     "maps": maps.Updatable;
@@ -1003,6 +1361,7 @@ declare module 'zapatos/schema' {
   }[T];
 
   export type UniqueIndexForTable<T extends Table> = {
+    "drum_layouts": drum_layouts.UniqueIndex;
     "difficulties": difficulties.UniqueIndex;
     "favorites": favorites.UniqueIndex;
     "maps": maps.UniqueIndex;
@@ -1010,6 +1369,7 @@ declare module 'zapatos/schema' {
   }[T];
 
   export type ColumnForTable<T extends Table> = {
+    "drum_layouts": drum_layouts.Column;
     "difficulties": difficulties.Column;
     "favorites": favorites.Column;
     "maps": maps.Column;
@@ -1017,6 +1377,7 @@ declare module 'zapatos/schema' {
   }[T];
 
   export type SQLForTable<T extends Table> = {
+    "drum_layouts": drum_layouts.SQL;
     "difficulties": difficulties.SQL;
     "favorites": favorites.SQL;
     "maps": maps.SQL;
