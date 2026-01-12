@@ -15,5 +15,5 @@ export const difficultyRegex = new RegExp(`(${difficultyRegexKeys})`, 'gi');
 
 export type KnownDifficulty = keyof typeof difficultyMap;
 // Best effort sorting of freeform difficulty names
-export const parseDifficulty = (s?: string) =>
+export const parseDifficulty = (s?: string | null) =>
   (s?.match(difficultyRegex) || ['medium'])[0].toLowerCase() as KnownDifficulty;

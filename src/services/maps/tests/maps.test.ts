@@ -1,8 +1,8 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { deserializeApiSuccess } from 'schema/api';
-import { deserializeGetMapResponse, deserializeSubmitMapResponse } from 'schema/maps';
-import { serializeSetFavoriteMapsRequest } from 'schema/users';
+import { ApiSuccess } from 'schema/api';
+import { GetMapResponse, SubmitMapResponse } from 'schema/maps';
+import { SetFavoriteMapsRequest } from 'schema/users';
 import { testAuthenticate, testGet, testPost, testServer, testUser2 } from 'services/jest_helpers';
 
 describe('maps handler', () => {
@@ -21,13 +21,13 @@ describe('maps handler', () => {
       contentType: 'application/zip',
     });
     const resp = await req.responseType('application/json');
-    const response = deserializeSubmitMapResponse(resp.body);
+    const response = SubmitMapResponse.parse(JSON.parse(resp.body));
 
     return { response, cookie };
   };
 
   const getMap = (id: string) => {
-    return testGet(`/api/maps/${id}`, deserializeGetMapResponse);
+    return testGet(`/api/maps/${id}`, GetMapResponse);
   };
 
   it('allows users to submit maps', async () => {
@@ -67,8 +67,8 @@ describe('maps handler', () => {
     // Favorite the map
     const favoriteResp = await testPost(
       '/api/favorites',
-      serializeSetFavoriteMapsRequest,
-      deserializeApiSuccess,
+      SetFavoriteMapsRequest,
+      ApiSuccess,
       {
         mapIds: [id],
         isFavorite: true,

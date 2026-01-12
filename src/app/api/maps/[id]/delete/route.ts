@@ -1,15 +1,15 @@
 import { joinErrors } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
-import { DeleteMapResponse, serializeDeleteMapResponse } from 'schema/maps';
+import { DeleteMapResponse } from 'schema/maps';
 import { GetMapError } from 'services/maps/maps_repo';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 
-const send = (res: DeleteMapResponse) => new NextResponse<Buffer>(serializeDeleteMapResponse(res));
+const send = (res: DeleteMapResponse) => NextResponse.json(DeleteMapResponse.parse(res));
 export async function POST(
   _req: NextRequest,
   props: { params: Promise<{ id: string }> }
-): Promise<NextResponse<Buffer>> {
+): Promise<NextResponse> {
   const params = await props.params;
   const session = await getUserSession();
   if (!session) {

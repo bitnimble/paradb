@@ -14,10 +14,19 @@
     transition: color 0.1s ease;
 }
 
+.navbarActions {
+    display: flex;
+    align-items: center;
+}
+
 .userStatus {
-    margin-right: calc(var(--gridBaseline) * 3);
+    margin-right: calc(var(--gridBaseline) * 2);
 }
 
 .menuItem {
     margin: 0 var(--gridBaseline);
+}
+
+.themeToggleContainer {
+    margin-right: calc(var(--gridBaseline) * 2);
 }

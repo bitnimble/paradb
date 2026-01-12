@@ -4,7 +4,7 @@
 # Clone and install deps
 git clone https://github.com/bitnimble/paradb.git
 cd paradb
-yarn
+bun install
 
 # Install and start postgres
 sudo apt install postgresql
@@ -20,5 +20,5 @@ createdb paradb
 db/init.sh
 
 # Start server
-yarn dev
+bun dev
 ```

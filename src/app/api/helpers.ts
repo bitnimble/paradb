@@ -1,17 +1,13 @@
 import { error } from 'services/helpers';
 import { ResultError } from 'base/result';
 import { NextRequest } from 'next/server';
-import { serializeApiError } from 'schema/api';
-
-export async function getBody<T>(req: NextRequest, deserializer: (s: string) => T) {
-  return deserializer(await req.text());
-}
+import { ApiError } from 'schema/api';
 
 export function checkBody(req: NextRequest, message: string) {
   if (!req.body) {
     return error({
       statusCode: 400,
-      errorSerializer: serializeApiError,
+      errorSerializer: ApiError.parse,
       errorBody: {},
       message,
     });

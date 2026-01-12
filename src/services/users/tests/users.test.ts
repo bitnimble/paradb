@@ -1,9 +1,9 @@
 import { testPost, testUser, testUser2 } from 'services/jest_helpers';
-import { SignupRequest, serializeSignupRequest, deserializeSignupResponse } from 'schema/users';
+import { SignupRequest, SignupResponse } from 'schema/users';
 
 describe('signup handler', () => {
   const signup = (body: SignupRequest) =>
-    testPost('/api/users/signup', serializeSignupRequest, deserializeSignupResponse, body);
+    testPost('/api/users/signup', SignupRequest, SignupResponse, body);
 
   it('allows users to sign up', async () => {
     const resp1 = await signup({

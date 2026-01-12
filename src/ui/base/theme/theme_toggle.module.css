@@ -1,0 +1,27 @@
+.themeToggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 24px;
+    padding: calc(var(--gridBaseline) * 0.5);
+    border-radius: calc(var(--gridBaseline) * 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: calc(var(--gridBaseline) * 4);
+    min-height: calc(var(--gridBaseline) * 4);
+}
+
+.themeToggle:hover {
+    background-color: rgba(155, 21, 241, 0.1);
+    transform: scale(1.1);
+}
+
+:global([data-theme='dark']) .themeToggle:hover {
+    background-color: rgba(187, 119, 255, 0.2);
+}
+
+.themeToggle:active {
+    transform: scale(0.95);
+}

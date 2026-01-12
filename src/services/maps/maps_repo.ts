@@ -1,9 +1,10 @@
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
 import { Index } from 'meilisearch';
-import { MapSortableAttributes, PDMap } from 'schema/maps';
-import { AdvancedSearchMapRequest, MapValidity, MapVisibility } from 'schema/maps_zod';
-import { DbError, camelCaseKeys, snakeCaseKeys } from 'services/db/helpers';
+import { MapSortableAttributes, PDMap, mapValidityEnum, mapVisibilityEnum } from 'schema/maps';
+import { AdvancedSearchMapRequest, MapValidity, MapVisibility } from 'schema/maps';
+import { DbError, camelCaseKeys } from 'services/db/helpers';
+import snakeCaseKeys from 'snakecase-keys';
 import { IdDomain, generateId } from 'services/db/id_gen';
 import { getDbPool } from 'services/db/pool';
 import {
@@ -157,12 +158,16 @@ export class MapsRepo {
         .run(pool);
       return {
         success: true,
-        value: maps.map((m) => ({
-          ...camelCaseKeys(m),
-          userProjection: {
-            isFavorited: !!m.userProjection?.isFavorited,
-          },
-        })),
+        value: maps.map((m) =>
+          PDMap.decode({
+            ...camelCaseKeys(m),
+            visibility: mapVisibilityEnum.parse(m.visibility),
+            validity: mapValidityEnum.parse(m.validity),
+            userProjection: {
+              isFavorited: !!m.userProjection?.isFavorited,
+            },
+          })
+        ),
       };
     } catch (e) {
       return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
@@ -289,7 +294,7 @@ export class MapsRepo {
               .run(pool)),
           }
         : undefined;
-      return { success: true, value: { ...camelCaseKeys(map), userProjection } };
+      return { success: true, value: PDMap.parse({ ...camelCaseKeys(map), userProjection }) };
     } catch (e) {
       return { success: false, errors: [wrapError(e, GetMapError.UNKNOWN_DB_ERROR)] };
     }
@@ -350,7 +355,9 @@ export class MapsRepo {
           .update('maps', snakeCaseKeys({ downloadCount: map.download_count + 1 }), { id: mapId })
           .run(client);
 
-        const meilisearchResp = await this.updateMeilisearchMap(camelCaseKeys(updatedMap[0]));
+        const meilisearchResp = await this.updateMeilisearchMap(
+          PDMap.parse(camelCaseKeys(updatedMap[0]))
+        );
         if (!meilisearchResp.success) {
           // TODO: wire a proper ResultError out of the `db.serializable`
           throw new Error(`Could not update search index`);
@@ -496,16 +503,18 @@ export class MapsRepo {
 
       await promoteTempMapFiles(id);
 
-      const mapResult = camelCaseKeys({
-        ...insertedMap,
-        difficulties: insertedDifficulties,
-        favorites: (existingMap.success && existingMap.value.favorites) || 0,
-        userProjection: {
-          isFavorited: !!(await db
-            .selectOne('favorites', { map_id: id, user_id: uploader })
-            .run(pool)),
-        },
-      });
+      const mapResult = PDMap.parse(
+        camelCaseKeys({
+          ...insertedMap,
+          difficulties: insertedDifficulties,
+          favorites: (existingMap.success && existingMap.value.favorites) || 0,
+          userProjection: {
+            isFavorited: !!(await db
+              .selectOne('favorites', { map_id: id, user_id: uploader })
+              .run(pool)),
+          },
+        })
+      );
       const meilisearchResp = await this.updateMeilisearchMap(mapResult);
       if (!meilisearchResp.success) {
         return meilisearchResp;

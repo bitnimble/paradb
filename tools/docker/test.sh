@@ -24,10 +24,8 @@ mc rb --force local/"$S3_MAPS_BUCKET" || true
 mc mb local/"$S3_MAPS_BUCKET"
 mc admin policy attach local readwrite --user "$S3_ACCESS_KEY_ID" || true
 
-yarn search:rebuild
-
 echo "Starting server"
-yarn next dev &
+bun next dev &
 
 until curl --output /dev/null --silent --head --fail "$BASE_URL"; do
     printf 'Waiting for server to start...\n'
@@ -35,4 +33,4 @@ until curl --output /dev/null --silent --head --fail "$BASE_URL"; do
 done
 
 echo "Running tests"
-yarn jest --runInBand
+bun jest --runInBand

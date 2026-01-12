@@ -1,6 +1,7 @@
 import { attachDatabasePool } from '@vercel/functions';
 import pg from 'pg';
-import { getEnvVars, getSingleton } from 'services/env';
+import { getEnvVars } from 'services/env';
+import { getSingleton } from 'services/singleton';
 
 export async function getDbPool(maxConnections?: number) {
   return getSingleton('_dbPool', async () => {

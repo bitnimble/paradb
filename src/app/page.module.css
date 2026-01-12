@@ -1,11 +1,11 @@
 :root {
-  --gutter: calc(var(--gridBaseline) * 2);
+    --gutter: calc(var(--gridBaseline) * 2);
 }
 
 .filter {
     position: sticky;
     top: 0;
-    background: white;
+    background: var(--colorBackground);
     z-index: 1;
     border-bottom: 1px solid var(--colorGreyA15);
 
@@ -37,7 +37,11 @@
 
 .mapListTable {
     padding: 0 var(--gutter);
-    color: #666;
+    color: var(--colorGrey);
+}
+
+:global([data-theme='dark']) .mapListTable {
+    color: #ccc;
 }
 
 .mapListRow {
@@ -48,7 +52,7 @@
 
 .mapListRow:hover,
 .bulkSelectEnabled .mapListRow:hover {
-    box-shadow: 0 0 0 1px var(--colorPurple);
+    box-shadow: 0 0 0 1px var(--colorAccent);
 }
 
 .bulkSelectEnabled .mapListRow {
@@ -72,15 +76,15 @@
 
 .bulkSelectEnabled .mapListRow.mapListRowSelected::after {
     content: '✔';
-    color: var(--colorPurple);
+    color: var(--colorAccent);
     font-weight: bolder;
     font-size: 20px;
-    border: 2px solid var(--colorPurple);
+    border: 2px solid var(--colorAccent);
 }
 
 .bulkSelectEnabled .mapListRowSelected,
 .bulkSelectEnabled .mapListRowSelected:hover {
-    box-shadow: 0 0 0 2px var(--colorPurple);
+    box-shadow: 0 0 0 2px var(--colorAccent);
 }
 
 .mapListCell {

@@ -1,17 +1,17 @@
 import { joinErrors } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
-import { ZodApiError } from 'schema/api_zod';
+import { ApiError } from 'schema/api';
 import {
   AdvancedSearchMapRequest,
   AdvancedSearchMapResponse,
   AdvancedSearchMapsResponse,
-} from 'schema/maps_zod';
+} from 'schema/maps';
 import { getServerContext } from 'services/server_context';
 
 // TODO: make this a GET
 export async function POST(
   req: NextRequest
-): Promise<NextResponse<AdvancedSearchMapsResponse | ZodApiError>> {
+): Promise<NextResponse<AdvancedSearchMapsResponse | ApiError>> {
   const searchReq = AdvancedSearchMapRequest.parse(await req.json());
   // TODO: handle limits
   const { mapsRepo } = await getServerContext();

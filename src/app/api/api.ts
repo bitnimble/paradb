@@ -1,35 +1,24 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import * as qs from 'qs';
-import { ApiResponse, apiResponse } from 'schema/api';
+import { ApiResponse } from 'schema/api';
 import {
   DeleteMapResponse,
   FindMapsResponse,
   GetMapResponse,
   SearchMapsRequest,
+  SubmitMapRequest,
   SubmitMapResponse,
-  deserializeDeleteMapResponse,
-  deserializeFindMapsResponse,
-  deserializeGetMapResponse,
-  deserializeSubmitMapResponse,
 } from 'schema/maps';
-import { SubmitMapRequest } from 'schema/maps_zod';
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
+  GetUserResponse,
   LoginRequest,
   LoginResponse,
   SetFavoriteMapsRequest,
   SignupRequest,
   SignupResponse,
   User,
-  deserializeChangePasswordResponse,
-  deserializeGetUserResponse,
-  deserializeLoginResponse,
-  deserializeSignupResponse,
-  serializeChangePasswordRequest,
-  serializeLoginRequest,
-  serializeSetFavoriteMapsRequest,
-  serializeSignupRequest,
 } from 'schema/users';
 import { createClient } from 'services/session/supabase_client';
 
@@ -61,50 +50,49 @@ export class HttpApi implements Api {
   readonly supabase = createClient();
 
   async login(req: LoginRequest): Promise<LoginResponse> {
-    const bsonReq = serializeLoginRequest(req);
-    const resp = await post(path(this.apiBase, 'users', 'login'), bsonReq);
-    return deserializeLoginResponse(resp);
+    const resp = await post(path(this.apiBase, 'users', 'login'), LoginRequest.parse(req));
+    return LoginResponse.parse(resp);
   }
 
   async signup(req: SignupRequest): Promise<SignupResponse> {
-    const bsonReq = serializeSignupRequest(req);
-    const resp = await post(path(this.apiBase, 'users', 'signup'), bsonReq);
-    return deserializeSignupResponse(resp);
+    const resp = await post(path(this.apiBase, 'users', 'signup'), SignupRequest.parse(req));
+    return SignupResponse.parse(resp);
   }
 
   async getSession(): Promise<User> {
-    const bsonResp = await get(path(this.apiBase, 'users', 'session'));
-    const resp = deserializeGetUserResponse(bsonResp);
-    if (!resp.success) {
+    const resp = await get(path(this.apiBase, 'users', 'session'));
+    const parsed = GetUserResponse.parse(resp);
+    if (!parsed.success) {
       throw new Error();
     }
-    return resp.user;
+    return parsed.user;
   }
 
   async getMe(): Promise<User> {
-    const bsonResp = await get(path(this.apiBase, 'users', 'me'));
-    const resp = deserializeGetUserResponse(bsonResp);
-    if (!resp.success) {
+    const resp = await get(path(this.apiBase, 'users', 'me'));
+    const parsed = GetUserResponse.parse(resp);
+    if (!parsed.success) {
       throw new Error();
     }
-    return resp.user;
+    return parsed.user;
   }
 
   async changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
-    const bsonReq = serializeChangePasswordRequest(req);
-    const bsonResp = await post(path(this.apiBase, 'users', 'changePassword'), bsonReq);
-    return deserializeChangePasswordResponse(bsonResp);
+    const resp = await post(
+      path(this.apiBase, 'users', 'changePassword'),
+      ChangePasswordRequest.parse(req)
+    );
+    return ChangePasswordResponse.parse(resp);
   }
 
   async setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse> {
-    const bsonReq = serializeSetFavoriteMapsRequest(req);
-    const bsonResp = await post(path(this.apiBase, 'favorites'), bsonReq);
-    return apiResponse.deserialize(bsonResp);
+    const resp = await post(path(this.apiBase, 'favorites'), SetFavoriteMapsRequest.parse(req));
+    return ApiResponse.parse(resp);
   }
 
   async findMaps(): Promise<FindMapsResponse> {
     const resp = await get(path(this.apiBase, 'maps'));
-    return deserializeFindMapsResponse(resp);
+    return FindMapsResponse.parse(resp);
   }
 
   async searchMaps(req: {
@@ -113,22 +101,22 @@ export class HttpApi implements Api {
     limit: number;
   }): Promise<FindMapsResponse> {
     const resp = await get(path(this.apiBase, 'maps'), qs.stringify(req));
-    return deserializeFindMapsResponse(resp);
+    return FindMapsResponse.parse(resp);
   }
 
   async getMap(id: string): Promise<GetMapResponse> {
     const resp = await get(path(this.apiBase, 'maps', id));
-    return deserializeGetMapResponse(resp);
+    return GetMapResponse.parse(resp);
   }
 
   async deleteMap(id: string): Promise<DeleteMapResponse> {
     const resp = await post(path(this.apiBase, 'maps', id, 'delete'));
-    return deserializeDeleteMapResponse(resp);
+    return DeleteMapResponse.parse(resp);
   }
 
   async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
-    const resp = await post(path(this.apiBase, 'maps', 'submit'), JSON.stringify(req));
-    return deserializeSubmitMapResponse(resp);
+    const resp = await post(path(this.apiBase, 'maps', 'submit'), req);
+    return SubmitMapResponse.parse(resp);
   }
 }
 
@@ -139,18 +127,18 @@ function path(...parts: string[]) {
   ].join('');
 }
 
-async function get(path: string, queryParams?: string): Promise<string> {
+async function get(path: string, queryParams?: string): Promise<unknown> {
   const search = queryParams ? `?${queryParams}` : '';
   const resp = await fetch(path + search);
-  return resp.text();
+  return resp.json();
 }
-async function post(path: string, body?: string): Promise<string> {
+async function post(path: string, body?: unknown): Promise<unknown> {
   const resp = await fetch(path, {
     method: 'POST',
     headers: { ['Content-Type']: contentType },
-    body,
+    body: body != null ? JSON.stringify(body) : undefined,
   });
-  return resp.text();
+  return resp.json();
 }
 
 const contentType = 'application/json';

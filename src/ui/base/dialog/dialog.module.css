@@ -5,7 +5,7 @@
     right: 0;
     bottom: 0;
 
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--colorDialogOverlay);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,9 +13,9 @@
 
 .dialog {
     position: relative;
-    background-color: var(--colorWhite);
+    background-color: var(--colorBackground);
     padding: calc(var(--gridBaseline) * 2);
-    border: 1px dotted var(--colorBlack);
+    border: 1px dotted var(--colorForeground);
 }
 
 .close {

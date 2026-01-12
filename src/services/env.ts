@@ -1,11 +1,4 @@
-export function getSingleton<T>(name: string, factory: () => T): T {
-  // Assigning to globalThis should be synchronous, so that another request doesn't attempt
-  // to recreate the singleton at the same time during the await.
-  if (!(globalThis as any)[name]) {
-    (globalThis as any)[name] = factory();
-  }
-  return (globalThis as any)[name];
-}
+import { getSingleton } from './singleton';
 
 /** Keep in sync with the test env vars in `jest_setup.ts` */
 export type EnvVars = {
@@ -33,6 +26,10 @@ export type EnvVars = {
   supabaseUrl: string;
   supabasePublishableKey: string;
   supabaseSecretKey: string;
+  axiomApiToken: string;
+  axiomDataset: string;
+  axiomPublicApiToken: string;
+  axiomPublicDataset: string;
 };
 
 /**
@@ -68,6 +65,10 @@ function createEnvVars(): EnvVars {
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
     supabasePublishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     supabaseSecretKey: process.env.SUPABASE_SECRET_KEY,
+    axiomApiToken: process.env.AXIOM_API_TOKEN,
+    axiomDataset: process.env.AXIOM_DATASET,
+    axiomPublicApiToken: process.env.NEXT_PUBLIC_AXIOM_API_TOKEN,
+    axiomPublicDataset: process.env.NEXT_PUBLIC_AXIOM_DATASET,
   };
   let fail = false;
   for (const [key, value] of Object.entries(envVars)) {
