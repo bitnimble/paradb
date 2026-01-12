@@ -25,7 +25,7 @@ export function SkeletonProvider({
 
   return (
     <SkeletonContext.Provider value={skeletonRef}>
-      <div id="skeleton" ref={skeletonRef} className={className}>
+      <div ref={skeletonRef} className={className}>
         {children}
       </div>
     </SkeletonContext.Provider>
