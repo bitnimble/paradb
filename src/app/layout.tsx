@@ -11,7 +11,7 @@ import styles from './layout.module.css';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
-  metadataBase: new URL(process.env.BASE_URL || 'http://locahost:3000'),
+  metadataBase: new URL(process.env.BASE_URL || 'http://localhost:3000'),
 };
 
 export const viewport = {
