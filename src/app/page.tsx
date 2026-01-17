@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import { action, computed, observable, reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Difficulty, PDMap } from 'schema/maps';
 import { Button } from 'ui/base/button/button';
 import { metrics } from 'ui/base/design_system/design_tokens';
@@ -18,6 +18,8 @@ import { KnownDifficulty, difficultyColors, parseDifficulty } from 'utils/diffic
 import { RoutePath, routeFor } from 'utils/routes';
 import styles from './page.module.css';
 import { Search } from './search';
+import useInfiniteScroll from 'hooks/useInfiniteScroll';
+import { useSkeletonRef } from 'app/skeleton_provider';
 
 export default function Page() {
   return (
@@ -62,7 +64,15 @@ const Home = observer(() => {
   );
   const [presenter] = useState(() => new MapListPresenter(api, store));
 
-  React.useEffect(() => {
+  const skeletonRef = useSkeletonRef();
+
+  useInfiniteScroll(skeletonRef, () => {
+    if (store.hasMore && !store.loadingMore) {
+      presenter.onLoadMore();
+    }
+  });
+
+  useEffect(() => {
     if (store.maps == null) {
       presenter.onSearch('search');
     }
@@ -122,7 +132,7 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
   const scrollableTable = observable.box(false);
   const tableScrollContainerRef = React.createRef<HTMLDivElement>();
   // TODO: avoid mixing mobx and hooks
-  React.useEffect(() => {
+  useEffect(() => {
     const dispose = reaction(
       () => store.maps,
       () => {
