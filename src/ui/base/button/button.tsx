@@ -1,6 +1,9 @@
+'use client';
+
 import classNames from 'classnames';
 import { T } from 'ui/base/text/text';
-import React from 'react';
+import React, { useRef } from 'react';
+import { useButton } from 'react-aria';
 import styles from './button.module.css';
 import loadingStyles from './loading.module.css';
 
@@ -26,17 +29,26 @@ const styleClassname: Record<ButtonStyle, string> = {
 
 export const Button = (props: ButtonProps) => {
   const { className, style = 'regular', link, loading, disabled, onClick, children } = props;
+  const ref = useRef<HTMLButtonElement>(null);
+  const isDisabled = disabled || loading || false;
 
-  const _onClick = () => onClick?.();
+  const { buttonProps } = useButton(
+    {
+      isDisabled,
+      onPress: () => onClick?.(),
+    },
+    ref
+  );
+
   return link ? (
     <div
       className={classNames(className, styles.button, styleClassname[style], {
-        [styles.disabled]: disabled || loading,
+        [styles.disabled]: isDisabled,
       })}
     >
       <a
         className={styles.a}
-        href={disabled || loading ? '' : link}
+        href={isDisabled ? '' : link}
         referrerPolicy="no-referrer"
         target="_blank"
       >
@@ -47,11 +59,11 @@ export const Button = (props: ButtonProps) => {
     </div>
   ) : (
     <button
-      disabled={disabled || loading || false}
+      {...buttonProps}
+      ref={ref}
       className={classNames(className, styleClassname[style], styles.button, {
-        [styles.disabled]: disabled || loading,
+        [styles.disabled]: isDisabled,
       })}
-      onClick={_onClick}
     >
       <T.Medium>{children}</T.Medium>
       {style === 'success' ? ' ✔' : null}
