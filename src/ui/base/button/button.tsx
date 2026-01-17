@@ -2,8 +2,8 @@
 
 import classNames from 'classnames';
 import { T } from 'ui/base/text/text';
-import React, { useRef } from 'react';
-import { useButton } from 'react-aria';
+import React from 'react';
+import { Button as AriaButton } from 'react-aria-components';
 import styles from './button.module.css';
 import loadingStyles from './loading.module.css';
 
@@ -29,16 +29,7 @@ const styleClassname: Record<ButtonStyle, string> = {
 
 export const Button = (props: ButtonProps) => {
   const { className, style = 'regular', link, loading, disabled, onClick, children } = props;
-  const ref = useRef<HTMLButtonElement>(null);
   const isDisabled = disabled || loading || false;
-
-  const { buttonProps } = useButton(
-    {
-      isDisabled,
-      onPress: () => onClick?.(),
-    },
-    ref
-  );
 
   return link ? (
     <div
@@ -58,9 +49,9 @@ export const Button = (props: ButtonProps) => {
       </a>
     </div>
   ) : (
-    <button
-      {...buttonProps}
-      ref={ref}
+    <AriaButton
+      isDisabled={isDisabled}
+      onPress={() => onClick?.()}
       className={classNames(className, styleClassname[style], styles.button, {
         [styles.disabled]: isDisabled,
       })}
@@ -75,6 +66,6 @@ export const Button = (props: ButtonProps) => {
           <div></div>
         </div>
       ) : undefined}
-    </button>
+    </AriaButton>
   );
 };
