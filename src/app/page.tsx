@@ -20,6 +20,7 @@ import styles from './page.module.css';
 import { Search } from './search';
 import useInfiniteScroll from 'hooks/useInfiniteScroll';
 import { useSkeletonRef } from 'app/skeleton_provider';
+import { Tooltip } from 'ui/base/tooltip/tooltip';
 
 export default function Page() {
   return (

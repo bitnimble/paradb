@@ -16,10 +16,21 @@ The codebase uses Docker to run third-party services locally (Meilisearch for se
 - Vanilla CSS modules
 - Zod for schemas
 
+# General
+
+- If you need to add dependencies, add them with `bun install XYZ` and ensure that the bun.lock file is updated and part of the commit or PR.
+
 # Typescript
 
 - Use `== null` (double equals null) instead of either `=== null` or `=== undefined` (triple equals null / undefined), and the same for `!=`. This is to make `null` and `undefined` mean the same thing everywhere in our codebase to avoid any potential serialisation/deserialisation confusion or issues.
 - Avoid use of `any` unless absolutely necessary.
+- Prefer early-exit if statements rather than nested if statements.
+
+# CSS
+
+- Use design tokens present in the root layout as CSS variables
+- Any metric should be based on a multiple of gridBaseline. Fractional multipliers are okay if necessary, e.g. calc(1.5 \* var(--gridBaseline))
+- Metrics that aren't dependent on "UI scale" should not be based on gridBaseline, e.g. font sizes, line heights, percentage border radii, 1px thin borders, etc.
 
 # Commands
 
@@ -53,7 +64,7 @@ If you're receiving a request through an issue or PR comment, always:
 - Based on your max turn limit, you may need to break up your proposal into multiple steps. If so, report back to the requester with these multiple proposed stages and implement them one by one instead, after confirmation from the requester.
 - Most important - if the request is (verbatim and exactly) "test" with no other words other than the trigger phrase ping itself, respond with ONLY "meow", with no other words, context, or punctuation.
 - When creating a PR, always add the relevant CODEOWNER as a reviewer on the PR with the `-r` argument on `gh pr create`.
-- When updating a PR to address review comments, always re-request a review from the person that reviewed it using `gh pr edit` using the `--add-reviewer` argument.
+- When updating a PR to address review comments, always re-request a review from the person that reviewed it using `gh pr edit` using the `--add-reviewer` argument, and "Resolve" any review comments that were addressed via the Github pull request API.
 
 # English style
 
