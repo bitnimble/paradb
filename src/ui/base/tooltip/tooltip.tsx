@@ -8,6 +8,7 @@ import {
   type TooltipProps as AriaTooltipProps,
 } from 'react-aria-components';
 import styles from './tooltip.module.css';
+import { colors } from '../design_system/design_tokens';
 
 export type TooltipProps = {
   /** Content to display in the tooltip */
@@ -29,7 +30,7 @@ export const Tooltip = (props: TooltipProps) => {
       <AriaTooltip placement={placement} className={styles.tooltip}>
         <OverlayArrow className={styles.arrow}>
           <svg width={8} height={8} viewBox="0 0 8 8">
-            <path d="M0 0 L4 4 L8 0" />
+            <path strokeWidth="1" stroke={colors.purple} d="M0 0 L4 4 L8 0" />
           </svg>
         </OverlayArrow>
         {content}

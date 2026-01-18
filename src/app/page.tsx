@@ -213,38 +213,27 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
 const DifficultyColorPills = (props: { difficulties: Difficulty[] }) => {
   const difficulties = new Set(props.difficulties.map((d) => parseDifficulty(d.difficultyName)));
   const color = (d: KnownDifficulty) => (difficulties.has(d) ? difficultyColors[d] : undefined);
-  const tooltip = (
-    <div>
-      Difficulties:{' '}
-      {props.difficulties
-        .map((d) => d.difficultyName)
-        .filter((n) => !!n)
-        .join(', ')}
-    </div>
-  );
   return (
-    <Tooltip content={tooltip}>
-      <div className={styles.difficulties}>
-        <div
-          className={classNames(
-            styles.difficultyColorPill,
-            !color('expert') && !color('expert+') && styles.greyPill
-          )}
-          style={{ backgroundColor: color('expert') || color('expert+') }}
-        ></div>
-        <div
-          className={classNames(styles.difficultyColorPill, !color('hard') && styles.greyPill)}
-          style={{ backgroundColor: color('hard') }}
-        ></div>
-        <div
-          className={classNames(styles.difficultyColorPill, !color('medium') && styles.greyPill)}
-          style={{ backgroundColor: color('medium') }}
-        ></div>
-        <div
-          className={classNames(styles.difficultyColorPill, !color('easy') && styles.greyPill)}
-          style={{ backgroundColor: color('easy') }}
-        ></div>
-      </div>
-    </Tooltip>
+    <div className={styles.difficulties}>
+      <div
+        className={classNames(
+          styles.difficultyColorPill,
+          !color('expert') && !color('expert+') && styles.greyPill
+        )}
+        style={{ backgroundColor: color('expert') || color('expert+') }}
+      ></div>
+      <div
+        className={classNames(styles.difficultyColorPill, !color('hard') && styles.greyPill)}
+        style={{ backgroundColor: color('hard') }}
+      ></div>
+      <div
+        className={classNames(styles.difficultyColorPill, !color('medium') && styles.greyPill)}
+        style={{ backgroundColor: color('medium') }}
+      ></div>
+      <div
+        className={classNames(styles.difficultyColorPill, !color('easy') && styles.greyPill)}
+        style={{ backgroundColor: color('easy') }}
+      ></div>
+    </div>
   );
 };

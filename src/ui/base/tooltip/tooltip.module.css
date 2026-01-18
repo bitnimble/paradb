@@ -1,11 +1,13 @@
 .tooltip {
-    background: var(--colorForeground);
-    color: var(--colorBackground);
+    background: var(--colorBackground);
+    color: var(--colorForeground);
     padding: var(--gridBaseline) calc(var(--gridBaseline) * 1.5);
     border-radius: calc(var(--gridBaseline) * 0.5);
+    border: 1px solid var(--colorPurple);
+    box-sizing: border-box;
     font-size: 14px;
     max-width: calc(var(--gridBaseline) * 32);
-    transition: opacity 150ms ease-out;
+    transition: opacity 100ms ease-in-out;
 }
 
 .tooltip[data-placement='top'] {
@@ -29,7 +31,7 @@
 }
 
 .arrow svg {
-    fill: var(--colorForeground);
+    fill: var(--colorBackground);
     display: block;
 }
 
@@ -37,28 +39,28 @@
     bottom: calc(var(--gridBaseline) * -0.5);
 }
 
-.tooltip[data-placement='top'] .arrow svg {
-    transform: rotate(180deg);
-}
-
 .tooltip[data-placement='bottom'] .arrow {
-    top: calc(var(--gridBaseline) * -0.5);
+    top: calc(var(--gridBaseline) * -1);
 }
 
 .tooltip[data-placement='left'] .arrow {
     right: calc(var(--gridBaseline) * -0.5);
 }
 
-.tooltip[data-placement='left'] .arrow svg {
-    transform: rotate(90deg);
+.tooltip[data-placement='right'] .arrow {
+    left: calc(var(--gridBaseline) * -1);
 }
 
-.tooltip[data-placement='right'] .arrow {
-    left: calc(var(--gridBaseline) * -0.5);
+.tooltip[data-placement='bottom'] .arrow svg {
+    transform: rotate(180deg);
+}
+
+.tooltip[data-placement='left'] .arrow svg {
+    transform: rotate(-90deg);
 }
 
 .tooltip[data-placement='right'] .arrow svg {
-    transform: rotate(-90deg);
+    transform: rotate(90deg);
 }
 
 .tooltip[data-entering] {
