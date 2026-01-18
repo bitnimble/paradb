@@ -20,6 +20,7 @@ import styles from './page.module.css';
 import { Search } from './search';
 import useInfiniteScroll from 'hooks/useInfiniteScroll';
 import { useSkeletonRef } from 'app/skeleton_provider';
+import { Tooltip } from 'ui/base/tooltip/tooltip';
 
 export default function Page() {
   return (
@@ -212,27 +213,38 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
 const DifficultyColorPills = (props: { difficulties: Difficulty[] }) => {
   const difficulties = new Set(props.difficulties.map((d) => parseDifficulty(d.difficultyName)));
   const color = (d: KnownDifficulty) => (difficulties.has(d) ? difficultyColors[d] : undefined);
-  return (
-    <div className={styles.difficulties}>
-      <div
-        className={classNames(
-          styles.difficultyColorPill,
-          !color('expert') && !color('expert+') && styles.greyPill
-        )}
-        style={{ backgroundColor: color('expert') || color('expert+') }}
-      ></div>
-      <div
-        className={classNames(styles.difficultyColorPill, !color('hard') && styles.greyPill)}
-        style={{ backgroundColor: color('hard') }}
-      ></div>
-      <div
-        className={classNames(styles.difficultyColorPill, !color('medium') && styles.greyPill)}
-        style={{ backgroundColor: color('medium') }}
-      ></div>
-      <div
-        className={classNames(styles.difficultyColorPill, !color('easy') && styles.greyPill)}
-        style={{ backgroundColor: color('easy') }}
-      ></div>
+  const tooltip = (
+    <div>
+      Difficulties:{' '}
+      {props.difficulties
+        .map((d) => d.difficultyName)
+        .filter((n) => !!n)
+        .join(', ')}
     </div>
+  );
+  return (
+    <Tooltip content={tooltip}>
+      <div className={styles.difficulties}>
+        <div
+          className={classNames(
+            styles.difficultyColorPill,
+            !color('expert') && !color('expert+') && styles.greyPill
+          )}
+          style={{ backgroundColor: color('expert') || color('expert+') }}
+        ></div>
+        <div
+          className={classNames(styles.difficultyColorPill, !color('hard') && styles.greyPill)}
+          style={{ backgroundColor: color('hard') }}
+        ></div>
+        <div
+          className={classNames(styles.difficultyColorPill, !color('medium') && styles.greyPill)}
+          style={{ backgroundColor: color('medium') }}
+        ></div>
+        <div
+          className={classNames(styles.difficultyColorPill, !color('easy') && styles.greyPill)}
+          style={{ backgroundColor: color('easy') }}
+        ></div>
+      </div>
+    </Tooltip>
   );
 };
