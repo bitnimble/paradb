@@ -1,6 +1,9 @@
+'use client';
+
 import classNames from 'classnames';
 import { T } from 'ui/base/text/text';
 import React from 'react';
+import { Button as AriaButton } from 'react-aria-components';
 import styles from './button.module.css';
 import loadingStyles from './loading.module.css';
 
@@ -26,17 +29,17 @@ const styleClassname: Record<ButtonStyle, string> = {
 
 export const Button = (props: ButtonProps) => {
   const { className, style = 'regular', link, loading, disabled, onClick, children } = props;
+  const isDisabled = disabled || loading || false;
 
-  const _onClick = () => onClick?.();
   return link ? (
     <div
       className={classNames(className, styles.button, styleClassname[style], {
-        [styles.disabled]: disabled || loading,
+        [styles.disabled]: isDisabled,
       })}
     >
       <a
         className={styles.a}
-        href={disabled || loading ? '' : link}
+        href={isDisabled ? '' : link}
         referrerPolicy="no-referrer"
         target="_blank"
       >
@@ -46,12 +49,12 @@ export const Button = (props: ButtonProps) => {
       </a>
     </div>
   ) : (
-    <button
-      disabled={disabled || loading || false}
+    <AriaButton
+      isDisabled={isDisabled}
+      onPress={() => onClick?.()}
       className={classNames(className, styleClassname[style], styles.button, {
-        [styles.disabled]: disabled || loading,
+        [styles.disabled]: isDisabled,
       })}
-      onClick={_onClick}
     >
       <T.Medium>{children}</T.Medium>
       {style === 'success' ? ' ✔' : null}
@@ -63,6 +66,6 @@ export const Button = (props: ButtonProps) => {
           <div></div>
         </div>
       ) : undefined}
-    </button>
+    </AriaButton>
   );
 };

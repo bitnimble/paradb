@@ -1,18 +1,31 @@
+'use client';
+
 import React from 'react';
+import { Button, Dialog as AriaDialog, Modal, ModalOverlay } from 'react-aria-components';
 import styles from './dialog.module.css';
 
-export class Dialog extends React.Component<{ Body: React.ComponentType; onClose: () => void }> {
-  render() {
-    const { onClose, Body } = this.props;
-    return (
-      <div className={styles.dialogContainer}>
-        <div className={styles.dialog}>
-          <button className={styles.close} onClick={onClose}>
+type DialogProps = {
+  Body: React.ComponentType;
+  onClose: () => void;
+};
+
+export const Dialog = (props: DialogProps) => {
+  const { onClose, Body } = props;
+
+  return (
+    <ModalOverlay
+      className={styles.dialogContainer}
+      isDismissable
+      onOpenChange={(isOpen) => !isOpen && onClose()}
+    >
+      <Modal>
+        <AriaDialog className={styles.dialog}>
+          <Button className={styles.close} aria-label="Close dialog" onPress={onClose}>
             ✖
-          </button>
+          </Button>
           <Body />
-        </div>
-      </div>
-    );
-  }
-}
+        </AriaDialog>
+      </Modal>
+    </ModalOverlay>
+  );
+};

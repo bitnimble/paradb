@@ -1,7 +1,10 @@
+'use client';
+
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import { T } from 'ui/base/text/text';
 import React from 'react';
+import { Input, Label, NumberField, FieldError } from 'react-aria-components';
 import styles from './numeric.module.css';
 
 export type NumericProps = {
@@ -17,36 +20,39 @@ export type NumericProps = {
 };
 
 export const Numeric = observer((props: NumericProps) => {
-  const onChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    const value = target.valueAsNumber;
-    if (value >= (props.min ?? Number.MIN_VALUE) && value <= (props.max ?? Number.MAX_VALUE)) {
-      props.onChange(value);
-    }
-  };
   const onKeyDown = ({ key }: React.KeyboardEvent<HTMLInputElement>) =>
     props.onSubmit != null && key === 'Enter' && props.onSubmit();
+
+  const hasError = props.error != null && props.error.trim() !== '';
+
   return (
-    <div
+    <NumberField
       className={classNames(props.className, styles.container, {
         [styles.errorContainer]: props.error != null,
       })}
+      value={props.value}
+      minValue={props.min}
+      maxValue={props.max}
+      isRequired={props.required}
+      isInvalid={hasError}
+      onChange={(value) => {
+        if (!isNaN(value)) {
+          props.onChange(value);
+        }
+      }}
     >
       {props.label && (
-        <span>
+        <Label>
           <T.Small color="grey">{props.label}</T.Small>
           {props.required ? <T.Small color="red">&nbsp;*</T.Small> : undefined}
-        </span>
+        </Label>
       )}
-      <input
-        type="number"
-        className={styles.numeric}
-        value={props.value}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-      />
-      {props.error != null && props.error.trim() !== '' ? (
-        <T.Tiny color="red">{props.error}</T.Tiny>
+      <Input className={styles.numeric} onKeyDown={onKeyDown} />
+      {hasError ? (
+        <FieldError>
+          <T.Tiny color="red">{props.error}</T.Tiny>
+        </FieldError>
       ) : undefined}
-    </div>
+    </NumberField>
   );
 });
