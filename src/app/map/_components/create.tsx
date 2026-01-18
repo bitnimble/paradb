@@ -1,9 +1,9 @@
 import { Api } from 'app/api/api';
 import { observer } from 'mobx-react';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import React from 'react';
 import { SubmitMapPage } from './submit_map';
 import { SubmitMapPresenter, SubmitMapStore, ThrottledMapUploader } from './submit_map_presenter';
-import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 export function createSubmitMapPage(api: Api, router: AppRouterInstance, id?: string) {
   const store: SubmitMapStore = new SubmitMapStore(id);

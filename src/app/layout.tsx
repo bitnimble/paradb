@@ -5,11 +5,11 @@ import type { Metadata } from 'next';
 import { getFlags } from 'services/server_context';
 import { SessionProvider } from 'session/session_provider';
 import { colors } from 'ui/base/design_system/design_tokens';
-import { ThemeProvider } from 'ui/base/theme';
+import { ThemeProvider } from 'ui/base/theme/theme_provider';
+import { ToastProvider } from 'ui/base/toast/toast';
 import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
-import { ToastProvider } from 'ui/base/toast/toast';
 
 export const metadata: Metadata = {
   title: 'ParaDB',

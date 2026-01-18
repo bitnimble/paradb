@@ -1,10 +1,16 @@
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
 import { Index } from 'meilisearch';
-import { MapSortableAttributes, PDMap, mapValidityEnum, mapVisibilityEnum } from 'schema/maps';
-import { AdvancedSearchMapRequest, MapValidity, MapVisibility } from 'schema/maps';
+import {
+  AdvancedSearchMapRequest,
+  MapSortableAttributes,
+  MapValidity,
+  MapVisibility,
+  PDMap,
+  mapValidityEnum,
+  mapVisibilityEnum,
+} from 'schema/maps';
 import { DbError, camelCaseKeys } from 'services/db/helpers';
-import snakeCaseKeys from 'snakecase-keys';
 import { IdDomain, generateId } from 'services/db/id_gen';
 import { getDbPool } from 'services/db/pool';
 import {
@@ -13,6 +19,7 @@ import {
   validateMap,
 } from 'services/maps/map_validator';
 import { getServerContext } from 'services/server_context';
+import snakeCaseKeys from 'snakecase-keys';
 import * as db from 'zapatos/db';
 import { S3Error, deleteFiles, promoteTempMapFiles, uploadAlbumArtFiles } from './s3_handler';
 

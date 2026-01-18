@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useRef, RefObject } from 'react';
+import React, { RefObject, createContext, useContext, useRef } from 'react';
 
 type SkeletonContextValue = RefObject<HTMLDivElement | null>;
 

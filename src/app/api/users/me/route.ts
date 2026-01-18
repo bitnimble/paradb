@@ -1,8 +1,8 @@
+import { NextResponse } from 'next/server';
+import { ApiError } from 'schema/api';
+import { GetUserResponse } from 'schema/users';
 import { error } from 'services/helpers';
 import { getUserSession } from 'services/session/session';
-import { NextResponse } from 'next/server';
-import { GetUserResponse } from 'schema/users';
-import { ApiError } from 'schema/api';
 
 export const dynamic = 'force-dynamic';
 

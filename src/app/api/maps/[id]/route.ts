@@ -1,9 +1,9 @@
-import { GetMapError } from 'services/maps/maps_repo';
-import { getServerContext } from 'services/server_context';
-import { getUserSession } from 'services/session/session';
 import { joinErrors } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 import { GetMapResponse } from 'schema/maps';
+import { GetMapError } from 'services/maps/maps_repo';
+import { getServerContext } from 'services/server_context';
+import { getUserSession } from 'services/session/session';
 
 const send = (res: GetMapResponse) => NextResponse.json(GetMapResponse.parse(res));
 export async function GET(

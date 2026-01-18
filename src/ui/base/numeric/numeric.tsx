@@ -2,9 +2,9 @@
 
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
-import { T } from 'ui/base/text/text';
 import React from 'react';
-import { Input, Label, NumberField, FieldError } from 'react-aria-components';
+import { FieldError, Input, Label, NumberField } from 'react-aria-components';
+import { T } from 'ui/base/text/text';
 import styles from './numeric.module.css';
 
 export type NumericProps = {

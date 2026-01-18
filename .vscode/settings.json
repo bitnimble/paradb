@@ -1,1 +1,8 @@
-{ "typescript.tsdk": "node_modules/typescript/lib" }
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.sortImports": "explicit",
+    "source.removeUnusedImports": "explicit"
+  }
+}

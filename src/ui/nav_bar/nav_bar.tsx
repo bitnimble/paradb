@@ -1,7 +1,7 @@
 import { getUserSession } from 'services/session/session';
 import { RouteLink } from 'ui/base/text/link';
 import { T } from 'ui/base/text/text';
-import { ThemeToggle } from 'ui/base/theme';
+import { ThemeToggle } from 'ui/base/theme/theme_toggle';
 import { routeFor, RoutePath } from 'utils/routes';
 import styles from './nav_bar.module.css';
 

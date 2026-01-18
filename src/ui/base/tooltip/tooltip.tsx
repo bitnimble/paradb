@@ -3,12 +3,12 @@
 import React from 'react';
 import {
   Tooltip as AriaTooltip,
-  TooltipTrigger,
   OverlayArrow,
+  TooltipTrigger,
   type TooltipProps as AriaTooltipProps,
 } from 'react-aria-components';
-import styles from './tooltip.module.css';
 import { colors } from '../design_system/design_tokens';
+import styles from './tooltip.module.css';
 
 export type TooltipProps = {
   /** Content to display in the tooltip */

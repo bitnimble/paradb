@@ -1,9 +1,9 @@
-import { camelCaseKeys, DbError } from 'services/db/helpers';
-import { convertToMeilisearchMap, MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
-import { getServerContext } from 'services/server_context';
 import { PromisedResult } from 'base/result';
 import { Index } from 'meilisearch';
 import { PDMap } from 'schema/maps';
+import { camelCaseKeys, DbError } from 'services/db/helpers';
+import { convertToMeilisearchMap, MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
+import { getServerContext } from 'services/server_context';
 import * as db from 'zapatos/db';
 
 export class FavoritesRepo {

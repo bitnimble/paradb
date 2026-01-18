@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button, Dialog as AriaDialog, Modal, ModalOverlay } from 'react-aria-components';
+import { Dialog as AriaDialog, Button, Modal, ModalOverlay } from 'react-aria-components';
 import styles from './dialog.module.css';
 
 type DialogProps = {

@@ -1,8 +1,8 @@
-import { getServerContext } from 'services/server_context';
-import { getUserSession } from 'services/session/session';
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiResponse } from 'schema/api';
 import { GetFavoriteMapsResponse, SetFavoriteMapsRequest } from 'schema/users';
+import { getServerContext } from 'services/server_context';
+import { getUserSession } from 'services/session/session';
 
 export async function GET() {
   const send = (res: GetFavoriteMapsResponse) =>

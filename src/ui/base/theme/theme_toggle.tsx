@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Button } from 'react-aria-components';
 import { useTheme } from './theme_provider';
 import styles from './theme_toggle.module.css';

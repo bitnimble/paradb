@@ -1,7 +1,7 @@
+import { redirect } from 'next/navigation';
+import { NextRequest, NextResponse } from 'next/server';
 import { getEnvVars } from 'services/env';
 import { getServerContext } from 'services/server_context';
-import { NextRequest, NextResponse } from 'next/server';
-import { redirect } from 'next/navigation';
 
 export async function GET(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;

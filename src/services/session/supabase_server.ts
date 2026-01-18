@@ -3,8 +3,8 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
-import { getEnvVars } from 'services/env';
 import { Database } from 'services/db/db.types';
+import { getEnvVars } from 'services/env';
 
 export async function createSupabaseServerClient(skipCookies?: true) {
   const envVars = getEnvVars();

@@ -1,6 +1,6 @@
-import { clearUserSession } from 'services/session/session';
-import { NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
+import { NextResponse } from 'next/server';
+import { clearUserSession } from 'services/session/session';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,7 +1,7 @@
 import classNames from 'classnames';
+import Link, { LinkProps } from 'next/link';
 import React from 'react';
 import styles from './link.module.css';
-import Link, { LinkProps } from 'next/link';
 
 type RouteLinkProps = { additionalClassName?: string; force?: boolean };
 

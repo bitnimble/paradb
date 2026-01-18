@@ -1,4 +1,3 @@
-import React from 'react';
 import { colors, metrics } from 'ui/base/design_system/design_tokens';
 
 export const MaintenanceBanner = (props: { message: string }) => {

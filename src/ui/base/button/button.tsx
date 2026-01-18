@@ -1,9 +1,9 @@
 'use client';
 
 import classNames from 'classnames';
-import { T } from 'ui/base/text/text';
 import React from 'react';
 import { Button as AriaButton } from 'react-aria-components';
+import { T } from 'ui/base/text/text';
 import styles from './button.module.css';
 import loadingStyles from './loading.module.css';
 

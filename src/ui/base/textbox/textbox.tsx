@@ -1,6 +1,6 @@
 import classNames from 'classnames';
-import { T } from 'ui/base/text/text';
 import React from 'react';
+import { T } from 'ui/base/text/text';
 import styles from './textbox.module.css';
 
 type TextboxBorderColor = 'grey' | 'purple';

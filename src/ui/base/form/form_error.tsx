@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react';
 import { T } from 'ui/base/text/text';
-import React from 'react';
 import styles from './form_error.module.css';
 
 export const FormError = observer(({ error }: { error: string | undefined }) =>

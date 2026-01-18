@@ -1,10 +1,10 @@
+import Image from 'next/image';
 import React from 'react';
 import sanitizeHtml from 'sanitize-html';
 import { Difficulty, PDMap } from 'schema/maps';
 import { T } from 'ui/base/text/text';
 import { difficultyColors, difficultyMap, parseDifficulty } from 'utils/difficulties';
 import styles from './map_page.module.css';
-import Image from 'next/image';
 
 const allowedTags: typeof sanitizeHtml.defaults.allowedTags = [
   ...sanitizeHtml.defaults.allowedTags,

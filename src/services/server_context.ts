@@ -1,13 +1,13 @@
+import { rebuildMeilisearchIndex } from 'app/api/maps/search/rebuild/route';
 import { MeiliSearch } from 'meilisearch';
 import { Pool } from 'pg';
 import { getDbPool } from 'services/db/pool';
 import { getEnvVars } from 'services/env';
-import { getSingleton } from 'services/singleton';
 import { Flags } from 'services/flags';
 import { MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
+import { getSingleton } from 'services/singleton';
 import { FavoritesRepo } from 'services/users/favorites_repo';
 import { createSupabaseServerClient } from './session/supabase_server';
-import { rebuildMeilisearchIndex } from 'app/api/maps/search/rebuild/route';
 
 type ServerContext = {
   pool: Pool;

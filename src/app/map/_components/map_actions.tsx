@@ -5,6 +5,7 @@ import { createSubmitMapPage } from 'app/map/_components/create';
 import { MapPagePresenter, MapPageStore } from 'app/map/_components/map_presenter';
 import { action } from 'mobx';
 import { observer } from 'mobx-react-lite';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 import { PDMap } from 'schema/maps';
 import { useSession } from 'session/session_provider';
@@ -12,7 +13,6 @@ import { Button } from 'ui/base/button/button';
 import { createDialog } from 'ui/base/dialog/create';
 import { getMapFileLink } from 'utils/maps';
 import styles from './map_page.module.css';
-import { useRouter } from 'next/navigation';
 
 type MapActionsProps = {
   map: PDMap;

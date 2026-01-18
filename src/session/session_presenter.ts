@@ -1,5 +1,5 @@
-import { makeAutoObservable, runInAction } from 'mobx';
 import { Api } from 'app/api/api';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { User } from 'schema/users';
 
 export class SessionStore {
