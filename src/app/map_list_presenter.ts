@@ -66,7 +66,6 @@ export class MapListPresenter {
 
   onClickBulkSelect() {
     this.store.enableBulkSelect = true;
-    showToast('Test toast', ToastIntent.DEFAULT);
   }
 
   async onClickBulkDownload() {
