@@ -2,7 +2,6 @@
 
 import { ToastQueue } from '@react-stately/toast';
 import classNames from 'classnames';
-import React from 'react';
 import {
   Button,
   UNSTABLE_Toast as Toast,
@@ -12,7 +11,17 @@ import {
 import { T } from 'ui/base/text/text';
 import styles from './toast.module.css';
 
-export type ToastIntent = 'default' | 'success' | 'error';
+const intentStyles: Record<ToastIntent, string> = {
+  [ToastIntent.DEFAULT]: styles.default,
+  [ToastIntent.ERROR]: styles.error,
+  [ToastIntent.SUCCESS]: styles.success,
+};
+
+export const enum ToastIntent {
+  DEFAULT = 'default',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}
 
 export type ToastData = {
   message: string;
@@ -29,19 +38,19 @@ const toastQueue = new ToastQueue<ToastData>({ maxVisibleToasts: 5 });
  */
 export function showToast(
   message: string,
-  intent: ToastIntent = 'default',
+  intent: ToastIntent = ToastIntent.DEFAULT,
   timeout: number = 5000
 ): void {
   toastQueue.add({ message, intent }, { timeout });
 }
 
-export function ToastContainer() {
+export function ToastProvider() {
   return (
     <ToastRegion queue={toastQueue} className={styles.toastRegion}>
       {({ toast }) => {
         const intent = toast.content.intent ?? 'default';
         return (
-          <Toast toast={toast} className={classNames(styles.toast, styles[intent])}>
+          <Toast toast={toast} className={classNames(styles.toast, intentStyles[intent])}>
             <ToastContent className={styles.content}>
               <T.Medium>{toast.content.message}</T.Medium>
             </ToastContent>

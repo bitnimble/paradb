@@ -6,10 +6,10 @@ import { getFlags } from 'services/server_context';
 import { SessionProvider } from 'session/session_provider';
 import { colors } from 'ui/base/design_system/design_tokens';
 import { ThemeProvider } from 'ui/base/theme';
-import { ToastProvider } from 'ui/base/toast';
 import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
+import { ToastProvider } from 'ui/base/toast/toast';
 
 export const metadata: Metadata = {
   title: 'ParaDB',

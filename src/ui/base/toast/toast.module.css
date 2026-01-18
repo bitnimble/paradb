@@ -1,7 +1,7 @@
 .toastRegion {
     position: fixed;
-    top: calc(var(--gridBaseline) * 2);
-    right: calc(var(--gridBaseline) * 2);
+    right: calc(var(--gridBaseline) * 5);
+    bottom: calc(var(--gridBaseline) * 5);
     z-index: 1000;
 
     display: flex;
@@ -24,11 +24,11 @@
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateX(100%);
+        transform: translateY(100%);
     }
     to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateY(0);
     }
 }
 
@@ -40,9 +40,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
-    width: calc(var(--gridBaseline) * 3);
-    height: calc(var(--gridBaseline) * 3);
+    margin-left: var(--gridBaseline);
 
     background: transparent;
     border: none;
@@ -57,26 +55,10 @@
 }
 
 /* Intent variants */
-.default {
-    border-color: var(--colorAccent);
-}
-
 .success {
     border-color: var(--colorGreen);
-    background: var(--colorGreen);
-    color: var(--colorWhite);
-}
-
-.success .closeButton {
-    color: var(--colorWhite);
 }
 
 .error {
     border-color: var(--colorRed);
-    background: var(--colorRed);
-    color: var(--colorWhite);
-}
-
-.error .closeButton {
-    color: var(--colorWhite);
 }
