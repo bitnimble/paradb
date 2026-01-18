@@ -5,6 +5,7 @@
     border-radius: calc(var(--gridBaseline) * 0.5);
     font-size: 14px;
     max-width: calc(var(--gridBaseline) * 32);
+    transition: opacity 150ms ease-out;
 }
 
 .tooltip[data-placement='top'] {
@@ -60,30 +61,10 @@
     transform: rotate(-90deg);
 }
 
-/* Entering animation */
 .tooltip[data-entering] {
-    animation: fadeIn 150ms ease-out;
+    opacity: 0;
 }
 
-/* Exiting animation */
 .tooltip[data-exiting] {
-    animation: fadeOut 150ms ease-in;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0;
-    }
+    opacity: 0;
 }
