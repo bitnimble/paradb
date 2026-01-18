@@ -2,7 +2,9 @@
 
 import { useApi } from 'app/api/api_provider';
 import { MapListPresenter, MapListStore } from 'app/map_list_presenter';
+import { useSkeletonRef } from 'app/skeleton_provider';
 import classNames from 'classnames';
+import useInfiniteScroll from 'hooks/useInfiniteScroll';
 import { action, computed, observable, reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import { useSearchParams } from 'next/navigation';
@@ -18,9 +20,6 @@ import { KnownDifficulty, difficultyColors, parseDifficulty } from 'utils/diffic
 import { RoutePath, routeFor } from 'utils/routes';
 import styles from './page.module.css';
 import { Search } from './search';
-import useInfiniteScroll from 'hooks/useInfiniteScroll';
-import { useSkeletonRef } from 'app/skeleton_provider';
-import { Tooltip } from 'ui/base/tooltip/tooltip';
 
 export default function Page() {
   return (

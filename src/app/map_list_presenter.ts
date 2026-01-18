@@ -4,6 +4,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { computedFn } from 'mobx-utils';
 import { MapSortableAttributes, PDMap, mapSortableAttributes } from 'schema/maps';
 import { TableSortStore } from 'ui/base/table/table_presenter';
+import { ToastIntent, showToast } from 'ui/base/toast/toast';
 import { getMapFileLink } from 'utils/maps';
 
 const SEARCH_LIMIT = 20;

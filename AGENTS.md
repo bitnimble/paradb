@@ -25,6 +25,7 @@ The codebase uses Docker to run third-party services locally (Meilisearch for se
 - Use `== null` (double equals null) instead of either `=== null` or `=== undefined` (triple equals null / undefined), and the same for `!=`. This is to make `null` and `undefined` mean the same thing everywhere in our codebase to avoid any potential serialisation/deserialisation confusion or issues.
 - Avoid use of `any` unless absolutely necessary.
 - Prefer early-exit if statements rather than nested if statements.
+- Avoid the use of barrel files
 
 # CSS
 

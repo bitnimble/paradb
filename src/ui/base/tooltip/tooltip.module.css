@@ -3,7 +3,7 @@
     color: var(--colorForeground);
     padding: var(--gridBaseline) calc(var(--gridBaseline) * 1.5);
     border-radius: calc(var(--gridBaseline) * 0.5);
-    border: 1px solid var(--colorPurple);
+    border: 1px solid var(--colorAccent);
     box-sizing: border-box;
     font-size: 14px;
     max-width: calc(var(--gridBaseline) * 32);

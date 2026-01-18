@@ -1,0 +1,69 @@
+'use client';
+
+import { ToastQueue } from '@react-stately/toast';
+import classNames from 'classnames';
+import {
+  Button,
+  UNSTABLE_Toast as Toast,
+  UNSTABLE_ToastContent as ToastContent,
+  UNSTABLE_ToastRegion as ToastRegion,
+} from 'react-aria-components';
+import { T } from 'ui/base/text/text';
+import styles from './toast.module.css';
+
+const intentStyles: Record<ToastIntent, string> = {
+  [ToastIntent.DEFAULT]: styles.default,
+  [ToastIntent.ERROR]: styles.error,
+  [ToastIntent.SUCCESS]: styles.success,
+};
+
+export const enum ToastIntent {
+  DEFAULT = 'default',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}
+
+export type ToastData = {
+  message: string;
+  intent?: ToastIntent;
+};
+
+const toastQueue = new ToastQueue<ToastData>({ maxVisibleToasts: 5 });
+
+/**
+ * Shows a toast notification.
+ * @param message The message to display
+ * @param intent The visual intent: 'default' (purple border), 'success' (green), or 'error' (red)
+ * @param timeout Duration in ms before auto-dismiss (default: 5000)
+ */
+export function showToast(
+  message: string,
+  intent: ToastIntent = ToastIntent.DEFAULT,
+  timeout: number = 5000
+): void {
+  toastQueue.add({ message, intent }, { timeout });
+}
+
+export function ToastProvider() {
+  return (
+    <ToastRegion queue={toastQueue} className={styles.toastRegion}>
+      {({ toast }) => {
+        const intent = toast.content.intent ?? 'default';
+        return (
+          <Toast toast={toast} className={classNames(styles.toast, intentStyles[intent])}>
+            <ToastContent className={styles.content}>
+              <T.Medium>{toast.content.message}</T.Medium>
+            </ToastContent>
+            <Button
+              className={styles.closeButton}
+              onPress={() => toastQueue.close(toast.key)}
+              slot="close"
+            >
+              ✕
+            </Button>
+          </Toast>
+        );
+      }}
+    </ToastRegion>
+  );
+}

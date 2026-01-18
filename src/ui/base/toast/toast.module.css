@@ -1,0 +1,64 @@
+.toastRegion {
+    position: fixed;
+    right: calc(var(--gridBaseline) * 5);
+    bottom: calc(var(--gridBaseline) * 5);
+    z-index: 1000;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--gridBaseline);
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: var(--gridBaseline);
+
+    padding: calc(var(--gridBaseline) * 1.5) calc(var(--gridBaseline) * 2);
+    background: var(--colorBackground);
+    border: 1px solid var(--colorAccent);
+
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.content {
+    flex: 1;
+}
+
+.closeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: var(--gridBaseline);
+
+    background: transparent;
+    border: none;
+    color: var(--colorForeground);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+}
+
+.closeButton:hover {
+    opacity: 1;
+}
+
+/* Intent variants */
+.success {
+    border-color: var(--colorGreen);
+}
+
+.error {
+    border-color: var(--colorRed);
+}

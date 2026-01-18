@@ -30,7 +30,7 @@ export const Tooltip = (props: TooltipProps) => {
       <AriaTooltip placement={placement} className={styles.tooltip}>
         <OverlayArrow className={styles.arrow}>
           <svg width={8} height={8} viewBox="0 0 8 8">
-            <path strokeWidth="1" stroke={colors.purple} d="M0 0 L4 4 L8 0" />
+            <path strokeWidth="1" stroke={colors.accent} d="M0 0 L4 4 L8 0" />
           </svg>
         </OverlayArrow>
         {content}

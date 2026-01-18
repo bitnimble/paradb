@@ -12,6 +12,7 @@ export const colors = {
   green: '#4c4',
   red: '#f00',
   purple: '#9b15f1',
+  accent: '#9b15f1',
 } as const;
 
 export const metrics = {
