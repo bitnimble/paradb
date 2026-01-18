@@ -1,0 +1,82 @@
+.toastRegion {
+    position: fixed;
+    top: calc(var(--gridBaseline) * 2);
+    right: calc(var(--gridBaseline) * 2);
+    z-index: 1000;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--gridBaseline);
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: var(--gridBaseline);
+
+    padding: calc(var(--gridBaseline) * 1.5) calc(var(--gridBaseline) * 2);
+    background: var(--colorBackground);
+    border: 1px solid var(--colorAccent);
+
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.content {
+    flex: 1;
+}
+
+.closeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: calc(var(--gridBaseline) * 3);
+    height: calc(var(--gridBaseline) * 3);
+
+    background: transparent;
+    border: none;
+    color: var(--colorForeground);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+}
+
+.closeButton:hover {
+    opacity: 1;
+}
+
+/* Intent variants */
+.default {
+    border-color: var(--colorAccent);
+}
+
+.success {
+    border-color: var(--colorGreen);
+    background: var(--colorGreen);
+    color: var(--colorWhite);
+}
+
+.success .closeButton {
+    color: var(--colorWhite);
+}
+
+.error {
+    border-color: var(--colorRed);
+    background: var(--colorRed);
+    color: var(--colorWhite);
+}
+
+.error .closeButton {
+    color: var(--colorWhite);
+}

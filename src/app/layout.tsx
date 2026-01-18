@@ -1,14 +1,15 @@
 import { ApiProvider } from 'app/api/api_provider';
 import { MaintenanceBanner } from 'app/maintenance_banner';
+import { SkeletonProvider } from 'app/skeleton_provider';
 import type { Metadata } from 'next';
 import { getFlags } from 'services/server_context';
 import { SessionProvider } from 'session/session_provider';
 import { colors } from 'ui/base/design_system/design_tokens';
 import { ThemeProvider } from 'ui/base/theme';
+import { ToastProvider } from 'ui/base/toast';
 import { NavBar } from 'ui/nav_bar/nav_bar';
 import './globals.css';
 import styles from './layout.module.css';
-import { SkeletonProvider } from 'app/skeleton_provider';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 ) : null}
                 <NavBar />
                 <div className={styles.content}>{children}</div>
+                <ToastProvider />
               </SkeletonProvider>
             </SessionProvider>
           </ApiProvider>
