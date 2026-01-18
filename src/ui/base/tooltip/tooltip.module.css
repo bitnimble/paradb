@@ -2,25 +2,25 @@
     background: var(--colorForeground);
     color: var(--colorBackground);
     padding: var(--gridBaseline) calc(var(--gridBaseline) * 1.5);
-    border-radius: 4px;
+    border-radius: calc(var(--gridBaseline) * 0.5);
     font-size: 14px;
-    max-width: 250px;
+    max-width: calc(var(--gridBaseline) * 32);
 }
 
 .tooltip[data-placement='top'] {
-    margin-bottom: 8px;
+    margin-bottom: var(--gridBaseline);
 }
 
 .tooltip[data-placement='bottom'] {
-    margin-top: 8px;
+    margin-top: var(--gridBaseline);
 }
 
 .tooltip[data-placement='left'] {
-    margin-right: 8px;
+    margin-right: var(--gridBaseline);
 }
 
 .tooltip[data-placement='right'] {
-    margin-left: 8px;
+    margin-left: var(--gridBaseline);
 }
 
 .arrow {
@@ -33,7 +33,7 @@
 }
 
 .tooltip[data-placement='top'] .arrow {
-    bottom: -4px;
+    bottom: calc(var(--gridBaseline) * -0.5);
 }
 
 .tooltip[data-placement='top'] .arrow svg {
@@ -41,11 +41,11 @@
 }
 
 .tooltip[data-placement='bottom'] .arrow {
-    top: -4px;
+    top: calc(var(--gridBaseline) * -0.5);
 }
 
 .tooltip[data-placement='left'] .arrow {
-    right: -4px;
+    right: calc(var(--gridBaseline) * -0.5);
 }
 
 .tooltip[data-placement='left'] .arrow svg {
@@ -53,7 +53,7 @@
 }
 
 .tooltip[data-placement='right'] .arrow {
-    left: -4px;
+    left: calc(var(--gridBaseline) * -0.5);
 }
 
 .tooltip[data-placement='right'] .arrow svg {
