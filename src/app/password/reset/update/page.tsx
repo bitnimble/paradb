@@ -1,84 +1,42 @@
 'use client';
 
-import { observer } from 'mobx-react';
-import React from 'react';
-import {
-  UpdatePasswordField,
-  UpdatePasswordPresenter,
-  UpdatePasswordStore,
-} from './update_password_presenter';
-import { FormError } from 'ui/base/form/form_error';
+import { observer } from 'mobx-react-lite';
+import { useState } from 'react';
 import { Button } from 'ui/base/button/button';
+import { FormError } from 'ui/base/form/form_error';
 import { Textbox } from 'ui/base/textbox/textbox';
 import styles from './update_password.module.css';
+import { UpdatePasswordPresenter, UpdatePasswordStore } from './update_password_presenter';
 
-type UpdatePasswordProps = {
-  password: string;
-  submitting: boolean;
-  success: boolean;
-  errors: Map<UpdatePasswordField, string>;
-  onChangePassword(value: string): void;
-  updatePassword(): void;
-};
+export default observer(() => {
+  const [store] = useState(new UpdatePasswordStore());
+  const presenter = new UpdatePasswordPresenter(store);
 
-const UpdatePassword = observer(
-  ({
-    password,
-    submitting,
-    success,
-    errors,
-    onChangePassword,
-    updatePassword,
-  }: UpdatePasswordProps) => {
-    if (success) {
-      return (
-        <div className={styles.updatePassword}>
-          <p>Your password has been updated. Redirecting to login...</p>
-        </div>
-      );
-    }
-
+  if (store.success) {
     return (
       <div className={styles.updatePassword}>
-        <p>Enter your new password.</p>
-        <Textbox
-          value={password}
-          onChange={onChangePassword}
-          inputType="password"
-          label="New password"
-          onSubmit={updatePassword}
-          error={errors.get('password')}
-        />
-        <div className={styles.submitContainer}>
-          <Button loading={submitting} onClick={updatePassword}>
-            Update password
-          </Button>
-        </div>
-        <FormError error={errors.get('form')} />
+        <p>Your password has been updated. Redirecting to login...</p>
       </div>
     );
   }
-);
 
-function createUpdatePasswordPage() {
-  const store = new UpdatePasswordStore();
-  const presenter = new UpdatePasswordPresenter(store);
-
-  return observer(() => {
-    return (
-      <UpdatePassword
-        password={store.password}
-        submitting={store.submitting}
-        success={store.success}
-        errors={store.errors}
-        onChangePassword={presenter.onChangePassword}
-        updatePassword={presenter.updatePassword}
+  return (
+    <div className={styles.updatePassword}>
+      <p>Enter your new password.</p>
+      <Textbox
+        value={store.password}
+        onChange={presenter.onChangePassword}
+        inputType="password"
+        label="New password"
+        onSubmit={presenter.updatePassword}
+        error={store.errors.get('password')}
       />
-    );
-  });
-}
-
-export default () => {
-  const [UpdatePasswordPage] = React.useState(() => createUpdatePasswordPage());
-  return <UpdatePasswordPage />;
-};
+      <div className={styles.submitContainer}>
+        <Button loading={store.submitting} onClick={presenter.updatePassword}>
+          Update password
+        </Button>
+      </div>
+      <FormError error={store.errors.get('form')} />
+    </div>
+  );
+});

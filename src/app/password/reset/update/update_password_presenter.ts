@@ -1,9 +1,9 @@
-import { action, makeObservable, observable, runInAction } from 'mobx';
+import { action, makeObservable, observable } from 'mobx';
 import { createClient } from 'services/session/supabase_client';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
 
-export type UpdatePasswordField = 'password' | 'form';
+type UpdatePasswordField = 'password' | 'form';
 
 export class UpdatePasswordStore extends FormStore<UpdatePasswordField> {
   submitting = false;
@@ -21,22 +21,22 @@ export class UpdatePasswordStore extends FormStore<UpdatePasswordField> {
 }
 
 export class UpdatePasswordPresenter extends FormPresenter<UpdatePasswordField> {
-  private readonly supabase = createClient();
-
   constructor(private readonly store: UpdatePasswordStore) {
     super(store);
-    makeObservable(this, {
+    makeObservable<typeof this, 'setSubmitting' | 'setSuccess'>(this, {
       onChangePassword: action.bound,
       updatePassword: action.bound,
+      setSubmitting: action.bound,
+      setSuccess: action.bound,
     });
   }
 
-  onChangePassword = (value: string) => (this.store.password = value);
-  private setSubmitting = action((value: boolean) => (this.store.submitting = value));
-  private setSuccess = action((value: boolean) => (this.store.success = value));
+  onChangePassword = action((value: string) => (this.store.password = value));
+  private setSubmitting = (value: boolean) => (this.store.submitting = value);
+  private setSuccess = (value: boolean) => (this.store.success = value);
 
   async updatePassword() {
-    runInAction(() => this.clearErrors());
+    this.clearErrors();
     const password = this.store.password;
     const errors = [
       ...this.checkPasswordRestrictionFields(['password', password]),
@@ -47,7 +47,7 @@ export class UpdatePasswordPresenter extends FormPresenter<UpdatePasswordField> 
     }
 
     this.setSubmitting(true);
-    const { error } = await this.supabase.auth.updateUser({ password });
+    const { error } = await createClient().auth.updateUser({ password });
     this.setSubmitting(false);
 
     if (error) {
