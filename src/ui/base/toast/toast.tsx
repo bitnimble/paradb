@@ -1,11 +1,11 @@
 'use client';
 
-import { ToastQueue } from '@react-stately/toast';
 import classNames from 'classnames';
 import {
   Button,
   UNSTABLE_Toast as Toast,
   UNSTABLE_ToastContent as ToastContent,
+  UNSTABLE_ToastQueue as ToastQueue,
   UNSTABLE_ToastRegion as ToastRegion,
 } from 'react-aria-components';
 import { T } from 'ui/base/text/text';

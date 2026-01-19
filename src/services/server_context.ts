@@ -1,12 +1,14 @@
 import { rebuildMeilisearchIndex } from 'app/api/maps/search/rebuild/route';
-import { MeiliSearch } from 'meilisearch';
 import { Pool } from 'pg';
 import { getDbPool } from 'services/db/pool';
 import { getEnvVars } from 'services/env';
 import { Flags } from 'services/flags';
-import { MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
+import { MapsRepo } from 'services/maps/maps_repo';
+import { createMeilisearchIndex, meilisearchIndexExists } from 'services/search/meilisearch';
 import { getSingleton } from 'services/singleton';
 import { FavoritesRepo } from 'services/users/favorites_repo';
+import { PostgresIndex } from './search/postgres';
+import { SearchIndex } from './search/types';
 import { createSupabaseServerClient } from './session/supabase_server';
 
 type ServerContext = {
@@ -22,17 +24,23 @@ async function createServerContext(): Promise<ServerContext> {
 
   const pool = await getDbPool();
 
-  const meilisearch = new MeiliSearch({
-    host: envVars.meilisearchHost,
-    apiKey: envVars.meilisearchKey,
-  });
+  let searchIndex: SearchIndex;
+  if (envVars.searchImplementation === 'postgres') {
+    searchIndex = new PostgresIndex();
+  } else {
+    const meilisearchConfig = {
+      host: envVars.meilisearchHost,
+      apiKey: envVars.meilisearchKey,
+    };
 
-  if ((await meilisearch.getIndexes()).results.find((i) => i.uid === 'maps') == null) {
-    await rebuildMeilisearchIndex();
+    if (!(await meilisearchIndexExists(meilisearchConfig, 'maps'))) {
+      await rebuildMeilisearchIndex();
+    }
+    searchIndex = await createMeilisearchIndex(meilisearchConfig, 'maps');
   }
-  const mapsIndex = await meilisearch.getIndex<MeilisearchMap>('maps');
-  const mapsRepo = new MapsRepo(mapsIndex);
-  const favoritesRepo = new FavoritesRepo(mapsRepo, mapsIndex);
+  console.log(`Using ${envVars.searchImplementation} search index`);
+  const mapsRepo = new MapsRepo(searchIndex);
+  const favoritesRepo = new FavoritesRepo(mapsRepo, searchIndex);
   const flags = getFlags();
 
   return {

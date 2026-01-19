@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "allow": ["Bash(bun check:*)", "Bash(bun tsc:*)", "Bash(bun format:*)"],
+    "defaultMode": "acceptEdits"
+  }
+}
