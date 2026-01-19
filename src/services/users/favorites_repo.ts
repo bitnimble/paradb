@@ -1,15 +1,15 @@
 import { PromisedResult } from 'base/result';
-import { Index } from 'meilisearch';
 import { PDMap } from 'schema/maps';
 import { camelCaseKeys, DbError } from 'services/db/helpers';
-import { convertToMeilisearchMap, MapsRepo, MeilisearchMap } from 'services/maps/maps_repo';
+import { MapsRepo } from 'services/maps/maps_repo';
+import { SearchIndex } from 'services/search/types';
 import { getServerContext } from 'services/server_context';
 import * as db from 'zapatos/db';
 
 export class FavoritesRepo {
   constructor(
     private readonly mapsRepo: MapsRepo,
-    private readonly meilisearchMaps: Index<MeilisearchMap>
+    private readonly searchIndex: SearchIndex
   ) {}
 
   async setFavorites(
@@ -42,9 +42,7 @@ export class FavoritesRepo {
         .select('maps', { id: db.conditions.isIn(mapIds) }, { columns: ['id', 'download_count'] })
         .run(pool);
 
-      await this.meilisearchMaps.updateDocuments(
-        mapFavorites.map((m) => convertToMeilisearchMap(camelCaseKeys(m)))
-      );
+      await this.searchIndex.updateDocuments(mapFavorites.map((m) => camelCaseKeys(m)));
     } catch {
       // TODO: better favorites error handling
       return { success: false, errors: [{ type: DbError.UNKNOWN_DB_ERROR }] };

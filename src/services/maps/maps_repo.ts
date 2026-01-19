@@ -1,6 +1,5 @@
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
-import { Index } from 'meilisearch';
 import {
   AdvancedSearchMapRequest,
   MapSortableAttributes,
@@ -18,48 +17,13 @@ import {
   ValidateMapError,
   validateMap,
 } from 'services/maps/map_validator';
+import { SearchIndex } from 'services/search/types';
 import { getServerContext } from 'services/server_context';
 import snakeCaseKeys from 'snakecase-keys';
 import * as db from 'zapatos/db';
 import { S3Error, deleteFiles, promoteTempMapFiles, uploadAlbumArtFiles } from './s3_handler';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
-
-export type MeilisearchMap = {
-  id: string;
-  title?: string;
-  artist?: string;
-  author?: string;
-  uploader?: string;
-  downloadCount?: number;
-  description?: string;
-  submissionDate?: number;
-  favorites?: number;
-};
-export function convertToMeilisearchMap(map: Partial<PDMap> & { id: string }): MeilisearchMap {
-  const {
-    id,
-    title,
-    artist,
-    author,
-    uploader,
-    downloadCount,
-    description,
-    submissionDate,
-    favorites,
-  } = map;
-  return {
-    id,
-    title,
-    artist,
-    author: author || '',
-    uploader,
-    downloadCount,
-    description: description || '',
-    submissionDate: submissionDate != null ? Number(new Date(submissionDate)) : undefined,
-    favorites,
-  };
-}
 
 export type FindMapsBy =
   | { by: 'id'; ids: string[] }
@@ -87,12 +51,12 @@ type ProcessMapOpts = {
 export const enum CreateMapError {
   TOO_MANY_ID_GEN_ATTEMPTS = 'too_many_id_gen_attempts',
 }
-export const enum MeilisearchError {
+export const enum SearchIndexError {
   SEARCH_INDEX_ERROR = 'search-index-error',
 }
 
 export class MapsRepo {
-  constructor(private readonly meilisearchMaps: Index<MeilisearchMap>) {}
+  constructor(private readonly searchIndex: SearchIndex) {}
 
   // TODO: add search parameters to findMaps
   // TODO: pull `userId` out as RequestContext
@@ -191,7 +155,7 @@ export class MapsRepo {
     limit: number;
   }): PromisedResult<PDMap[], DbError> {
     const { user, query, offset, limit, sort, sortDirection } = searchOptions;
-    const response = await this.meilisearchMaps.search<MeilisearchMap>(query, {
+    const response = await this.searchIndex.search(query, {
       offset,
       limit,
       sort: sort && sortDirection ? [`${sort}:${sortDirection}`] : undefined,
@@ -219,7 +183,7 @@ export class MapsRepo {
       searchOptions.uploader ? `uploader = "${searchOptions.uploader}"` : null,
     ].filter(exists);
 
-    const searchResponse = await this.meilisearchMaps.search(searchOptions.title, {
+    const searchResponse = await this.searchIndex.search(searchOptions.title ?? '', {
       filter: filterParts.join(' AND '),
       hitsPerPage: searchOptions.limitPerPage || 20,
       page: searchOptions.page || 1,
@@ -330,18 +294,15 @@ export class MapsRepo {
     }
   }
 
-  private async updateMeilisearchMap(
+  private async updateSearchIndex(
     map: Partial<PDMap> & { id: string }
-  ): PromisedResult<void, MeilisearchError> {
-    // Update search index
+  ): PromisedResult<void, SearchIndexError> {
     try {
-      await this.meilisearchMaps.updateDocuments([convertToMeilisearchMap(map)], {
-        primaryKey: 'id',
-      });
+      await this.searchIndex.updateDocuments([map]);
     } catch (e) {
       return {
         success: false,
-        errors: [{ type: MeilisearchError.SEARCH_INDEX_ERROR, internalMessage: JSON.stringify(e) }],
+        errors: [{ type: SearchIndexError.SEARCH_INDEX_ERROR, internalMessage: JSON.stringify(e) }],
       };
     }
     return { success: true, value: undefined };
@@ -362,10 +323,10 @@ export class MapsRepo {
           .update('maps', snakeCaseKeys({ downloadCount: map.download_count + 1 }), { id: mapId })
           .run(client);
 
-        const meilisearchResp = await this.updateMeilisearchMap(
+        const searchIndexResp = await this.updateSearchIndex(
           PDMap.parse(camelCaseKeys(updatedMap[0]))
         );
-        if (!meilisearchResp.success) {
+        if (!searchIndexResp.success) {
           // TODO: wire a proper ResultError out of the `db.serializable`
           throw new Error(`Could not update search index`);
         }
@@ -394,7 +355,7 @@ export class MapsRepo {
       if (deleted.length === 0) {
         return { success: false, errors: [{ type: DeleteMapError.MISSING_MAP }] };
       }
-      await this.meilisearchMaps.deleteDocument(id);
+      await this.searchIndex.deleteDocument(id);
       // Attempt to delete any orphaned S3 temp files just in case
       await Promise.all([deleteFiles(id, true), deleteFiles(id, false)]);
       return { success: true, value: undefined };
@@ -449,7 +410,7 @@ export class MapsRepo {
     | CreateMapError
     | ValidateMapError
     | ValidateMapDifficultyError
-    | MeilisearchError
+    | SearchIndexError
   > {
     const { id, mapFile: buffer, uploader } = opts;
     await this.setValidity(id, MapValidity.VALIDATING);
@@ -522,9 +483,9 @@ export class MapsRepo {
           },
         })
       );
-      const meilisearchResp = await this.updateMeilisearchMap(mapResult);
-      if (!meilisearchResp.success) {
-        return meilisearchResp;
+      const searchIndexResp = await this.updateSearchIndex(mapResult);
+      if (!searchIndexResp.success) {
+        return searchIndexResp;
       }
       return { success: true, value: mapResult };
     } catch (e) {
@@ -540,7 +501,7 @@ export const submitErrorMap: Record<
   | CreateMapError
   | ValidateMapError
   | ValidateMapDifficultyError
-  | MeilisearchError,
+  | SearchIndexError,
   [number, string]
 > = {
   [S3Error.S3_GET_ERROR]: internalError,
@@ -571,5 +532,5 @@ export const submitErrorMap: Record<
     400,
     'Invalid map data; a map .rlrr is missing a required field (title, artist or complexity)',
   ],
-  [MeilisearchError.SEARCH_INDEX_ERROR]: internalError,
+  [SearchIndexError.SEARCH_INDEX_ERROR]: internalError,
 };
