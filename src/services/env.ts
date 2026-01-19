@@ -30,6 +30,7 @@ export type EnvVars = {
   axiomDataset: string;
   axiomPublicApiToken: string;
   axiomPublicDataset: string;
+  searchImplementation: string;
 };
 
 /**
@@ -69,6 +70,7 @@ function createEnvVars(): EnvVars {
     axiomDataset: process.env.AXIOM_DATASET,
     axiomPublicApiToken: process.env.NEXT_PUBLIC_AXIOM_API_TOKEN,
     axiomPublicDataset: process.env.NEXT_PUBLIC_AXIOM_DATASET,
+    searchImplementation: process.env.SEARCH_IMPLEMENTATION || 'meilisearch',
   };
   let fail = false;
   for (const [key, value] of Object.entries(envVars)) {

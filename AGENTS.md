@@ -26,6 +26,7 @@ The codebase uses Docker to run third-party services locally (Meilisearch for se
 - Avoid use of `any` unless absolutely necessary.
 - Prefer early-exit if statements rather than nested if statements.
 - Avoid the use of barrel files
+- When writing code interacting with the Postgres database, use Zapatos helper functions where possible and ideally avoid direct SQL. If possible, use Zapatos conditions helpers (via db.conditions) over db.sql template function. If you absolutely must use SQL, use the Zapatos db.sql template function.
 
 # CSS
 

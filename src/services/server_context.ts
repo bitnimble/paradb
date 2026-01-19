@@ -7,6 +7,8 @@ import { MapsRepo } from 'services/maps/maps_repo';
 import { createMeilisearchIndex, meilisearchIndexExists } from 'services/search/meilisearch';
 import { getSingleton } from 'services/singleton';
 import { FavoritesRepo } from 'services/users/favorites_repo';
+import { PostgresIndex } from './search/postgres';
+import { SearchIndex } from './search/types';
 import { createSupabaseServerClient } from './session/supabase_server';
 
 type ServerContext = {
@@ -22,15 +24,21 @@ async function createServerContext(): Promise<ServerContext> {
 
   const pool = await getDbPool();
 
-  const meilisearchConfig = {
-    host: envVars.meilisearchHost,
-    apiKey: envVars.meilisearchKey,
-  };
+  let searchIndex: SearchIndex;
+  if (envVars.searchImplementation === 'postgres') {
+    searchIndex = new PostgresIndex();
+  } else {
+    const meilisearchConfig = {
+      host: envVars.meilisearchHost,
+      apiKey: envVars.meilisearchKey,
+    };
 
-  if (!(await meilisearchIndexExists(meilisearchConfig, 'maps'))) {
-    await rebuildMeilisearchIndex();
+    if (!(await meilisearchIndexExists(meilisearchConfig, 'maps'))) {
+      await rebuildMeilisearchIndex();
+    }
+    searchIndex = await createMeilisearchIndex(meilisearchConfig, 'maps');
   }
-  const searchIndex = await createMeilisearchIndex(meilisearchConfig, 'maps');
+  console.log(`Using ${envVars.searchImplementation} search index`);
   const mapsRepo = new MapsRepo(searchIndex);
   const favoritesRepo = new FavoritesRepo(mapsRepo, searchIndex);
   const flags = getFlags();
