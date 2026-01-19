@@ -54,7 +54,9 @@ export const LoginSignup = observer(
           error={errors.get('password')}
           onSubmit={login}
         />
-        <RouteLink href={routeFor([RoutePath.RESET_PASSWORD])}>Forgot password?</RouteLink>
+        <RouteLink href={routeFor([RoutePath.PASSWORD, RoutePath.RESET])}>
+          Forgot password?
+        </RouteLink>
         <div className={styles.submitContainer}>
           <RouteLink href={routeFor([RoutePath.SIGNUP])} onClick={onNavigateClick}>
             Signup instead

@@ -1,5 +1,12 @@
+'use client';
+
 import { observer } from 'mobx-react';
-import { UpdatePasswordField } from './update_password_presenter';
+import React from 'react';
+import {
+  UpdatePasswordField,
+  UpdatePasswordPresenter,
+  UpdatePasswordStore,
+} from './update_password_presenter';
 import { FormError } from 'ui/base/form/form_error';
 import { Button } from 'ui/base/button/button';
 import { Textbox } from 'ui/base/textbox/textbox';
@@ -14,7 +21,7 @@ type UpdatePasswordProps = {
   updatePassword(): void;
 };
 
-export const UpdatePassword = observer(
+const UpdatePassword = observer(
   ({
     password,
     submitting,
@@ -52,3 +59,26 @@ export const UpdatePassword = observer(
     );
   }
 );
+
+function createUpdatePasswordPage() {
+  const store = new UpdatePasswordStore();
+  const presenter = new UpdatePasswordPresenter(store);
+
+  return observer(() => {
+    return (
+      <UpdatePassword
+        password={store.password}
+        submitting={store.submitting}
+        success={store.success}
+        errors={store.errors}
+        onChangePassword={presenter.onChangePassword}
+        updatePassword={presenter.updatePassword}
+      />
+    );
+  });
+}
+
+export default () => {
+  const [UpdatePasswordPage] = React.useState(() => createUpdatePasswordPage());
+  return <UpdatePasswordPage />;
+};

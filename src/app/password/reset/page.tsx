@@ -1,5 +1,12 @@
+'use client';
+
 import { observer } from 'mobx-react';
-import { ResetPasswordField } from './reset_password_presenter';
+import React from 'react';
+import {
+  ResetPasswordField,
+  ResetPasswordPresenter,
+  ResetPasswordStore,
+} from './reset_password_presenter';
 import { FormError } from 'ui/base/form/form_error';
 import { RouteLink } from 'ui/base/text/link';
 import { Button } from 'ui/base/button/button';
@@ -16,7 +23,7 @@ type ResetPasswordProps = {
   requestReset(): void;
 };
 
-export const ResetPassword = observer(
+const ResetPassword = observer(
   ({ email, submitting, success, errors, onChangeEmail, requestReset }: ResetPasswordProps) => {
     if (success) {
       return (
@@ -48,3 +55,26 @@ export const ResetPassword = observer(
     );
   }
 );
+
+function createResetPasswordPage() {
+  const store = new ResetPasswordStore();
+  const presenter = new ResetPasswordPresenter(store);
+
+  return observer(() => {
+    return (
+      <ResetPassword
+        email={store.email}
+        submitting={store.submitting}
+        success={store.success}
+        errors={store.errors}
+        onChangeEmail={presenter.onChangeEmail}
+        requestReset={presenter.requestReset}
+      />
+    );
+  });
+}
+
+export default () => {
+  const [ResetPasswordPage] = React.useState(() => createResetPasswordPage());
+  return <ResetPasswordPage />;
+};
