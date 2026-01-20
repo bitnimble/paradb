@@ -23,11 +23,10 @@ module.exports = withSentryConfig(nextConfig, {
   // Suppresses source map uploading logs during build
   silent: true,
   authToken: process.env.SENTRY_AUTH_TOKEN,
-  tunnelRoute: '/monitoring',
-  // Upload a larger set of source maps for prettier stack traces (increases build time)
-  widenClientFileUpload: true,
+  // TODO: enable tunnelling for adblock?
 
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
-  excludeServerRoutes: ['/api/users/session'],
+  bundleSizeOptimizations: {
+    excludeTracing: true,
+    excludeDebugStatements: true,
+  },
 });
