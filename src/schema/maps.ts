@@ -13,6 +13,7 @@ export enum MapValidity {
   PENDING_UPLOAD = 'pending_upload',
   PENDING_REUPLOAD = 'pending_reupload',
   UPLOADED = 'uploaded',
+  REUPLOADED = 'reuploaded',
   VALIDATING = 'validating',
   INVALID = 'invalid',
   VALID = 'valid',

@@ -413,6 +413,10 @@ export class MapsRepo {
     | SearchIndexError
   > {
     const { id, mapFile: buffer, uploader } = opts;
+    const existingMap = await this.getMap(id);
+    const isExistingMap =
+      existingMap.success && existingMap.value.validity === MapValidity.REUPLOADED;
+
     await this.setValidity(id, MapValidity.VALIDATING);
     const validatedMapResult = await validateMap({ id, buffer });
     if (!validatedMapResult.success) {
@@ -423,8 +427,6 @@ export class MapsRepo {
       validatedMapResult.value;
 
     // We are updating a map; delete the old file off S3 first
-    const existingMap = await this.getMap(id);
-    const isExistingMap = existingMap.success && existingMap.value.validity === MapValidity.VALID;
     const uploadResult = await uploadAlbumArtFiles(id, albumArtFiles, true);
     if (!uploadResult.success) {
       return uploadResult;

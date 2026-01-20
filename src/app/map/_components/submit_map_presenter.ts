@@ -86,7 +86,7 @@ export class ThrottledMapUploader {
       });
       xhr.upload.onload = action(async () => {
         upload.state = 'processing';
-        const processMapResp = await reportUploadComplete(submitMapResp.id);
+        const processMapResp = await reportUploadComplete(submitMapResp.id, !!reuploadMapId);
         runInAction(() => {
           if (!processMapResp.success) {
             upload.state = 'error';

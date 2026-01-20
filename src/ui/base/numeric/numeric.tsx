@@ -43,7 +43,7 @@ export const Numeric = observer((props: NumericProps) => {
     >
       {props.label && (
         <Label>
-          <T.Small color="grey">{props.label}</T.Small>
+          <T.Small color="fgSecondary">{props.label}</T.Small>
           {props.required ? <T.Small color="red">&nbsp;*</T.Small> : undefined}
         </Label>
       )}

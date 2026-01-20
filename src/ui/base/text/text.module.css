@@ -5,6 +5,7 @@
 .text {
     margin: 0;
     margin-bottom: 0.1em;
+    color: var(--colorForeground);
 }
 
 .styleRegular {
@@ -62,8 +63,11 @@
     line-height: 1.3;
 }
 
-.textColorAuto {
-    color: var(--colorAutoContrast);
+.textColorFg {
+    color: var(--colorForeground);
+}
+.textColorFgSecondary {
+    color: var(--colorForegroundSecondary);
 }
 .textColorRed {
     color: var(--colorRed);

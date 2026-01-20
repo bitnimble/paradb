@@ -70,14 +70,14 @@ export const MapPage = (props: Props) => {
         <T.ExtraLarge display="block" style="title">
           {map.title}
         </T.ExtraLarge>
-        <T.Large display="block" color="grey">
+        <T.Large display="block" color="fgSecondary">
           {map.artist}
         </T.Large>
         <div>
-          <T.Small display="block" color="grey">
+          <T.Small display="block" color="fgSecondary">
             {map.author != null ? `Mapped by ${map.author}` : undefined}
           </T.Small>
-          <T.Small display="block" color="grey">
+          <T.Small display="block" color="fgSecondary">
             Submitted {new Date(map.submissionDate).toDateString()}
           </T.Small>
         </div>
@@ -87,7 +87,6 @@ export const MapPage = (props: Props) => {
         {map.description != null ? (
           <div className={styles.description}>
             <T.Small
-              color="grey"
               ComponentOverride={({ className, children }) => (
                 <div className={className}>{children}</div>
               )}

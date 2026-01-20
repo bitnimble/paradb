@@ -4,7 +4,7 @@ import styles from './text.module.css';
 
 type TextStyle = 'regular' | 'title' | 'monospace' | 'code';
 type TextWeight = 'regular' | 'semibold' | 'bold' | 'extrabold' | 'black';
-type TextColor = 'auto' | 'red' | 'white' | 'grey' | 'purple';
+type TextColor = 'fg' | 'fgSecondary' | 'red' | 'white' | 'grey' | 'purple';
 type TextDisplay = 'inline' | 'block';
 
 const styleMap: Record<TextStyle, string> = {
@@ -23,7 +23,8 @@ const weightMap: Record<TextWeight, string> = {
 };
 
 const colorMap: Record<TextColor, string> = {
-  'auto': styles.textColorAuto,
+  'fg': styles.textColorFg,
+  'fgSecondary': styles.textColorFgSecondary,
   'red': styles.textColorRed,
   'white': styles.textColorWhite,
   'grey': styles.textColorGrey,

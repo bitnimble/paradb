@@ -50,7 +50,7 @@ export const Textbox = (props: TextboxProps) => {
     >
       {props.label && (
         <span>
-          <T.Small color="grey">{props.label}</T.Small>
+          <T.Small color="fgSecondary">{props.label}</T.Small>
           {props.required ? <T.Small color="red">&nbsp;*</T.Small> : undefined}
         </span>
       )}

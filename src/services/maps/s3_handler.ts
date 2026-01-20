@@ -39,6 +39,7 @@ function getS3Client() {
           secretAccessKey: envVars.s3AccessKeySecret,
         },
         forcePathStyle: true,
+        requestChecksumCalculation: 'WHEN_REQUIRED',
       }),
       bucket: envVars.s3MapsBucket,
     };

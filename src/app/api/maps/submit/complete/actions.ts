@@ -14,10 +14,13 @@ import { getUserSession } from 'services/session/session';
  * If it is a reupload, it will replace the existing map data. If it is a new map and it is invalid,
  * it will rollback and delete the temporary Map record.
  */
-export async function reportUploadComplete(id: string) {
+export async function reportUploadComplete(id: string, isReupload: boolean) {
   const { mapsRepo } = await getServerContext();
 
-  const validityResult = await mapsRepo.setValidity(id, MapValidity.UPLOADED);
+  const validityResult = await mapsRepo.setValidity(
+    id,
+    isReupload ? MapValidity.REUPLOADED : MapValidity.UPLOADED
+  );
   if (!validityResult.success) {
     return actionError({
       errorBody: {},

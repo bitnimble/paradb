@@ -6,7 +6,7 @@ import { T } from 'ui/base/text/text';
 import styles from './submit_map.module.css';
 import { UploadState, zipTypes } from './submit_map_presenter';
 
-type SubmitMapPageProps = {
+type SubmitMapPageContent = {
   filenames: string[];
   uploadProgress: UploadState[];
   isUploading: boolean;
@@ -16,7 +16,7 @@ type SubmitMapPageProps = {
   onSubmit(): void;
 };
 
-export const SubmitMapPage = observer((props: SubmitMapPageProps) => {
+export const SubmitMapPageContent = observer((props: SubmitMapPageContent) => {
   const [isDraggingOver, setDraggingOver] = React.useState(false);
 
   const onFileChange = (files: FileList | null) => {
@@ -117,7 +117,6 @@ export const SubmitMapPage = observer((props: SubmitMapPageProps) => {
 │  ├─ ...`}
       </T.Medium>
       <T.Medium>The maximum file size is 40MB.</T.Medium>
-      <br />
       {showProgressScreen ? (
         <div className={classNames(styles.fileContainer, styles.hasMapData, styles.isSubmitting)}>
           <div className={styles.filenames}>
@@ -132,7 +131,6 @@ export const SubmitMapPage = observer((props: SubmitMapPageProps) => {
       ) : (
         <DropInput />
       )}
-      <br />
       <Button disabled={showProgressScreen} loading={isUploading} onClick={onSubmit}>
         Submit
       </Button>
