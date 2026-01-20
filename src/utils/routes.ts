@@ -3,6 +3,9 @@ export const enum RoutePath {
   MAP = 'map',
   LOGIN = 'login',
   LOGOUT = 'logout',
+  PASSWORD = 'password',
+  RESET = 'reset',
+  UPDATE = 'update',
   SETTINGS = 'settings',
   SIGNUP = 'signup',
   SUBMIT = 'submit',
@@ -15,6 +18,8 @@ export type RouteSegments =
   | [RoutePath.MAP_LIST]
   | [RoutePath.LOGIN]
   | [RoutePath.LOGOUT]
+  | [RoutePath.PASSWORD, RoutePath.RESET]
+  | [RoutePath.PASSWORD, RoutePath.RESET, RoutePath.UPDATE]
   | [RoutePath.SETTINGS]
   | [RoutePath.SIGNUP]
   | [RoutePath.INSTRUCTIONS];

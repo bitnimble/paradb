@@ -55,9 +55,14 @@ export const LoginSignup = observer(
           onSubmit={login}
         />
         <div className={styles.submitContainer}>
-          <RouteLink href={routeFor([RoutePath.SIGNUP])} onClick={onNavigateClick}>
-            Signup instead
-          </RouteLink>
+          <div className={styles.accountActions}>
+            <RouteLink href={routeFor([RoutePath.SIGNUP])} onClick={onNavigateClick}>
+              Signup instead
+            </RouteLink>
+            <RouteLink href={routeFor([RoutePath.PASSWORD, RoutePath.RESET])}>
+              Forgot password?
+            </RouteLink>
+          </div>
           <Button loading={submitting} onClick={login}>
             Login
           </Button>

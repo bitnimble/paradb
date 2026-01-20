@@ -61,6 +61,18 @@ export class FormPresenter<Field extends string> {
     return errorFields;
   }
 
+  protected checkPasswordConfirmFields(
+    password: readonly [Field, string],
+    confirmPassword: readonly [Field, string]
+  ) {
+    const matches = password[1] === confirmPassword[1];
+    if (!matches) {
+      this.pushErrors([confirmPassword[0]], 'Password does not match.');
+      return [confirmPassword[0]];
+    }
+    return [];
+  }
+
   protected clearErrors() {
     this._store.errors.clear();
   }
