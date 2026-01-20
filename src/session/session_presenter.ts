@@ -1,6 +1,7 @@
 import { Api } from 'app/api/api';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { User } from 'schema/users';
+import { createClient } from 'services/session/supabase_client';
 
 export class SessionStore {
   hasLoaded = false;
@@ -20,6 +21,10 @@ export class SessionPresenter {
   }
 
   async maybeLoadSession() {
+    // TODO: rewrite sessionstore and presenter in the client to just use Supabase Auth
+    const client = createClient();
+    await client.auth.initialize();
+
     if (this.store.hasLoaded) {
       return;
     }

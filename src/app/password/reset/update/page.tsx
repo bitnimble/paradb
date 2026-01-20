@@ -15,7 +15,7 @@ export default observer(() => {
   if (store.success) {
     return (
       <div className={styles.updatePassword}>
-        <p>Your password has been updated. Redirecting to login...</p>
+        <p>Your password has been updated. Redirecting to home...</p>
       </div>
     );
   }
@@ -28,8 +28,18 @@ export default observer(() => {
         onChange={presenter.onChangePassword}
         inputType="password"
         label="New password"
+        required={true}
         onSubmit={presenter.updatePassword}
         error={store.errors.get('password')}
+      />
+      <Textbox
+        value={store.confirmPassword}
+        onChange={presenter.onChangeConfirmPassword}
+        inputType="password"
+        label="Confirm new password"
+        required={true}
+        onSubmit={presenter.updatePassword}
+        error={store.errors.get('confirmPassword')}
       />
       <div className={styles.submitContainer}>
         <Button loading={store.submitting} onClick={presenter.updatePassword}>

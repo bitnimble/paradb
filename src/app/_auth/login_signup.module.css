@@ -5,8 +5,8 @@
     flex-direction: column;
     justify-content: center;
     height: 100%;
-    width: calc(var(--gridBaseline) * 35);
-    max-width: 90%;
+    width: calc(var(--gridBaseline) * 50);
+    max-width: 80%;
 }
 
 .submitContainer {
@@ -15,4 +15,10 @@
     margin-top: var(--gridBaseline);
     align-items: center;
     justify-content: space-between;
+}
+
+.accountActions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gridBaseline);
 }

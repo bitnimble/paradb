@@ -42,7 +42,7 @@ export function getEnvVars() {
 
 function createEnvVars(): EnvVars {
   const envVars: { [K in keyof EnvVars]: EnvVars[K] | undefined } = {
-    baseUrl: process.env.BASE_URL,
+    baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
     pgHost: process.env.PGHOST,
     pgPort: Number(process.env.PGPORT || undefined),
     pgDatabase: process.env.PGDATABASE,

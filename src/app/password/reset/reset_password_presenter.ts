@@ -29,6 +29,10 @@ export class ResetPasswordPresenter extends FormPresenter<ResetPasswordField> {
       setSubmitting: action.bound,
       setSuccess: action.bound,
     });
+
+    console.log(
+      `${process.env.NEXT_PUBLIC_BASE_URL}${routeFor([RoutePath.PASSWORD, RoutePath.RESET, RoutePath.UPDATE])}`
+    );
   }
 
   onChangeEmail = (value: string) => (this.store.email = value);
