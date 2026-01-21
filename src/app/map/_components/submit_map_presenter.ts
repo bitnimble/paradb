@@ -1,13 +1,6 @@
 import { Api } from 'app/api/api';
 import { reportUploadComplete } from 'app/api/maps/submit/complete/actions';
-import {
-  action,
-  computed,
-  makeAutoObservable,
-  makeObservable,
-  observable,
-  runInAction,
-} from 'mobx';
+import { action, computed, observable, runInAction } from 'mobx';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
@@ -30,21 +23,19 @@ export type UploadState =
 
 const MAX_CONNECTIONS = 2;
 export class ThrottledMapUploader {
-  uploads: UploadState[] = [];
+  @observable accessor uploads: UploadState[] = [];
 
-  constructor(private readonly api: Api) {
-    makeAutoObservable(this, { uploads: observable.deep }, { autoBind: true });
-  }
+  constructor(private readonly api: Api) {}
 
-  get isUploading() {
+  @computed get isUploading() {
     return this.uploads.some((s) => s.state === 'uploading' || s.state === 'processing');
   }
 
-  get hasErrors() {
+  @computed get hasErrors() {
     return this.uploads.some((u) => u.state === 'error');
   }
 
-  get uploadProgress() {
+  @computed get uploadProgress() {
     return this.uploads.slice().sort((a, b) => a.file.name.localeCompare(b.file.name));
   }
 
@@ -141,13 +132,13 @@ export class ThrottledMapUploader {
     });
   }
 
-  addFiles(files: UploadState[]) {
+  @action addFiles(files: UploadState[]) {
     files.forEach((f) => {
       this.uploads.push(f);
     });
   }
 
-  reset() {
+  @action reset() {
     this.uploads = [];
   }
 }
@@ -155,19 +146,18 @@ export class ThrottledMapUploader {
 export type SubmitMapField = 'files';
 export class SubmitMapStore extends FormStore<SubmitMapField> {
   id?: string = undefined;
-  files = new Map<string, UploadState>();
+  @observable accessor files = new Map<string, UploadState>();
 
-  get filenames() {
+  @computed get filenames() {
     return [...this.files.values()].map((f) => f.file.name).sort((a, b) => a.localeCompare(b));
   }
 
   constructor(id?: string) {
     super();
     this.id = id;
-    makeObservable(this, { files: observable.shallow, filenames: computed, reset: action.bound });
   }
 
-  reset() {
+  @action reset() {
     this.files = new Map();
   }
 }
@@ -179,11 +169,10 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     private readonly router: AppRouterInstance
   ) {
     super(store);
-    makeObservable(this, { onChangeData: action.bound });
   }
 
-  onChangeData(files: FileList) {
-    runInAction(() => this.store.errors.clear());
+  @action onChangeData(files: FileList) {
+    this.clearErrors();
     if (this.store.id != null && files.length > 1) {
       this.pushErrors(['files'], 'When reuploading a map, you can only select a single file.');
       return;
@@ -204,7 +193,7 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     }
   }
 
-  submit = async () => {
+  async submit() {
     this.uploader.addFiles([...this.store.files.values()]);
     this.store.reset();
     const [ids, errors] = await this.uploader.start(this.store.id);
@@ -216,5 +205,5 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     } else {
       this.router.push(routeFor([RoutePath.MAP_LIST]));
     }
-  };
+  }
 }

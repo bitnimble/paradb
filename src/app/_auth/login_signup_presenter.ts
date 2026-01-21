@@ -1,31 +1,22 @@
 import { Api } from 'app/api/api';
-import { action, makeObservable, observable, runInAction } from 'mobx';
+import { action, observable } from 'mobx';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
 
 export type LoginSignupField = 'username' | 'password' | 'email' | 'form';
 
 export class LoginSignupStore extends FormStore<LoginSignupField> {
-  submitting = false;
-  username = '';
-  email = '';
-  password = '';
+  @observable accessor submitting = false;
+  @observable accessor username = '';
+  @observable accessor email = '';
+  @observable accessor password = '';
 
-  constructor() {
-    super();
-    makeObservable(this, {
-      username: observable.ref,
-      email: observable.ref,
-      password: observable.ref,
-      submitting: observable.ref,
-      reset: action.bound,
-    });
-  }
-
-  reset() {
+  @action reset() {
     this.errors.clear();
     this.email = '';
     this.password = '';
+    this.username = '';
+    this.submitting = false;
   }
 }
 
@@ -35,19 +26,23 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
     private readonly store: LoginSignupStore
   ) {
     super(store);
-    makeObservable(this, {
-      onChangeUsername: action.bound,
-      onChangeEmail: action.bound,
-      onChangePassword: action.bound,
-    });
   }
 
-  onChangeUsername = (value: string) => (this.store.username = value);
-  onChangeEmail = (value: string) => (this.store.email = value);
-  onChangePassword = (value: string) => (this.store.password = value);
+  @action onChangeUsername(value: string) {
+    this.store.username = value;
+  }
+  @action onChangeEmail(value: string) {
+    this.store.email = value;
+  }
+  @action onChangePassword(value: string) {
+    this.store.password = value;
+  }
+  @action private setSubmitting(submitting: boolean) {
+    this.store.submitting = submitting;
+  }
 
-  login = async () => {
-    runInAction(() => this.clearErrors());
+  async login() {
+    this.clearErrors();
     const username = this.store.username;
     const password = this.store.password;
     const errors = this.checkRequiredFields(['username', username], ['password', password]);
@@ -55,9 +50,9 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
       return;
     }
 
-    runInAction(() => (this.store.submitting = true));
+    this.setSubmitting(true);
     const resp = await this.api.login({ username, password });
-    runInAction(() => (this.store.submitting = false));
+    this.setSubmitting(false);
     if (resp.success) {
       await this.api.supabase.auth.setSession({
         access_token: resp.accessToken,
@@ -67,10 +62,10 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
     } else {
       this.pushErrors(['form'], resp.errorMessage || 'Could not login. Please try again later.');
     }
-  };
+  }
 
-  signup = async () => {
-    runInAction(() => this.clearErrors());
+  async signup() {
+    this.clearErrors();
     const username = this.store.username;
     const email = this.store.email;
     const password = this.store.password;
@@ -83,9 +78,9 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
       return;
     }
 
-    runInAction(() => (this.store.submitting = true));
+    this.setSubmitting(true);
     const resp = await this.api.signup({ username, email, password });
-    runInAction(() => (this.store.submitting = false));
+    this.setSubmitting(false);
     if (resp.success) {
       if (resp.session) {
         await this.api.supabase.auth.setSession({
@@ -108,5 +103,5 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
         this.pushErrors(['password'], resp.password);
       }
     }
-  };
+  }
 }

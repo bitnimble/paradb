@@ -1,18 +1,15 @@
 import { Api } from 'app/api/api';
-import { makeAutoObservable, observable, runInAction } from 'mobx';
+import { observable, runInAction } from 'mobx';
 import React from 'react';
 import { PDMap } from 'schema/maps';
 import { RoutePath, routeFor } from 'utils/routes';
 
 export class MapPageStore {
-  ReuploadDialog?: React.ComponentType = undefined;
-  map: PDMap;
+  @observable accessor ReuploadDialog: React.ComponentType | undefined = undefined;
+  @observable accessor map: PDMap;
 
   constructor(map: PDMap) {
     this.map = map;
-    makeAutoObservable(this, {
-      map: observable.deep,
-    });
   }
 }
 
@@ -20,9 +17,7 @@ export class MapPagePresenter {
   constructor(
     private readonly api: Api,
     private readonly store: MapPageStore
-  ) {
-    makeAutoObservable(this, {}, { autoBind: true });
-  }
+  ) {}
 
   async getMap(id: string) {
     const resp = await this.api.getMap(id);

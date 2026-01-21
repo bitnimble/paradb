@@ -1,4 +1,4 @@
-import { action, makeObservable, observable } from 'mobx';
+import { action, observable } from 'mobx';
 import { createClient } from 'services/session/supabase_client';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
@@ -6,40 +6,31 @@ import { RoutePath, routeFor } from 'utils/routes';
 type UpdatePasswordField = 'password' | 'confirmPassword' | 'form';
 
 export class UpdatePasswordStore extends FormStore<UpdatePasswordField> {
-  submitting = false;
-  password = '';
-  confirmPassword = '';
-  success = false;
-
-  constructor() {
-    super();
-    makeObservable(this, {
-      password: observable.ref,
-      confirmPassword: observable.ref,
-      submitting: observable.ref,
-      success: observable.ref,
-    });
-  }
+  @observable accessor submitting = false;
+  @observable accessor password = '';
+  @observable accessor confirmPassword = '';
+  @observable accessor success = false;
 }
 
 export class UpdatePasswordPresenter extends FormPresenter<UpdatePasswordField> {
   constructor(private readonly store: UpdatePasswordStore) {
     super(store);
-    makeObservable<typeof this, 'setSubmitting' | 'setSuccess'>(this, {
-      onChangePassword: action.bound,
-      onChangeConfirmPassword: action.bound,
-      updatePassword: action.bound,
-      setSubmitting: action.bound,
-      setSuccess: action.bound,
-    });
   }
 
-  onChangePassword = (value: string) => (this.store.password = value);
-  onChangeConfirmPassword = (value: string) => (this.store.confirmPassword = value);
-  private setSubmitting = (value: boolean) => (this.store.submitting = value);
-  private setSuccess = (value: boolean) => (this.store.success = value);
+  @action onChangePassword(value: string) {
+    this.store.password = value;
+  }
+  @action onChangeConfirmPassword(value: string) {
+    this.store.confirmPassword = value;
+  }
+  @action private setSubmitting(value: boolean) {
+    this.store.submitting = value;
+  }
+  @action private setSuccess(value: boolean) {
+    this.store.success = value;
+  }
 
-  async updatePassword() {
+  @action async updatePassword() {
     this.clearErrors();
     const password = this.store.password;
     const confirmPassword = this.store.confirmPassword;
