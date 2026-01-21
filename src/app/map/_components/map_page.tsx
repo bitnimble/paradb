@@ -87,6 +87,7 @@ export const MapPage = (props: Props) => {
         {map.description != null ? (
           <div className={styles.description}>
             <T.Small
+              color="fgSecondary"
               ComponentOverride={({ className, children }) => (
                 <div className={className}>{children}</div>
               )}

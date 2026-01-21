@@ -15,7 +15,7 @@
     /* Theme-aware colors */
     --colorBackground: #fff;
     --colorBackgroundSecondary: #f5f5f5;
-    --colorForeground: #000;
+    --colorForeground: #222;
     --colorForegroundSecondary: #555;
     --colorAccent: var(--colorPurple);
     --colorDialogOverlay: rgba(255, 255, 255, 0.9);

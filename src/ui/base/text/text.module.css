@@ -5,7 +5,6 @@
 .text {
     margin: 0;
     margin-bottom: 0.1em;
-    color: var(--colorForeground);
 }
 
 .styleRegular {
