@@ -11,7 +11,7 @@ export class LoginSignupStore extends FormStore<LoginSignupField> {
   @observable accessor email = '';
   @observable accessor password = '';
 
-  @action reset() {
+  @action.bound reset() {
     this.errors.clear();
     this.email = '';
     this.password = '';
@@ -28,20 +28,20 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
     super(store);
   }
 
-  @action onChangeUsername(value: string) {
+  @action.bound onChangeUsername(value: string) {
     this.store.username = value;
   }
-  @action onChangeEmail(value: string) {
+  @action.bound onChangeEmail(value: string) {
     this.store.email = value;
   }
-  @action onChangePassword(value: string) {
+  @action.bound onChangePassword(value: string) {
     this.store.password = value;
   }
   @action private setSubmitting(submitting: boolean) {
     this.store.submitting = submitting;
   }
 
-  async login() {
+  readonly onLogin = async () => {
     this.clearErrors();
     const username = this.store.username;
     const password = this.store.password;
@@ -62,9 +62,9 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
     } else {
       this.pushErrors(['form'], resp.errorMessage || 'Could not login. Please try again later.');
     }
-  }
+  };
 
-  async signup() {
+  readonly onSignup = async () => {
     this.clearErrors();
     const username = this.store.username;
     const email = this.store.email;
@@ -103,5 +103,5 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
         this.pushErrors(['password'], resp.password);
       }
     }
-  }
+  };
 }

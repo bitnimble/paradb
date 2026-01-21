@@ -7,6 +7,7 @@ import { RoutePath, routeFor } from 'utils/routes';
 export class MapPageStore {
   @observable accessor ReuploadDialog: React.ComponentType | undefined = undefined;
   @observable accessor map: PDMap;
+  @observable accessor updatingFavorite = false;
 
   constructor(map: PDMap) {
     this.map = map;
@@ -20,14 +21,18 @@ export class MapPagePresenter {
   ) {}
 
   async getMap(id: string) {
+    runInAction(() => (this.store.updatingFavorite = true));
     const resp = await this.api.getMap(id);
     if (!resp.success) {
       throw new Error('Could not retrieve map');
     }
-    runInAction(() => (this.store.map = resp.map));
+    runInAction(() => {
+      this.store.map = resp.map;
+      this.store.updatingFavorite = false;
+    });
   }
 
-  async deleteMap() {
+  readonly onDeleteMap = async () => {
     if (!this.store.map) {
       return;
     }
@@ -42,16 +47,20 @@ export class MapPagePresenter {
 
     // Don't use next routing, in order to force a full load
     window.location.href = routeFor([RoutePath.MAP_LIST]);
-  }
+  };
 
-  async toggleFavorite() {
+  readonly onToggleFavorite = async () => {
     if (!this.store.map || !this.store.map.userProjection) {
       return;
     }
+    runInAction(() => (this.store.updatingFavorite = true));
     const newVal = !this.store.map.userProjection.isFavorited;
     const resp = await this.api.setFavorites({ mapIds: [this.store.map.id], isFavorite: newVal });
     if (resp.success) {
-      runInAction(() => (this.store.map.userProjection = { isFavorited: newVal }));
+      runInAction(() => {
+        this.store.map.userProjection = { isFavorited: newVal };
+        this.store.updatingFavorite = false;
+      });
     }
-  }
+  };
 }

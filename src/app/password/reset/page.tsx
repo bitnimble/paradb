@@ -30,12 +30,12 @@ export default observer(() => {
         value={store.email}
         onChange={presenter.onChangeEmail}
         label="Email"
-        onSubmit={presenter.requestReset}
+        onSubmit={presenter.onRequestReset}
         error={store.errors.get('email')}
       />
       <div className={styles.submitContainer}>
         <RouteLink href={routeFor([RoutePath.LOGIN])}>Back to login</RouteLink>
-        <Button loading={store.submitting} onClick={presenter.requestReset}>
+        <Button loading={store.submitting} onClick={presenter.onRequestReset}>
           Send reset link
         </Button>
       </div>

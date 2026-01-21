@@ -19,8 +19,8 @@ export function createLoginSignupPage(api: Api) {
         onChangeUsername={presenter.onChangeUsername}
         onChangeEmail={presenter.onChangeEmail}
         onChangePassword={presenter.onChangePassword}
-        login={presenter.login}
-        signup={presenter.signup}
+        login={presenter.onLogin}
+        signup={presenter.onSignup}
         onNavigateClick={store.reset}
       />
     );

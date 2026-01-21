@@ -13,7 +13,6 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--gridBaseline);
 
     color: inherit;
     padding: var(--gridBaseline) calc(var(--gridBaseline) * 2);
@@ -24,6 +23,10 @@
         color 0.15s ease;
     cursor: pointer;
     border: 1px solid var(--regularColor);
+}
+
+.loading .buttonText:not(:empty) {
+    margin-right: var(--gridBaseline);
 }
 
 .button:hover:not(.disabled) {

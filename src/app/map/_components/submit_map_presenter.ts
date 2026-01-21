@@ -171,7 +171,7 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     super(store);
   }
 
-  @action onChangeData(files: FileList) {
+  @action.bound onChangeData(files: FileList) {
     this.clearErrors();
     if (this.store.id != null && files.length > 1) {
       this.pushErrors(['files'], 'When reuploading a map, you can only select a single file.');
@@ -193,7 +193,7 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     }
   }
 
-  async submit() {
+  readonly submit = async () => {
     this.uploader.addFiles([...this.store.files.values()]);
     this.store.reset();
     const [ids, errors] = await this.uploader.start(this.store.id);
@@ -205,5 +205,5 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     } else {
       this.router.push(routeFor([RoutePath.MAP_LIST]));
     }
-  }
+  };
 }

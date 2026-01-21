@@ -43,7 +43,7 @@ export default observer(() => {
         error={errors.get('oldPassword')}
         inputType="password"
         onChange={presenter.onChangeOldPassword}
-        onSubmit={presenter.changePassword}
+        onSubmit={presenter.onChangePassword}
       />
       <Textbox
         label="New password"
@@ -52,12 +52,12 @@ export default observer(() => {
         error={errors.get('newPassword')}
         inputType="password"
         onChange={presenter.onChangeNewPassword}
-        onSubmit={presenter.changePassword}
+        onSubmit={presenter.onChangePassword}
       />
       <Button
         loading={submitting}
         style={success ? 'success' : undefined}
-        onClick={presenter.changePassword}
+        onClick={presenter.onChangePassword}
       >
         {success ? 'Password changed' : 'Change password'}
       </Button>

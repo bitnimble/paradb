@@ -61,11 +61,11 @@ export class MapListPresenter {
     }
   }
 
-  @action onClickBulkSelect() {
+  @action.bound onClickBulkSelect() {
     this.store.enableBulkSelect = true;
   }
 
-  async onClickBulkDownload() {
+  readonly onClickBulkDownload = async () => {
     const a = document.createElement('a');
     a.style.display = 'none';
     document.body.appendChild(a);
@@ -78,9 +78,9 @@ export class MapListPresenter {
     }
 
     a.remove();
-  }
+  };
 
-  @action onClickCancelBulkSelect() {
+  @action.bound onClickCancelBulkSelect() {
     this.store.enableBulkSelect = false;
     this.store.selectedMaps.clear();
   }
@@ -89,7 +89,7 @@ export class MapListPresenter {
     return this.store.enableBulkSelect && this.store.selectedMaps.has(id);
   }
 
-  @action onChangeQuery(val: string) {
+  @action.bound onChangeQuery(val: string) {
     this.store.query = val;
     this.store.lastSelectedMapIndex = undefined;
   }
@@ -110,7 +110,7 @@ export class MapListPresenter {
     return { sort: label, sortDirection: tableStore.sortDirection };
   }
 
-  @action async onSortChanged() {
+  @action.bound async onSortChanged() {
     const sort = this.getTableSortParams();
     if (!sort) {
       return;
@@ -118,7 +118,7 @@ export class MapListPresenter {
     return this.onSearch('sort');
   }
 
-  @action async onSearch(trigger: 'sort' | 'search') {
+  @action.bound async onSearch(trigger: 'sort' | 'search') {
     if (trigger === 'search' && this.store.query !== '') {
       this.store.tableSortStore.resetSort();
     }
@@ -139,7 +139,7 @@ export class MapListPresenter {
     this.store.lastSelectedMapIndex = undefined;
   }
 
-  @action async onLoadMore() {
+  @action.bound async onLoadMore() {
     const sort = this.getTableSortParams();
     this.store.loadingMore = true;
     const resp = await this.api.searchMaps({

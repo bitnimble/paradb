@@ -67,11 +67,11 @@ export class FormPresenter<Field extends string> {
     return [];
   }
 
-  @action protected clearErrors() {
+  @action.bound protected clearErrors() {
     this._store.errors.clear();
   }
 
-  @action protected pushErrors(fields: Field[], error: string) {
+  @action.bound protected pushErrors(fields: Field[], error: string) {
     fields.forEach((f) => this._store.errors.set(f, error));
   }
 }

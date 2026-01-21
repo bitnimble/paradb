@@ -22,10 +22,10 @@ export class SettingsPresenter extends FormPresenter<SettingsFields> {
     super(store);
   }
 
-  @action onChangeOldPassword(value: string) {
+  @action.bound onChangeOldPassword(value: string) {
     this.store.oldPassword = value;
   }
-  @action onChangeNewPassword(value: string) {
+  @action.bound onChangeNewPassword(value: string) {
     this.store.newPassword = value;
   }
   @action private setSuccess(value: boolean | undefined) {
@@ -35,7 +35,7 @@ export class SettingsPresenter extends FormPresenter<SettingsFields> {
     this.store.submitting = value;
   }
 
-  @action async changePassword() {
+  @action.bound async onChangePassword() {
     this.clearErrors();
 
     const { oldPassword, newPassword } = this.store;

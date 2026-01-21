@@ -17,10 +17,10 @@ export class UpdatePasswordPresenter extends FormPresenter<UpdatePasswordField> 
     super(store);
   }
 
-  @action onChangePassword(value: string) {
+  @action.bound onChangePassword(value: string) {
     this.store.password = value;
   }
-  @action onChangeConfirmPassword(value: string) {
+  @action.bound onChangeConfirmPassword(value: string) {
     this.store.confirmPassword = value;
   }
   @action private setSubmitting(value: boolean) {
@@ -30,7 +30,7 @@ export class UpdatePasswordPresenter extends FormPresenter<UpdatePasswordField> 
     this.store.success = value;
   }
 
-  @action async updatePassword() {
+  @action.bound async onUpdatePassword() {
     this.clearErrors();
     const password = this.store.password;
     const confirmPassword = this.store.confirmPassword;

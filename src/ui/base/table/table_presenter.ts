@@ -16,7 +16,7 @@ export class TableSortStore<T, N extends number> {
     this.sortDirection = defaultSortDirection;
   }
 
-  @action resetSort() {
+  @action.bound resetSort() {
     this.sortColumn = this.defaultSortColumn;
     this.sortDirection = this.defaultSortDirection;
   }
@@ -46,7 +46,7 @@ export class TablePresenter<T, N extends number> {
     }
   }
 
-  @action onColumnClick(columnIndex: number) {
+  @action.bound onColumnClick(columnIndex: number) {
     if (columnIndex !== this.sortStore.sortColumn) {
       this.setSortColumn(columnIndex);
       this.setSortDirection('desc');

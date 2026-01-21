@@ -28,8 +28,12 @@ export const MapActions = observer((props: MapActionsProps) => {
   return (
     <div className={styles.actions}>
       {!!sessionStore.user && isFavorited != null && (
-        <Button onClick={presenter.toggleFavorite} style={isFavorited ? 'active' : 'regular'}>
-          ❤
+        <Button
+          onClick={presenter.onToggleFavorite}
+          loading={store.updatingFavorite}
+          style={isFavorited ? 'active' : 'regular'}
+        >
+          {store.updatingFavorite ? '' : '❤'}
         </Button>
       )}
       {downloadLink && <Button link={downloadLink}>Download</Button>}
@@ -38,7 +42,7 @@ export const MapActions = observer((props: MapActionsProps) => {
           <Dialog Body={<SubmitMapPage id={store.map.id} />}>
             <Button>Reupload</Button>
           </Dialog>
-          <Button style="error" onClick={presenter.deleteMap}>
+          <Button style="error" onClick={presenter.onDeleteMap}>
             Delete
           </Button>
         </>

@@ -16,7 +16,7 @@ export class ResetPasswordPresenter extends FormPresenter<ResetPasswordField> {
     super(store);
   }
 
-  @action onChangeEmail(value: string) {
+  @action.bound onChangeEmail(value: string) {
     this.store.email = value;
   }
   @action private setSubmitting(value: boolean) {
@@ -26,7 +26,7 @@ export class ResetPasswordPresenter extends FormPresenter<ResetPasswordField> {
     this.store.success = value;
   }
 
-  @action async requestReset() {
+  @action.bound async onRequestReset() {
     this.clearErrors();
     const email = this.store.email;
     const errors = [
