@@ -1,26 +1,16 @@
 import { Api } from 'app/api/api';
 import { checkExists } from 'base/preconditions';
-import { action, makeObservable, observable, runInAction } from 'mobx';
+import { action, observable } from 'mobx';
 import { SessionStore } from 'session/session_presenter';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 
 export type SettingsFields = 'oldPassword' | 'newPassword' | 'form';
 
 export class SettingsStore extends FormStore<SettingsFields> {
-  oldPassword = '';
-  newPassword = '';
-  submitting = false;
-  success?: boolean = undefined;
-
-  constructor() {
-    super();
-    makeObservable(this, {
-      oldPassword: observable.ref,
-      newPassword: observable.ref,
-      submitting: observable.ref,
-      success: observable.ref,
-    });
-  }
+  @observable accessor oldPassword = '';
+  @observable accessor newPassword = '';
+  @observable accessor submitting = false;
+  @observable accessor success: boolean | undefined = undefined;
 }
 
 export class SettingsPresenter extends FormPresenter<SettingsFields> {
@@ -30,20 +20,23 @@ export class SettingsPresenter extends FormPresenter<SettingsFields> {
     private readonly sessionStore: SessionStore
   ) {
     super(store);
-    makeObservable(this, {
-      onChangeOldPassword: action.bound,
-      onChangeNewPassword: action.bound,
-      changePassword: action.bound,
-    });
   }
 
-  onChangeOldPassword = (value: string) => (this.store.oldPassword = value);
-  onChangeNewPassword = (value: string) => (this.store.newPassword = value);
-  private setSuccess = action((value: boolean | undefined) => (this.store.success = value));
-  private setSubmitting = action((value: boolean) => (this.store.submitting = value));
+  @action.bound onChangeOldPassword(value: string) {
+    this.store.oldPassword = value;
+  }
+  @action.bound onChangeNewPassword(value: string) {
+    this.store.newPassword = value;
+  }
+  @action private setSuccess(value: boolean | undefined) {
+    this.store.success = value;
+  }
+  @action private setSubmitting(value: boolean) {
+    this.store.submitting = value;
+  }
 
-  async changePassword() {
-    runInAction(() => this.clearErrors());
+  @action.bound async onChangePassword() {
+    this.clearErrors();
 
     const { oldPassword, newPassword } = this.store;
     const errors = [

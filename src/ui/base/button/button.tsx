@@ -54,10 +54,13 @@ export const Button = (props: ButtonProps) => {
       onPress={() => onClick?.()}
       className={classNames(className, styleClassname[style], styles.button, {
         [styles.disabled]: isDisabled,
+        [styles.loading]: loading,
       })}
     >
-      <T.Medium>{children}</T.Medium>
-      {style === 'success' ? ' ✔' : null}
+      <T.Medium className={styles.buttonText}>
+        {children}
+        {style === 'success' ? ' ✔' : null}
+      </T.Medium>
       {loading ? (
         <div className={classNames(loadingStyles.laBallPulse, loadingStyles.laSm)}>
           {/* These divs are styled via 'loading.css'. */}

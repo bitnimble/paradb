@@ -1,4 +1,4 @@
-import { computed, makeObservable, observable } from 'mobx';
+import { action, computed, observable } from 'mobx';
 
 // Some simple regexes for quick validation. Non exhaustive.
 const basicUrlRegex =
@@ -13,21 +13,15 @@ const enum FieldError {
 }
 
 export class FormStore<Field extends string> {
-  errors = new Map<Field, string>();
+  @observable accessor errors = new Map<Field, string>();
 
-  get hasErrors() {
+  @computed get hasErrors() {
     return this.errors.size > 0;
-  }
-
-  constructor() {
-    makeObservable(this, { errors: observable.shallow, hasErrors: computed });
   }
 }
 
 export class FormPresenter<Field extends string> {
-  constructor(private readonly _store: FormStore<Field>) {
-    makeObservable(this, {}, { autoBind: true });
-  }
+  constructor(private readonly _store: FormStore<Field>) {}
 
   protected undefinedIfEmpty(s: string): string | undefined {
     return s.trim() === '' ? undefined : s;
@@ -73,11 +67,11 @@ export class FormPresenter<Field extends string> {
     return [];
   }
 
-  protected clearErrors() {
+  @action.bound protected clearErrors() {
     this._store.errors.clear();
   }
 
-  protected pushErrors(fields: Field[], error: string) {
+  @action.bound protected pushErrors(fields: Field[], error: string) {
     fields.forEach((f) => this._store.errors.set(f, error));
   }
 }

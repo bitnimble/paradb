@@ -1,7 +1,6 @@
 import { Api } from 'app/api/api';
 import { checkExists } from 'base/preconditions';
-import { makeAutoObservable, runInAction } from 'mobx';
-import { computedFn } from 'mobx-utils';
+import { action, observable, runInAction } from 'mobx';
 import { MapSortableAttributes, PDMap, mapSortableAttributes } from 'schema/maps';
 import { TableSortStore } from 'ui/base/table/table_presenter';
 import { getMapFileLink } from 'utils/maps';
@@ -9,20 +8,21 @@ import { getMapFileLink } from 'utils/maps';
 const SEARCH_LIMIT = 20;
 
 export class MapListStore {
-  enableBulkSelect = false;
-  query: string = '';
-  selectedMaps = new Set<string>();
-  lastSelectedMapIndex?: number = undefined;
-  maps?: PDMap[] = undefined;
-  hasMore = true;
-  loadingMore = false;
+  @observable accessor enableBulkSelect = false;
+  @observable accessor query: string = '';
+  // Use a map instead of a set because ObservableSet will retrigger reactions on any mutation,
+  // compared to a Map which has individually observed entries
+  @observable accessor selectedMaps = new Map<string, true>();
+  @observable accessor lastSelectedMapIndex: number | undefined = undefined;
+  @observable accessor maps: PDMap[] | undefined = undefined;
+  @observable accessor hasMore = true;
+  @observable accessor loadingMore = false;
 
   constructor(
     query: string,
     readonly tableSortStore: TableSortStore<PDMap, 7>
   ) {
     this.query = query;
-    makeAutoObservable(this);
   }
 }
 
@@ -36,11 +36,9 @@ export class MapListPresenter {
   constructor(
     private readonly api: Api,
     private readonly store: MapListStore
-  ) {
-    makeAutoObservable(this, {}, { autoBind: true });
-  }
+  ) {}
 
-  toggleMapSelection(id: string, shiftKeyHeld: boolean) {
+  @action.bound toggleMapSelection(id: string, shiftKeyHeld: boolean) {
     const index = checkExists(this.store.maps).findIndex((m) => m.id === id);
 
     if (
@@ -49,7 +47,7 @@ export class MapListPresenter {
       index > this.store.lastSelectedMapIndex
     ) {
       for (let i = this.store.lastSelectedMapIndex + 1; i <= index; i++) {
-        this.store.selectedMaps.add(checkExists(this.store.maps)[i].id);
+        this.store.selectedMaps.set(checkExists(this.store.maps)[i].id, true);
       }
       this.store.lastSelectedMapIndex = index;
     } else {
@@ -57,17 +55,17 @@ export class MapListPresenter {
         this.store.selectedMaps.delete(id);
         this.store.lastSelectedMapIndex = undefined;
       } else {
-        this.store.selectedMaps.add(id);
+        this.store.selectedMaps.set(id, true);
         this.store.lastSelectedMapIndex = index;
       }
     }
   }
 
-  onClickBulkSelect() {
+  @action.bound onClickBulkSelect() {
     this.store.enableBulkSelect = true;
   }
 
-  async onClickBulkDownload() {
+  readonly onClickBulkDownload = async () => {
     const a = document.createElement('a');
     a.style.display = 'none';
     document.body.appendChild(a);
@@ -80,18 +78,18 @@ export class MapListPresenter {
     }
 
     a.remove();
-  }
+  };
 
-  onClickCancelBulkSelect() {
+  @action.bound onClickCancelBulkSelect() {
     this.store.enableBulkSelect = false;
     this.store.selectedMaps.clear();
   }
 
-  readonly isSelected = computedFn((id: string) => {
+  isSelected(id: string) {
     return this.store.enableBulkSelect && this.store.selectedMaps.has(id);
-  });
+  }
 
-  onChangeQuery(val: string) {
+  @action.bound onChangeQuery(val: string) {
     this.store.query = val;
     this.store.lastSelectedMapIndex = undefined;
   }
@@ -112,7 +110,7 @@ export class MapListPresenter {
     return { sort: label, sortDirection: tableStore.sortDirection };
   }
 
-  async onSortChanged() {
+  @action.bound async onSortChanged() {
     const sort = this.getTableSortParams();
     if (!sort) {
       return;
@@ -120,12 +118,9 @@ export class MapListPresenter {
     return this.onSearch('sort');
   }
 
-  async onSearch(trigger: 'sort' | 'search') {
+  @action.bound async onSearch(trigger: 'sort' | 'search') {
     if (trigger === 'search' && this.store.query !== '') {
-      runInAction(() => {
-        this.store.tableSortStore.sortColumn = undefined;
-        this.store.tableSortStore.sortDirection = undefined;
-      });
+      this.store.tableSortStore.resetSort();
     }
     const sort = this.getTableSortParams();
     runInAction(() => (this.store.maps = undefined));
@@ -144,9 +139,9 @@ export class MapListPresenter {
     this.store.lastSelectedMapIndex = undefined;
   }
 
-  async onLoadMore() {
+  @action.bound async onLoadMore() {
     const sort = this.getTableSortParams();
-    runInAction(() => (this.store.loadingMore = true));
+    this.store.loadingMore = true;
     const resp = await this.api.searchMaps({
       query: this.store.query,
       limit: SEARCH_LIMIT,

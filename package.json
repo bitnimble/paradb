@@ -54,6 +54,8 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.28.6",
+    "@babel/plugin-syntax-typescript": "^7.28.6",
     "@types/bcrypt": "^5.0.0",
     "@types/jest": "^29.5.5",
     "@types/pg": "^8.10.2",

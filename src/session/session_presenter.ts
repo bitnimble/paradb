@@ -1,24 +1,18 @@
 import { Api } from 'app/api/api';
-import { makeAutoObservable, runInAction } from 'mobx';
+import { observable, runInAction } from 'mobx';
 import { User } from 'schema/users';
 import { createClient } from 'services/session/supabase_client';
 
 export class SessionStore {
-  hasLoaded = false;
-  user?: User = undefined;
-
-  constructor() {
-    makeAutoObservable(this);
-  }
+  @observable accessor hasLoaded = false;
+  @observable accessor user: User | undefined = undefined;
 }
 
 export class SessionPresenter {
   constructor(
     private readonly api: Api,
     private readonly store: SessionStore
-  ) {
-    makeAutoObservable(this, {}, { autoBind: true });
-  }
+  ) {}
 
   async maybeLoadSession() {
     // TODO: rewrite sessionstore and presenter in the client to just use Supabase Auth

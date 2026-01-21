@@ -29,7 +29,7 @@ export default observer(() => {
         inputType="password"
         label="New password"
         required={true}
-        onSubmit={presenter.updatePassword}
+        onSubmit={presenter.onUpdatePassword}
         error={store.errors.get('password')}
       />
       <Textbox
@@ -38,11 +38,11 @@ export default observer(() => {
         inputType="password"
         label="Confirm new password"
         required={true}
-        onSubmit={presenter.updatePassword}
+        onSubmit={presenter.onUpdatePassword}
         error={store.errors.get('confirmPassword')}
       />
       <div className={styles.submitContainer}>
-        <Button loading={store.submitting} onClick={presenter.updatePassword}>
+        <Button loading={store.submitting} onClick={presenter.onUpdatePassword}>
           Update password
         </Button>
       </div>
