@@ -20,7 +20,7 @@ export default observer(() => {
       <Textbox
         value={store.username}
         onChange={presenter.onChangeUsername}
-        label="Username"
+        label="Username/email"
         onSubmit={presenter.onLogin}
         error={store.errors.get('username')}
       />
