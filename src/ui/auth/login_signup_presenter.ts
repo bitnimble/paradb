@@ -55,14 +55,15 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
 
     this.setSubmitting(true);
     const resp = await this.api.login({ username, password });
-    this.setSubmitting(false);
     if (resp.success) {
       await this.client.auth.setSession({
         access_token: resp.accessToken,
         refresh_token: resp.refreshToken,
       });
+      this.setSubmitting(false);
       window.location.href = routeFor([RoutePath.MAP_LIST]);
     } else {
+      this.setSubmitting(false);
       this.pushErrors(['form'], resp.errorMessage || 'Could not login. Please try again later.');
     }
   };
@@ -83,7 +84,6 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
 
     this.setSubmitting(true);
     const resp = await this.api.signup({ username, email, password });
-    this.setSubmitting(false);
     if (resp.success) {
       if (resp.session) {
         await this.client.auth.setSession({
@@ -94,8 +94,10 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
         // TODO: show message that they need to confirm their email. Currently not needed as email
         // verification is not enabled in the Supabase project settings.
       }
+      this.setSubmitting(false);
       window.location.href = routeFor([RoutePath.MAP_LIST]);
     } else {
+      this.setSubmitting(false);
       if (resp.email) {
         this.pushErrors(['email'], resp.email);
       }
