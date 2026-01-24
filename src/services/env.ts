@@ -18,11 +18,8 @@ export type EnvVars = {
   s3MapsBucket: string;
   meilisearchHost: string;
   meilisearchKey: string;
-  dynamicConfigEndpoint: string;
-  dynamicConfigBucket: string;
-  dynamicConfigAccessKeyId: string;
-  dynamicConfigSecretKey: string;
-  dynamicConfigRepoFile: string;
+  flagsEdgeConfig: string;
+  flagsEdgeConfigKey: string;
   supabaseUrl: string;
   supabasePublishableKey: string;
   supabaseSecretKey: string;
@@ -58,11 +55,8 @@ function createEnvVars(): EnvVars {
     s3MapsBucket: process.env.S3_MAPS_BUCKET,
     meilisearchHost: process.env.MEILISEARCH_HOST,
     meilisearchKey: process.env.MEILISEARCH_KEY,
-    dynamicConfigEndpoint: process.env.DYNAMIC_CONFIG_ENDPOINT,
-    dynamicConfigBucket: process.env.DYNAMIC_CONFIG_BUCKET,
-    dynamicConfigAccessKeyId: process.env.DYNAMIC_CONFIG_ACCESS_KEY_ID,
-    dynamicConfigSecretKey: process.env.DYNAMIC_CONFIG_SECRET_KEY,
-    dynamicConfigRepoFile: process.env.DYNAMIC_CONFIG_REPO_FILE,
+    flagsEdgeConfig: process.env.FLAGS_EDGE_CONFIG,
+    flagsEdgeConfigKey: process.env.FLAGS_EDGE_CONFIG_KEY,
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
     supabasePublishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     supabaseSecretKey: process.env.SUPABASE_SECRET_KEY,

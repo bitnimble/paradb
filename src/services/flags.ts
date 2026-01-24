@@ -1,107 +1,52 @@
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { createEdgeConfigAdapter } from '@flags-sdk/edge-config';
+import { Adapter } from 'flags';
+import { flag } from 'flags/next';
 import { getEnvVars } from 'services/env';
+import z from 'zod';
+import { getLog } from './logging/server_logger';
 
-const stringFlag = (defaultValue: string) =>
-  ({
-    type: 'string',
-    defaultValue,
-  }) as const;
-const booleanFlag = (defaultValue: boolean) =>
-  ({
-    type: 'boolean',
-    defaultValue,
-  }) as const;
+const log = getLog(['flags']);
 
-const flagDefaults = {
-  ['showMaintenanceBanner']: booleanFlag(false),
-  ['maintenanceBannerMessage']: stringFlag(
-    'ParaDB will soon be going down for maintenance. Downtime is expected to last for approximately 1 hour.'
-  ),
-};
-const flagKeys = new Set(Object.keys(flagDefaults));
-export type FlagKey = keyof typeof flagDefaults;
+const createTypedAdapter = <T, EntitiesType>(schema: z.ZodType<T>, defaultValue: T) => {
+  const envVars = getEnvVars();
+  const edgeConfigAdapter = createEdgeConfigAdapter(envVars.flagsEdgeConfig, {
+    edgeConfigItemKey: envVars.flagsEdgeConfigKey,
+  })();
 
-type FlagStore = {
-  [K in keyof typeof flagDefaults]: (typeof flagDefaults)[K] & {
-    value?: (typeof flagDefaults)[K]['defaultValue'];
-  };
-};
+  return (): Adapter<T, EntitiesType> => {
+    return {
+      origin: edgeConfigAdapter.origin,
+      async decide(opts): Promise<T> {
+        try {
+          const value = await edgeConfigAdapter.decide(opts);
+          if (value == null) {
+            return opts.defaultValue || defaultValue;
+          }
 
-export class Flags {
-  private flags: FlagStore = structuredClone(flagDefaults);
-  private s3client = this.createS3Client();
+          const result = schema.safeParse(value);
+          if (result.success) {
+            return result.data;
+          }
 
-  constructor() {
-    this.updateFlags();
-    setInterval(
-      () => {
-        this.updateFlags();
+          const errorMessage = `Unable to parse value for flag ${opts.key}, ${result.error.message}: ${JSON.stringify(value)}`;
+          log.error(errorMessage);
+          throw new Error(errorMessage);
+        } catch {
+          return opts.defaultValue || defaultValue;
+        }
       },
-      1000 * 60 * 1
-    ); // every 5 mins
-  }
-
-  private createS3Client() {
-    try {
-      const envVars = getEnvVars();
-      return new S3Client({
-        endpoint: envVars.dynamicConfigEndpoint,
-        region: 'auto',
-        credentials: {
-          accessKeyId: envVars.dynamicConfigAccessKeyId,
-          secretAccessKey: envVars.dynamicConfigSecretKey,
-        },
-        forcePathStyle: true,
-      });
-    } catch {
-      console.warn('Failed to create S3 client for Flags, dynamic flags will be disabled');
-      return null;
-    }
-  }
-
-  private updateFlags = async () => {
-    if (!this.s3client) {
-      return;
-    }
-    const envVars = getEnvVars();
-    try {
-      const resp = await this.s3client.send(
-        new GetObjectCommand({
-          Bucket: envVars.dynamicConfigBucket,
-          Key: envVars.dynamicConfigRepoFile,
-        })
-      );
-      const body = await resp.Body?.transformToString();
-      if (!body) {
-        console.error('Failed to read dynamic-config file');
-        return;
-      }
-      const flags = JSON.parse(body);
-      for (const [key, value] of Object.entries(flags.global)) {
-        if (!flagKeys.has(key)) {
-          continue;
-        }
-        const flagKey = key as FlagKey;
-        const descriptor = flagDefaults[flagKey];
-        if (value === null) {
-          // If the flag has explicitly been cleared in dynamic-config, we can reset it in the store.
-          this.flags[flagKey].value = undefined;
-        }
-        if (typeof value !== descriptor.type) {
-          continue;
-        }
-        if (this.flags[flagKey].value !== value) {
-          console.log(`Updated flag ${flagKey} to ${value}`);
-        }
-        this.flags[flagKey].value = value as any;
-      }
-    } catch (e) {
-      console.error(`Failed to update flags: ${e}`);
-      return;
-    }
+    };
   };
+};
 
-  get<K extends FlagKey>(key: K): (typeof flagDefaults)[K]['defaultValue'] {
-    return this.flags[key].value ?? this.flags[key].defaultValue;
-  }
-}
+const string = createTypedAdapter(z.string(), '');
+const boolean = createTypedAdapter(z.boolean(), false);
+
+export const flagShowMaintenanceBanner = flag({
+  key: 'showMaintenanceBanner',
+  adapter: boolean(),
+});
+export const flagMaintenanceBannerMessage = flag({
+  key: 'maintenanceBannerMessage',
+  adapter: string(),
+});
