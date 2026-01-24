@@ -15,7 +15,6 @@ const SORTABLE_FIELDS: Record<string, SortableColumn> = {
 
 export class PostgresIndex implements SearchIndex {
   async search(query: string, options?: SearchOptions): Promise<SearchResult> {
-    console.log('searching with postgres');
     const pool = await getDbPool();
 
     const offset = options?.offset ?? 0;

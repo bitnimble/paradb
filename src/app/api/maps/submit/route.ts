@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MapValidity, SubmitMapRequest, SubmitMapResponse } from 'schema/maps';
 import { error } from 'services/helpers';
+import { getLog } from 'services/logging/server_logger';
 import { mintUploadUrl } from 'services/maps/s3_handler';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
@@ -15,6 +16,7 @@ const send = (res: SubmitMapResponse) => NextResponse.json(SubmitMapResponse.par
  * /api/maps/submit/complete, which will process/validate the map and publish it.
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  const log = getLog(['maps', 'submit']);
   const session = await getUserSession();
   if (!session) {
     return error({
@@ -27,7 +29,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   const submitMapReqResult = SubmitMapRequest.safeParse(await req.json());
   if (!submitMapReqResult.success) {
-    console.log(JSON.stringify(submitMapReqResult.error));
     return error({
       statusCode: 400,
       message: 'Invalid submit map request.',
@@ -65,6 +66,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       uploader: session.id,
     });
     if (!createMapResult.success) {
+      log.error('Could not create placeholder map when preparing for upload', {
+        errors: createMapResult.errors,
+      });
       return error({
         statusCode: 500,
         message: 'Could not create placeholder map when preparing for upload.',
@@ -77,6 +81,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
   const urlResp = await mintUploadUrl(id);
   if (!urlResp.success) {
+    log.error('Could not mint the URL for uploading the map.', {
+      error: urlResp.error,
+    });
     return error({
       statusCode: 500,
       message: 'Could not create the URL for uploading the map.',

@@ -2,10 +2,12 @@ import { Api } from 'app/api/api';
 import { reportUploadComplete } from 'app/api/maps/submit/complete/actions';
 import { action, computed, observable, runInAction } from 'mobx';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { getLog } from 'services/logging/client_logger';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
 
 export const zipTypes = ['application/zip', 'application/x-zip', 'application/x-zip-compressed'];
+const log = getLog(['ui', 'maps', 'submit']);
 
 type UploadStateBase = { file: File };
 type PendingUpload = UploadStateBase & { state: 'pending' };
@@ -95,7 +97,9 @@ export class ThrottledMapUploader {
       runInAction(() => {
         upload.state = 'error';
         (upload as UploadError).errorMessage = 'Unknown error';
-        console.error(JSON.stringify(e));
+        log.error('Error when submitting/uploading map from client', {
+          error: e,
+        });
       });
     }
   }

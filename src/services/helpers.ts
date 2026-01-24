@@ -3,6 +3,9 @@ import { getQueryParams } from 'app/api/helpers';
 import { ResultError } from 'base/result';
 import { NextRequest, NextResponse } from 'next/server';
 import { ApiError } from 'schema/api';
+import { getLog } from './logging/server_logger';
+
+const log = getLog(['api']);
 
 export function error<P, T extends ApiError & P, E extends string>(opts: {
   statusCode: number;
@@ -24,10 +27,14 @@ export function error<P, T extends ApiError & P, E extends string>(opts: {
   }
   if (details) {
     Sentry.setTag('type', details.type);
-    console.error(details.type);
   }
   Sentry.captureException(error);
-  console.error(error);
+  if (statusCode > 499) {
+    log.error('Server error: ' + message, {
+      error,
+      details,
+    });
+  }
 
   const errorResponse = { success: false, statusCode, errorMessage: message, ...errorBody } as T;
   return NextResponse.json(errorSerializer(errorResponse), {
@@ -39,6 +46,7 @@ export function actionError<P, E extends string>(opts: {
   errorBody: P;
   message: string;
   resultError?: ResultError<E>;
+  shouldLog?: boolean;
 }) {
   const { errorBody, message, resultError } = opts;
 
@@ -53,10 +61,14 @@ export function actionError<P, E extends string>(opts: {
   }
   if (details) {
     Sentry.setTag('type', details.type);
-    console.error(details.type);
   }
   Sentry.captureException(error);
-  console.error(error);
+  if (opts.shouldLog) {
+    log.error('Server error: ' + message, {
+      error,
+      details,
+    });
+  }
 
   return { success: false, errorMessage: message, ...errorBody } as const;
 }

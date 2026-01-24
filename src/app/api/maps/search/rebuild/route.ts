@@ -2,6 +2,7 @@ import { MeiliSearch } from 'meilisearch';
 import { NextResponse } from 'next/server';
 import { mapSortableAttributes } from 'schema/maps';
 import { getEnvVars } from 'services/env';
+import { getLog } from 'services/logging/server_logger';
 import { MapsRepo } from 'services/maps/maps_repo';
 import { MeilisearchIndex, SearchableMap } from 'services/search/meilisearch';
 
@@ -13,11 +14,12 @@ export async function GET() {
 }
 
 export async function rebuildMeilisearchIndex() {
+  const log = getLog(['maps', 'search', 'rebuild']);
   const { meilisearchHost, meilisearchKey } = getEnvVars();
   const client = new MeiliSearch({ host: meilisearchHost, apiKey: meilisearchKey });
-  console.log('Creating new indexes');
+  log.info('Creating new indexes');
   await client.createIndex(TEMP_MAPS_INDEX_UID).waitTask();
-  console.log('Getting index');
+  log.info('Getting index');
   const tempNewIndex = await client.getIndex<SearchableMap>(TEMP_MAPS_INDEX_UID);
   const searchIndex = new MeilisearchIndex(tempNewIndex);
   const mapsRepo = new MapsRepo(searchIndex);
@@ -27,7 +29,7 @@ export async function rebuildMeilisearchIndex() {
     throw new Error(JSON.stringify(mapsResult.errors));
   }
 
-  console.log('Setting up attribute fields');
+  log.info('Setting up attribute fields');
   const updateRanking = await searchIndex._index.updateRankingRules([
     'sort',
     'words',
@@ -48,7 +50,7 @@ export async function rebuildMeilisearchIndex() {
     'uploader',
   ]);
 
-  console.log('Adding sortable attributes: ', mapSortableAttributes.join(', '));
+  log.info('Adding sortable attributes: ' + mapSortableAttributes.join(', '));
 
   const updateSorts = await searchIndex._index.updateSortableAttributes([...mapSortableAttributes]);
 
@@ -56,19 +58,19 @@ export async function rebuildMeilisearchIndex() {
     [updateRanking, updateSearch, updateFilters, updateSorts].map((t) => t.taskUid),
     { timeout: 60000 }
   );
-  console.log(`Added ${mapsResult.value.length} maps, waiting for tasks to complete...`);
-  console.log('Adding data');
+  log.info(`Added ${mapsResult.value.length} maps, waiting for tasks to complete...`);
+  log.info('Adding data');
   try {
     await searchIndex.updateDocuments(mapsResult.value);
   } catch (e) {
-    console.log(`Error: ${JSON.stringify(e)}`);
+    log.info(`Error: ${JSON.stringify(e)}`);
   }
 
-  console.log('Swapping indexes');
+  log.info('Swapping indexes');
   // If the index already exists, then do a proper swap - otherwise, just rename the new temp index
   const rename = (await client.getIndexes()).results.find((i) => i.uid === 'maps') == null;
   await client.swapIndexes([{ indexes: [TEMP_MAPS_INDEX_UID, 'maps'], rename }]).waitTask();
-  console.log('Deleting old index');
+  log.info('Deleting old index');
   await client.deleteIndexIfExists(TEMP_MAPS_INDEX_UID);
-  console.log('Done!');
+  log.info('Done!');
 }

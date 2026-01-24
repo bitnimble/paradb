@@ -7,6 +7,7 @@ import { MapsRepo } from 'services/maps/maps_repo';
 import { createMeilisearchIndex, meilisearchIndexExists } from 'services/search/meilisearch';
 import { getSingleton } from 'services/singleton';
 import { FavoritesRepo } from 'services/users/favorites_repo';
+import { getLog } from './logging/server_logger';
 import { PostgresIndex } from './search/postgres';
 import { SearchIndex } from './search/types';
 import { createSupabaseServerClient } from './session/supabase_server';
@@ -19,7 +20,8 @@ type ServerContext = {
 };
 
 async function createServerContext(): Promise<ServerContext> {
-  console.log('Creating server context');
+  const log = getLog(['server_context']);
+  log.info('Creating server context');
   const envVars = getEnvVars();
 
   const pool = await getDbPool();
@@ -38,7 +40,7 @@ async function createServerContext(): Promise<ServerContext> {
     }
     searchIndex = await createMeilisearchIndex(meilisearchConfig, 'maps');
   }
-  console.log(`Using ${envVars.searchImplementation} search index`);
+  log.info(`Using ${envVars.searchImplementation} search index`);
   const mapsRepo = new MapsRepo(searchIndex);
   const favoritesRepo = new FavoritesRepo(mapsRepo, searchIndex);
   const flags = getFlags();

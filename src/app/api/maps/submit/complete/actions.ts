@@ -28,6 +28,7 @@ export async function reportUploadComplete(id: string, isReupload: boolean) {
         errorBody: {},
         message: 'Could not update map upload status.',
         resultError: validityResult,
+        shouldLog: true,
       });
     }
 
@@ -83,6 +84,7 @@ export async function reportUploadComplete(id: string, isReupload: boolean) {
         errorBody: {},
         message: 'The file could not be processed.',
         resultError: getMapResult,
+        shouldLog: true,
       });
     }
     const mapFile = getMapResult.value;
@@ -107,6 +109,7 @@ export async function reportUploadComplete(id: string, isReupload: boolean) {
         message: processMapResult.errors[0].userMessage || message,
         errorBody: {},
         resultError: processMapResult,
+        shouldLog: true,
       });
     }
 

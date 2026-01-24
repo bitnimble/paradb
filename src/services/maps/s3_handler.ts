@@ -220,8 +220,8 @@ export async function mintUploadUrl(id: string) {
       { expiresIn: 3600 } // 1 hour
     );
     return { success: true, value: resp } as const;
-  } catch {
-    return { success: false } as const;
+  } catch (e) {
+    return { success: false, error: e } as const;
   }
 }
 
