@@ -14,7 +14,7 @@
     align-items: center;
     justify-content: center;
 
-    color: inherit;
+    color: var(--buttonFgColor);
     padding: var(--gridBaseline) calc(var(--gridBaseline) * 2);
     text-decoration: none;
     background: var(--colorBackground);
@@ -30,11 +30,11 @@
 }
 
 .button:hover:not(.disabled) {
-    color: var(--colorWhite);
+    --buttonFgColor: var(--colorWhite);
 }
 
 .regular.button {
-    color: var(--regularColor);
+    --buttonFgColor: var(--regularColor);
 }
 .regular.button:hover:not(.disabled) {
     background: var(--regularColor);
@@ -42,12 +42,12 @@
 
 .active {
     background: var(--regularColor);
-    color: white;
+    --buttonFgColor: var(--colorWhite);
 }
 
 .error.button {
     border-color: var(--errorColor);
-    color: var(--errorColor);
+    --buttonFgColor: var(--errorColor);
 }
 .error.button:hover:not(.disabled) {
     background: var(--errorColor);
@@ -57,7 +57,7 @@
     position: relative;
     border-color: var(--successColor);
     background: var(--successColor);
-    color: var(--colorWhite);
+    --buttonFgColor: var(--colorWhite);
 }
 .success.button:hover:not(.disabled) {
     margin: -1px;
@@ -66,7 +66,8 @@
 
 .button.disabled {
     border-color: var(--colorGrey);
-    color: var(--colorGrey);
+    background: var(--colorGreyA30);
+    --buttonFgColor: var(--colorGrey);
     cursor: not-allowed;
 }
 

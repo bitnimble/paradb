@@ -3,21 +3,6 @@ import { ApiError, ApiSuccess } from './api';
 import { PDMap } from './maps';
 
 /* Structs */
-export const User = z.object({
-  id: z.string(),
-  username: z.string(),
-  email: z.string(),
-});
-export type User = z.infer<typeof User>;
-
-export const GetUserSuccess = ApiSuccess.extend({
-  user: User,
-});
-export type GetUserSuccess = z.infer<typeof GetUserSuccess>;
-
-export const GetUserResponse = z.discriminatedUnion('success', [GetUserSuccess, ApiError]);
-export type GetUserResponse = z.infer<typeof GetUserResponse>;
-
 export const UserSession = z.object({
   id: z.string(),
   username: z.string(),

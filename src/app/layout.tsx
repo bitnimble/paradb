@@ -3,11 +3,12 @@ import { MaintenanceBanner } from 'app/maintenance_banner';
 import { SkeletonProvider } from 'app/skeleton_provider';
 import type { Metadata } from 'next';
 import { getFlags } from 'services/server_context';
-import { SessionProvider } from 'session/session_provider';
+import { getUserSession } from 'services/session/session';
 import { colors } from 'ui/base/design_system/design_tokens';
 import { ThemeProvider } from 'ui/base/theme/theme_provider';
 import { ToastProvider } from 'ui/base/toast/toast';
 import { NavBar } from 'ui/nav_bar/nav_bar';
+import { SessionProvider } from 'ui/session/session_provider';
 import './globals.css';
 import styles from './layout.module.css';
 
@@ -22,14 +23,15 @@ export const viewport = {
 
 export const dynamic = 'force-dynamic';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const flags = getFlags();
+  const session = await getUserSession();
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
           <ApiProvider>
-            <SessionProvider>
+            <SessionProvider session={session}>
               <SkeletonProvider className={styles.skeleton}>
                 {flags.get('showMaintenanceBanner') ? (
                   <MaintenanceBanner message={flags.get('maintenanceBannerMessage')} />

@@ -17,8 +17,8 @@
 .laBallPulse > div {
     display: inline-block;
     float: none;
-    background-color: currentColor;
-    border: 0 solid currentColor;
+    background-color: var(--buttonFgColor);
+    border: 0 solid var(--buttonFgColor);
 }
 .laBallPulse {
     width: 54px;

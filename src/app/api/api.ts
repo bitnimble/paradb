@@ -1,4 +1,3 @@
-import { SupabaseClient } from '@supabase/supabase-js';
 import * as qs from 'qs';
 import { ApiResponse } from 'schema/api';
 import {
@@ -12,28 +11,19 @@ import {
 import {
   ChangePasswordRequest,
   ChangePasswordResponse,
-  GetUserResponse,
   LoginRequest,
   LoginResponse,
   SetFavoriteMapsRequest,
   SignupRequest,
   SignupResponse,
-  User,
 } from 'schema/users';
-import { createClient } from 'services/session/supabase_client';
 
 export interface Api {
-  readonly supabase: SupabaseClient;
-
   /* Auth */
   login(req: LoginRequest): Promise<LoginResponse>;
   signup(req: SignupRequest): Promise<SignupResponse>;
 
   /* User */
-  // Same as getMe(), but will not report errors to sentry if unauthorized. This is only
-  // intended to be used as a logged-in session check.
-  getSession(): Promise<User>;
-  getMe(): Promise<User>;
   changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse>;
   setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse>;
 
@@ -47,7 +37,6 @@ export interface Api {
 
 export class HttpApi implements Api {
   private apiBase = '/api';
-  readonly supabase = createClient();
 
   async login(req: LoginRequest): Promise<LoginResponse> {
     const resp = await post(path(this.apiBase, 'users', 'login'), LoginRequest.parse(req));
@@ -57,24 +46,6 @@ export class HttpApi implements Api {
   async signup(req: SignupRequest): Promise<SignupResponse> {
     const resp = await post(path(this.apiBase, 'users', 'signup'), SignupRequest.parse(req));
     return SignupResponse.parse(resp);
-  }
-
-  async getSession(): Promise<User> {
-    const resp = await get(path(this.apiBase, 'users', 'session'));
-    const parsed = GetUserResponse.parse(resp);
-    if (!parsed.success) {
-      throw new Error();
-    }
-    return parsed.user;
-  }
-
-  async getMe(): Promise<User> {
-    const resp = await get(path(this.apiBase, 'users', 'me'));
-    const parsed = GetUserResponse.parse(resp);
-    if (!parsed.success) {
-      throw new Error();
-    }
-    return parsed.user;
   }
 
   async changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse> {

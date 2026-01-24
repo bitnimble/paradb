@@ -1,7 +1,5 @@
 import { Api } from 'app/api/api';
-import { checkExists } from 'base/preconditions';
 import { action, observable } from 'mobx';
-import { SessionStore } from 'session/session_presenter';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 
 export type SettingsFields = 'oldPassword' | 'newPassword' | 'form';
@@ -17,7 +15,7 @@ export class SettingsPresenter extends FormPresenter<SettingsFields> {
   constructor(
     private readonly api: Api,
     private readonly store: SettingsStore,
-    private readonly sessionStore: SessionStore
+    private readonly userId: string
   ) {
     super(store);
   }
@@ -49,7 +47,7 @@ export class SettingsPresenter extends FormPresenter<SettingsFields> {
 
     this.setSubmitting(true);
     const resp = await this.api.changePassword({
-      id: checkExists(this.sessionStore.user).id,
+      id: this.userId,
       oldPassword: this.store.oldPassword,
       newPassword: this.store.newPassword,
     });

@@ -18,9 +18,7 @@ import {
   SetFavoriteMapsRequest,
   SignupRequest,
   SignupResponse,
-  User,
 } from 'schema/users';
-import { createClient } from 'services/session/supabase_client';
 import { Api } from './api';
 
 const DELAY = 500;
@@ -32,8 +30,6 @@ async function delay(ms: number = DELAY) {
 }
 
 export class FakeApi implements Api {
-  readonly supabase = createClient();
-
   async changePassword(_req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
     return { success: true };
   }
@@ -46,14 +42,6 @@ export class FakeApi implements Api {
 
   async signup(_req: SignupRequest): Promise<SignupResponse> {
     return { success: true, id: 'U123456' };
-  }
-
-  async getSession(): Promise<User> {
-    return { id: '0', username: 'alice', email: 'alice@test.com' };
-  }
-
-  async getMe(): Promise<User> {
-    return { id: '0', username: 'alice', email: 'alice@test.com' };
   }
 
   async findMaps(): Promise<FindMapsResponse> {

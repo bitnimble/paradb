@@ -1,13 +1,14 @@
 'use client';
 
 import { useApi } from 'app/api/api_provider';
-import { observer } from 'mobx-react';
-import React from 'react';
-import { useSession } from 'session/session_provider';
+import { observer, useLocalObservable } from 'mobx-react-lite';
+import { redirect } from 'next/navigation';
 import { Button } from 'ui/base/button/button';
 import { FormError } from 'ui/base/form/form_error';
 import { T } from 'ui/base/text/text';
 import { Textbox } from 'ui/base/textbox/textbox';
+import { useSession } from 'ui/session/session_provider';
+import { RoutePath, routeFor } from 'utils/routes';
 import styles from './page.module.css';
 import { SettingsPresenter, SettingsStore } from './settings_presenter';
 
@@ -16,11 +17,11 @@ const noop = () => void 0;
 export default observer(() => {
   const session = useSession();
   const api = useApi();
-  const [store] = React.useState(new SettingsStore());
-  if (!session.user) {
-    return null;
+  const store = useLocalObservable(() => new SettingsStore());
+  if (!session) {
+    return redirect(routeFor([RoutePath.LOGIN]));
   }
-  const presenter = new SettingsPresenter(api, store, session);
+  const presenter = new SettingsPresenter(api, store, session.id);
 
   const { oldPassword, newPassword, submitting, success, errors } = store;
   return (
@@ -29,7 +30,7 @@ export default observer(() => {
       <Textbox
         label="Username"
         readOnly={true}
-        value={session.user.username}
+        value={session.username}
         error={undefined}
         onChange={noop}
         tooltip="Changing your username is not currently implemented."

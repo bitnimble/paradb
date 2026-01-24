@@ -2,12 +2,11 @@
 
 import { useApi } from 'app/api/api_provider';
 import { MapPagePresenter, MapPageStore } from 'app/map/_components/map_presenter';
-import { observer } from 'mobx-react-lite';
-import React from 'react';
+import { observer, useLocalObservable } from 'mobx-react-lite';
 import { PDMap } from 'schema/maps';
-import { useSession } from 'session/session_provider';
 import { Button } from 'ui/base/button/button';
 import { Dialog } from 'ui/base/dialog/dialog';
+import { useSession } from 'ui/session/session_provider';
 import { getMapFileLink } from 'utils/maps';
 import styles from './map_page.module.css';
 import { SubmitMapPage } from './submit_map_page';
@@ -17,17 +16,17 @@ type MapActionsProps = {
 };
 
 export const MapActions = observer((props: MapActionsProps) => {
-  const sessionStore = useSession();
+  const session = useSession();
   const api = useApi();
-  const [store] = React.useState(new MapPageStore(props.map));
+  const store = useLocalObservable(() => new MapPageStore(props.map));
   const presenter = new MapPagePresenter(api, store);
 
-  const canModify = !!sessionStore.user && store.map.uploader === sessionStore.user.id;
+  const canModify = session && store.map.uploader === session.id;
   const downloadLink = props.map ? getMapFileLink(props.map.id) : undefined;
   const isFavorited = store.map.userProjection?.isFavorited;
   return (
     <div className={styles.actions}>
-      {!!sessionStore.user && isFavorited != null && (
+      {session && isFavorited != null && (
         <Button
           onClick={presenter.onToggleFavorite}
           loading={store.updatingFavorite}
