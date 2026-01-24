@@ -1,12 +1,29 @@
 'use client';
 
-import { createLoginSignupPage } from 'app/_auth/create';
+import { LoginSignup } from 'app/_auth/login_signup';
+import { LoginSignupPresenter, LoginSignupStore } from 'app/_auth/login_signup_presenter';
 import { useApi } from 'app/api/api_provider';
-import React from 'react';
+import { observer, useLocalObservable } from 'mobx-react-lite';
 
-export default () => {
+export default observer(() => {
   const api = useApi();
-  // TODO: convert to canonical next/react hooks
-  const [LoginSignupPage] = React.useState(() => createLoginSignupPage(api));
-  return <LoginSignupPage mode="login" />;
-};
+  const store = useLocalObservable(() => new LoginSignupStore());
+  const presenter = new LoginSignupPresenter(api, store);
+
+  return (
+    <LoginSignup
+      mode="login"
+      username={store.username}
+      email={store.email}
+      password={store.password}
+      submitting={store.submitting}
+      errors={store.errors}
+      onChangeUsername={presenter.onChangeUsername}
+      onChangeEmail={presenter.onChangeEmail}
+      onChangePassword={presenter.onChangePassword}
+      login={presenter.onLogin}
+      signup={presenter.onSignup}
+      onNavigateClick={store.reset}
+    />
+  );
+});

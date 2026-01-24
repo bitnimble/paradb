@@ -15,7 +15,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const invalidCredentials = {
     success: false,
     statusCode: 401,
-    errorMessage: 'Invalid credentials',
+    errorMessage: 'Invalid login credentials',
   } as const;
   const { username, password } = LoginRequest.parse(await req.json());
   const { supabase } = await getServerContext();
@@ -35,7 +35,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     password,
   });
   if (error) {
-    return send(invalidCredentials);
+    return send({
+      success: false,
+      statusCode: 401,
+      errorMessage: error.message,
+    });
   }
   return send({
     success: true,

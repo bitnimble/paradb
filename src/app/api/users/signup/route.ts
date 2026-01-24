@@ -46,6 +46,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         statusCode = 500;
         errorMessage = 'Could not create user, please try again later';
         break;
+      case CreateUserError.SUPABASE_ERROR:
+        statusCode = 400;
+        errorMessage = error.userMessage || 'Could not create user, please try again later';
+        break;
       case DbError.UNKNOWN_DB_ERROR:
         statusCode = 500;
         errorMessage = 'Unknown error, please try again later';

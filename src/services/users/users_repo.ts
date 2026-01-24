@@ -67,6 +67,7 @@ export const enum CreateUserError {
   INSECURE_PASSWORD = 'insecure_password',
   USERNAME_TAKEN = 'username_taken',
   EMAIL_TAKEN = 'email_taken',
+  SUPABASE_ERROR = 'supabase_error',
 }
 export async function createUser(
   opts: CreateUserOpts
@@ -121,7 +122,10 @@ export async function createUser(
     },
   });
   if (error) {
-    return { success: false, errors: [wrapError(error, DbError.UNKNOWN_DB_ERROR)] };
+    return {
+      success: false,
+      errors: [{ type: CreateUserError.SUPABASE_ERROR, userMessage: error.message }],
+    };
   }
 
   try {
