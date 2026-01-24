@@ -27,12 +27,42 @@ The codebase uses Docker to run third-party services locally (Meilisearch for se
 - Prefer early-exit if statements rather than nested if statements.
 - Avoid the use of barrel files
 - When writing code interacting with the Postgres database, use Zapatos helper functions where possible and ideally avoid direct SQL. If possible, use Zapatos conditions helpers (via db.conditions) over db.sql template function. If you absolutely must use SQL, use the Zapatos db.sql template function.
+- Types that are only used internally within a file should not be exported. Only export types that are needed by other modules.
+
+# React
+
+- Use `mobx-react-lite` instead of `mobx-react` for observer components
+- For client-side pages with forms, prefer the simple pattern: `useState` for the store, instantiate the presenter directly in the component, access store fields directly (e.g. `store.email`, `store.errors.get('field')`) rather than destructuring into intermediate variables or passing as props to a separate component
+- Avoid creating factory functions like `createXyzPage()` that return observer components. Instead, export `observer(() => { ... })` directly as the default export
+- Avoid separating page.tsx into multiple component files when the component is simple; inline the JSX directly in page.tsx
+
+# MobX
+
+- Use `action.bound` in `makeObservable` for methods that modify state, rather than wrapping calls in `runInAction()`
+- For simple setters (e.g. `setSubmitting`, `setSuccess`), define them as arrow function properties and register them with `action.bound` in `makeObservable`, rather than using `action()` wrapper or `runInAction()`
+- When registering private methods in `makeObservable`, use the generic form: `makeObservable<typeof this, 'privateMethod1' | 'privateMethod2'>(this, { ... })`
+
+# Dependency injection
+
+- For Supabase client access on the client side, prefer calling `createClient()` directly at the point of use rather than passing it as a constructor parameter or through context. This keeps components simpler and avoids unnecessary prop drilling.
 
 # CSS
 
 - Use design tokens present in the root layout as CSS variables
 - Any metric should be based on a multiple of gridBaseline. Fractional multipliers are okay if necessary, e.g. calc(1.5 \* var(--gridBaseline))
 - Metrics that aren't dependent on "UI scale" should not be based on gridBaseline, e.g. font sizes, line heights, percentage border radii, 1px thin borders, etc.
+
+# Routing
+
+- Prefer nested routes over flat routes with hyphens (e.g. `/password/reset` instead of `/reset-password`, `/password/reset/update` instead of `/update-password`)
+- Route segments should be short, single words where possible
+
+# Forms and UX
+
+- Password fields that accept user input (not just display) should have `required={true}`
+- Password change/update forms should include a confirmation field that validates the passwords match
+- Use the existing `checkPasswordConfirmFields` helper in `FormPresenter` for password confirmation validation
+- After successful password update, redirect to the appropriate destination (usually home/map list, not login, since the user is already authenticated)
 
 # Commands
 
