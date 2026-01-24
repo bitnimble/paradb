@@ -3,14 +3,14 @@ import { RefObject, useEffect, useEffectEvent, useRef } from 'react';
 /**
  * The space in pixels from the bottom of the container to trigger the callback.
  */
-export const DEFAULT_THRESHOLD = 100;
+const DEFAULT_THRESHOLD = 100;
 
 /**
  * Default debounce delay in milliseconds.
  */
-export const DEFAULT_DEBOUNCE_MS = 150;
+const DEFAULT_DEBOUNCE_MS = 150;
 
-export type ScrollContainerRef = RefObject<HTMLElement | null> | (() => HTMLElement | null);
+type ScrollContainerRef = RefObject<HTMLElement | null> | (() => HTMLElement | null);
 
 export interface UseInfiniteScrollOptions {
   /** The distance from the bottom of the container to trigger the callback. */
@@ -26,7 +26,7 @@ export interface UseInfiniteScrollOptions {
  * @param callback - The function to call when the user scrolls near the bottom.
  * @param options - Optional configuration (threshold).
  */
-const useInfiniteScroll = (
+export const useInfiniteScroll = (
   scrollContainerRef: ScrollContainerRef,
   callback: () => void,
   options: UseInfiniteScrollOptions = {}
@@ -70,5 +70,3 @@ const useInfiniteScroll = (
     };
   }, [scrollContainerRef, threshold, debounceMs]);
 };
-
-export default useInfiniteScroll;
