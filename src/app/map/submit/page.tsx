@@ -1,7 +1,5 @@
-'use client';
-
-import { SubmitMapPage } from '../_components/submit_map_page';
+import { SubmitMap } from 'ui/maps/submit/submit_map';
 
 export default function () {
-  return <SubmitMapPage />;
+  return <SubmitMap />;
 }

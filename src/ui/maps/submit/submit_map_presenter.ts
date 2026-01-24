@@ -193,7 +193,7 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
     }
   }
 
-  readonly submit = async () => {
+  readonly onSubmit = async () => {
     this.uploader.addFiles([...this.store.files.values()]);
     this.store.reset();
     const [ids, errors] = await this.uploader.start(this.store.id);

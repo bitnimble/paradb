@@ -52,7 +52,7 @@ export function getMapDescription(description: string) {
   });
 }
 
-export const MapPage = (props: Props) => {
+export const MapPageContent = (props: Props) => {
   const { map, mapActions } = props;
 
   return (

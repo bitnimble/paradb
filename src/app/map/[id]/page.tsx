@@ -1,9 +1,9 @@
-import { MapActions } from 'app/map/_components/map_actions';
-import { MapPage, getAlbumArtUrl, getMapDescription } from 'app/map/_components/map_page';
 import NotFound from 'app/not-found';
 import { Metadata } from 'next';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
+import { MapActions } from './map_actions';
+import { MapPageContent, getAlbumArtUrl, getMapDescription } from './map_page_content';
 
 export async function generateMetadata(props: {
   params: Promise<{ id: string }>;
@@ -35,5 +35,5 @@ export default async (props: { params: Promise<{ id: string }> }) => {
   if (!result.success) {
     return <NotFound />;
   }
-  return <MapPage map={result.value} mapActions={<MapActions map={result.value} />} />;
+  return <MapPageContent map={result.value} mapActions={<MapActions map={result.value} />} />;
 };

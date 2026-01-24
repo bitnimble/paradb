@@ -1,21 +1,17 @@
 'use client';
 
 import { useApi } from 'app/api/api_provider';
-import { MapPagePresenter, MapPageStore } from 'app/map/_components/map_presenter';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { PDMap } from 'schema/maps';
 import { Button } from 'ui/base/button/button';
 import { Dialog } from 'ui/base/dialog/dialog';
+import { SubmitMap } from 'ui/maps/submit/submit_map';
 import { useSession } from 'ui/session/session_provider';
 import { getMapFileLink } from 'utils/maps';
 import styles from './map_page.module.css';
-import { SubmitMapPage } from './submit_map_page';
+import { MapPagePresenter, MapPageStore } from './map_presenter';
 
-type MapActionsProps = {
-  map: PDMap;
-};
-
-export const MapActions = observer((props: MapActionsProps) => {
+export const MapActions = observer((props: { map: PDMap }) => {
   const session = useSession();
   const api = useApi();
   const store = useLocalObservable(() => new MapPageStore(props.map));
@@ -38,7 +34,7 @@ export const MapActions = observer((props: MapActionsProps) => {
       {downloadLink && <Button link={downloadLink}>Download</Button>}
       {canModify && (
         <>
-          <Dialog Body={<SubmitMapPage id={store.map.id} />}>
+          <Dialog Body={<SubmitMap id={store.map.id} />}>
             <Button>Reupload</Button>
           </Dialog>
           <Button style="error" onClick={presenter.onDeleteMap}>

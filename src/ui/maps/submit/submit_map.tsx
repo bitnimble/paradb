@@ -1,27 +1,34 @@
+'use client';
+
+import { useApi } from 'app/api/api_provider';
 import classNames from 'classnames';
-import { observer } from 'mobx-react';
+import { observer, useLocalObservable } from 'mobx-react-lite';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 import { Button } from 'ui/base/button/button';
 import { T } from 'ui/base/text/text';
 import styles from './submit_map.module.css';
-import { UploadState, zipTypes } from './submit_map_presenter';
+import {
+  SubmitMapPresenter,
+  SubmitMapStore,
+  ThrottledMapUploader,
+  UploadState,
+  zipTypes,
+} from './submit_map_presenter';
 
-type SubmitMapPageContent = {
-  filenames: string[];
-  uploadProgress: UploadState[];
-  isUploading: boolean;
-  showProgressScreen: boolean;
-  allowMultipleFileSelect: boolean;
-  onChangeData(files: FileList): void;
-  onSubmit(): void;
-};
+export const SubmitMap = observer((props: { id?: string }) => {
+  const api = useApi();
+  const router = useRouter();
+  const store = useLocalObservable(() => new SubmitMapStore(props.id));
+  const uploader = useLocalObservable(() => new ThrottledMapUploader(api));
+  const presenter = new SubmitMapPresenter(uploader, store, router);
 
-export const SubmitMapPageContent = observer((props: SubmitMapPageContent) => {
   const [isDraggingOver, setDraggingOver] = React.useState(false);
+  const showProgressScreen = uploader.isUploading || uploader.hasErrors;
 
   const onFileChange = (files: FileList | null) => {
     if (files && files.length) {
-      props.onChangeData(files);
+      presenter.onChangeData(files);
     }
   };
 
@@ -45,8 +52,8 @@ export const SubmitMapPageContent = observer((props: SubmitMapPageContent) => {
     setDraggingOver(false);
   };
 
-  const DropInput = () => {
-    const { filenames, allowMultipleFileSelect } = props;
+  const DropInput = observer(() => {
+    const { filenames } = store;
 
     return (
       <button
@@ -58,7 +65,7 @@ export const SubmitMapPageContent = observer((props: SubmitMapPageContent) => {
         <input
           type="file"
           accept={['zip', ...zipTypes].join(',')}
-          multiple={allowMultipleFileSelect}
+          multiple={props.id == null}
           onChange={onChange}
           onDrop={onDrop}
           onDragOver={preventDefault}
@@ -74,7 +81,7 @@ export const SubmitMapPageContent = observer((props: SubmitMapPageContent) => {
         </div>
       </button>
     );
-  };
+  });
 
   const ProgressBar = observer(({ uploadState }: { uploadState: UploadState }) => {
     if (uploadState.state === 'pending') {
@@ -100,7 +107,6 @@ export const SubmitMapPageContent = observer((props: SubmitMapPageContent) => {
     );
   });
 
-  const { uploadProgress, isUploading, showProgressScreen, onSubmit } = props;
   return (
     <div className={styles.submitMap}>
       <T.Medium>
@@ -120,7 +126,7 @@ export const SubmitMapPageContent = observer((props: SubmitMapPageContent) => {
       {showProgressScreen ? (
         <div className={classNames(styles.fileContainer, styles.hasMapData, styles.isSubmitting)}>
           <div className={styles.filenames}>
-            {uploadProgress.map((p, i) => (
+            {uploader.uploadProgress.map((p, i) => (
               <T.Small key={i} className={styles.uploadProgress}>
                 <span>{p.file.name}</span>
                 <ProgressBar uploadState={p} />
@@ -131,7 +137,11 @@ export const SubmitMapPageContent = observer((props: SubmitMapPageContent) => {
       ) : (
         <DropInput />
       )}
-      <Button disabled={showProgressScreen} loading={isUploading} onClick={onSubmit}>
+      <Button
+        disabled={showProgressScreen}
+        loading={uploader.isUploading}
+        onClick={presenter.onSubmit}
+      >
         Submit
       </Button>
     </div>
