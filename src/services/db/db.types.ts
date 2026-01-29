@@ -108,6 +108,7 @@ export type Database = {
           complexity: number
           description: string | null
           download_count: number
+          fts: unknown
           id: string
           submission_date: string
           tags: string | null
@@ -124,6 +125,7 @@ export type Database = {
           complexity: number
           description?: string | null
           download_count?: number
+          fts?: unknown
           id: string
           submission_date: string
           tags?: string | null
@@ -140,6 +142,7 @@ export type Database = {
           complexity?: number
           description?: string | null
           download_count?: number
+          fts?: unknown
           id?: string
           submission_date?: string
           tags?: string | null
@@ -316,3 +319,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

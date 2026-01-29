@@ -16,6 +16,7 @@ export type EnvVars = {
   s3AccessKeyId: string;
   s3AccessKeySecret: string;
   s3MapsBucket: string;
+  searchImplementation: string;
   meilisearchHost: string;
   meilisearchKey: string;
   flagsImplementation: string;
@@ -28,7 +29,6 @@ export type EnvVars = {
   axiomDataset: string;
   axiomPublicApiToken: string;
   axiomPublicDataset: string;
-  searchImplementation: string;
 };
 
 /**
@@ -54,6 +54,7 @@ function createEnvVars(): EnvVars {
     s3AccessKeyId: process.env.S3_ACCESS_KEY_ID,
     s3AccessKeySecret: process.env.S3_ACCESS_KEY_SECRET,
     s3MapsBucket: process.env.S3_MAPS_BUCKET,
+    searchImplementation: process.env.SEARCH_IMPLEMENTATION || 'meilisearch',
     meilisearchHost: process.env.MEILISEARCH_HOST,
     meilisearchKey: process.env.MEILISEARCH_KEY,
     flagsImplementation: process.env.FLAGS_IMPLEMENTATION,
@@ -66,7 +67,6 @@ function createEnvVars(): EnvVars {
     axiomDataset: process.env.AXIOM_DATASET,
     axiomPublicApiToken: process.env.NEXT_PUBLIC_AXIOM_API_TOKEN,
     axiomPublicDataset: process.env.NEXT_PUBLIC_AXIOM_DATASET,
-    searchImplementation: process.env.SEARCH_IMPLEMENTATION || 'meilisearch',
   };
   let fail = false;
   for (const [key, value] of Object.entries(envVars)) {

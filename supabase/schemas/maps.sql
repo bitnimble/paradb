@@ -12,7 +12,13 @@ CREATE TABLE maps (
   description text,
   tags text,
   complexity int not null,
-  album_art text
+  album_art text,
+  fts tsvector generated always as (
+    setweight(to_tsvector('english', title), 'A') ||
+    setweight(to_tsvector('english', artist), 'B') ||
+    setweight(to_tsvector('english', coalesce(author, '')), 'C') ||
+    setweight(to_tsvector('english', coalesce(description, '')), 'D')
+  ) stored
 );
 
 CREATE TABLE difficulties (
@@ -23,6 +29,7 @@ CREATE TABLE difficulties (
 );
 
 CREATE INDEX difficulties_map_id_idx ON difficulties USING btree (map_id);
+CREATE INDEX maps_fts_idx ON maps USING gin (fts);
 
 alter table difficulties enable row level security;
 alter table maps enable row level security;
