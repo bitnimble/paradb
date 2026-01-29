@@ -1,6 +1,17 @@
 import type { MDXComponents } from 'mdx/types';
+import { Children, isValidElement, ReactNode } from 'react';
 import styles from './src/ui/base/mdx/mdx.module.css';
 import { T } from './src/ui/base/text/text';
+
+function extractTextFromCode(children: ReactNode): ReactNode {
+  // Fenced code blocks render as <pre><code>content</code></pre>
+  // Extract the text content from the nested code element
+  const child = Children.only(children);
+  if (isValidElement<{ children?: ReactNode }>(child) && (child.type as any).name === 'code') {
+    return child.props.children;
+  }
+  return children;
+}
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -42,7 +53,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     code: ({ children }) => <T.Medium style="code">{children}</T.Medium>,
     pre: ({ children }) => (
       <T.Medium style="code" display="block">
-        {children}
+        {extractTextFromCode(children)}
       </T.Medium>
     ),
     blockquote: ({ children }) => <blockquote className={styles.blockquote}>{children}</blockquote>,
