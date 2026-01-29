@@ -95,7 +95,7 @@ export class MapListPresenter {
   }
 
   private getTableSortParams() {
-    const tableStore = checkExists(this.store.tableSortStore);
+    const tableStore = this.store.tableSortStore;
     if (tableStore.sortColumn == null || tableStore.sortDirection == null) {
       return null;
     }
@@ -119,8 +119,14 @@ export class MapListPresenter {
   }
 
   @action.bound async onSearch(trigger: 'sort' | 'search') {
-    if (trigger === 'search' && this.store.query !== '') {
-      this.store.tableSortStore.resetSort();
+    if (trigger === 'search') {
+      // Upon clearing search to go back to the original view, reset sort back to submission date
+      if (this.store.query === '') {
+        this.store.tableSortStore.resetSort();
+      } else {
+        // Otherwise, sort by server rank
+        this.store.tableSortStore.sortColumn = undefined;
+      }
     }
     const sort = this.getTableSortParams();
     runInAction(() => (this.store.maps = undefined));

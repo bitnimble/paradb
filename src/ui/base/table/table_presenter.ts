@@ -4,7 +4,7 @@ import { Columns } from './table';
 export type SortDirection = 'asc' | 'desc';
 
 export class TableSortStore<T, N extends number> {
-  @observable accessor sortColumn: number;
+  @observable accessor sortColumn: number | undefined;
   @observable accessor sortDirection: SortDirection;
 
   constructor(
@@ -41,9 +41,6 @@ export class TablePresenter<T, N extends number> {
 
   @action private setSortDirection(direction: 'asc' | 'desc') {
     this.sortStore.sortDirection = direction;
-    if (this.onSortChange) {
-      this.onSortChange();
-    }
   }
 
   @action.bound onColumnClick(columnIndex: number) {
@@ -52,6 +49,9 @@ export class TablePresenter<T, N extends number> {
       this.setSortDirection('desc');
     } else {
       this.setSortDirection(this.sortStore.sortDirection === 'asc' ? 'desc' : 'asc');
+    }
+    if (this.onSortChange) {
+      this.onSortChange();
     }
   }
 }

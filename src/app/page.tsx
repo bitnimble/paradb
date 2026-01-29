@@ -73,10 +73,8 @@ const Home = observer(() => {
   });
 
   useEffect(() => {
-    if (store.maps == null) {
-      presenter.onSearch('search');
-    }
-  }, [presenter, store.maps]);
+    presenter.onSearch('search');
+  }, [presenter]);
 
   const BulkSelectActions = observer(() => {
     return store.enableBulkSelect ? (
