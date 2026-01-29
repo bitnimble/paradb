@@ -1,11 +1,3 @@
-.prose {
-    line-height: 1.6;
-}
-
-.prose > *:first-child {
-    margin-top: 0;
-}
-
 .paragraph {
     margin-top: calc(var(--gridBaseline) * 3);
 }
