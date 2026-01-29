@@ -30,6 +30,8 @@ CREATE TABLE difficulties (
 
 CREATE INDEX difficulties_map_id_idx ON difficulties USING btree (map_id);
 CREATE INDEX maps_fts_idx ON maps USING gin (fts);
+CREATE INDEX on maps USING btree (visibility);
+CREATE INDEX on maps USING btree (submission_date);
 
 alter table difficulties enable row level security;
 alter table maps enable row level security;
