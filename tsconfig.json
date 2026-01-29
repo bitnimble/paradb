@@ -28,6 +28,6 @@
     "baseUrl": "src",
     "allowJs": true
   },
-  "include": ["src", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
+  "include": ["src", "mdx-components.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
   "exclude": ["node_modules", ".next"]
 }

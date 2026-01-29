@@ -1,0 +1,42 @@
+export const metadata = {
+  id: 'welcome',
+  title: 'Welcome to the ParaDB blog',
+  summary: 'Introducing my blog for updates and announcements',
+  date: new Date('2026-01-29'),
+};
+
+### Welcome to the first ParaDB update post!
+
+I've recently started working on ParaDB again; there's been a lot of major changes already, and a lot more to come. I've decided to start posting updates here for a couple of reasons:
+ - To let users know when there are cool new features or fixes
+ - To notify in advance for any expected downtime, and for what reason
+ - To give technical insight into some of the changes made, especially if something seems like a downgrade for now
+ - To raise awareness about major works that are under-the-hood, which otherwise wouldn't see the light of day
+ - To clarify the future roadmap and what to expect going forwards
+ - To have these updates persisted in a place where they won't get lost, e.g. Discord messages
+
+**A huge amount of recent work falls into the fourth point.** In no particular order:
+- The database has been migrated from a self-hosted Postgres instance running on my VPS over to **Supabase**, to provide better uptime, better security, smooth database migrations for future features, and rolling backups
+- The auth system and entire user database has been migrated from a handrolled bcrypt implementation to **Supabase Auth**, providing significantly better correctness and security, and allows for future features/requirements like **email verification**, **password resets**, security alerts via email, **2FA**, and **OAuth** (like logging in with your Google or Discord accounts)
+- **Email infrastructure** has been set up, for account transactional emails (you can now reset your password yourself without needing to DM me on Discord)
+- The server hosting has been moved to **Vercel** for improved uptime, seamless A/B deployments, and _significantly_ faster build times - **no more downtime when I want to push an update to the site**, as well as the ability for users to beta test new versions of the site at [https://beta.paradb.net](https://beta.paradb.net)
+- Feature flags have been moved from an S3 bucket to Vercel Edge Config for significantly faster flag refresh times
+- Logging has been beefed up and is now going to a proper logging ingest server so that I can now investigate bugs much easier
+- A significant amount of the codebase has been refactored to properly take advantage of Next.js and RSC patterns - this should result in much better performance, loading states and transitions, etc
+- Map uploading has been rewritten to no longer proxy through my backend, and goes straight to Cloudflare R2. This means **faster upload speeds** and fewer technical restrictions for large file sizes.
+- UI components are now using **react-aria-components** for improved correctness, new features and components, and better accessibility. New components are now trivial to add.
+- The codebase has been refactored to be compliant with Turbopack, improving build times.
+- Schemas are now using Zod types instead of a hand-rolled schema definition library based on MessagePack, for better devx and correctness on some validation logic. This also means that exporting the API types is now far simpler (e.g. to a JSON schema), and third-party clients can now integrate with ParaDB's database and API easier.
+- **Album art is now hosted from Cloudflare directly**; this should be much faster to load now, and removes the requirement for me to have disk space on the web server just to host the album art
+- Search index has been migrated from self-hosted Meilisearch, to using **Postgres FTS** on the database directly instead. This is a little more work to make pagination work nicely, but means that every service is now being hosted by a serverless provider instead of myself. I no longer need to manage my own VPS, fight the management interface clickops, reboot it when it OOMs, keep it updated for security vulnerabilities, upgrade it to the latest LTS version of Ubuntu, update all system dependencies, manage my own Postgres version upgrades, deal with the 15 minute build times on the tiny CPU count... and the list goes on.
+- **_Many, many, many bug fixes_**.
+
+### What does that all mean?
+
+Pretty much none of the above are user-facing changes; they are infrastructure improvements that pave the way for better security, uptime, and faster feature development in the future. Previously, a feature like "add tags to maps" would have taken a long time because of the necessary DB changes, and how fiddly it all was (and to make sure it was migrated correctly in the production environment as well). Now, it's something that I can do pretty quickly, and I can even do it from my laptop - better infrastructure means being able to move my development environment around much easier.
+
+### So what's next?
+
+There's a few more cleanup tasks to do after this huge refactor. I need to fix all of the tests, which are all completely broken now. I also need to enable email verification on signup, and trigger that for all existing users as well. After that, though, there's a lot of features coming that should come out pretty quickly: genres/tags (including for autoconverted maps), map collections/albums, user profile pages, improved search, UI overhaul for maps and the map list, editing map details on the website, map privacy and status (e.g. draft, unlisted, or private maps), difficulty metrics, and much more!
+
+**Watch this space for more updates in the future!**

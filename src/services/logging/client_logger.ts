@@ -32,6 +32,11 @@ function configureLogger() {
           lowestLevel: 'debug',
           sinks: ['console', 'axiom'],
         },
+        {
+          category: ['logtape', 'meta'],
+          lowestLevel: 'warning',
+          sinks: ['axiom'],
+        },
       ],
     });
 
