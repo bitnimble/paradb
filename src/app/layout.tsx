@@ -2,7 +2,7 @@ import { ApiProvider } from 'app/api/api_provider';
 import { MaintenanceBanner } from 'app/maintenance_banner';
 import { SkeletonProvider } from 'app/skeleton_provider';
 import type { Metadata } from 'next';
-import { flagMaintenanceBannerMessage, flagShowMaintenanceBanner } from 'services/flags';
+import { Flags } from 'services/flags/flag_definitions';
 import { getUserSession } from 'services/session/session';
 import { colors } from 'ui/base/design_system/design_tokens';
 import { ThemeProvider } from 'ui/base/theme/theme_provider';
@@ -25,8 +25,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getUserSession();
-  const showBanner = await flagShowMaintenanceBanner();
-  const bannerMessage = await flagMaintenanceBannerMessage();
+  const showBanner = await Flags.showMaintenanceBanner();
+  const bannerMessage = await Flags.maintenanceBannerMessage();
   return (
     <html lang="en" suppressHydrationWarning>
       <body>

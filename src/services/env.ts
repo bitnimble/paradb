@@ -18,6 +18,7 @@ export type EnvVars = {
   s3MapsBucket: string;
   meilisearchHost: string;
   meilisearchKey: string;
+  flagsImplementation: string;
   flagsEdgeConfig: string;
   flagsEdgeConfigKey: string;
   supabaseUrl: string;
@@ -55,6 +56,7 @@ function createEnvVars(): EnvVars {
     s3MapsBucket: process.env.S3_MAPS_BUCKET,
     meilisearchHost: process.env.MEILISEARCH_HOST,
     meilisearchKey: process.env.MEILISEARCH_KEY,
+    flagsImplementation: process.env.FLAGS_IMPLEMENTATION,
     flagsEdgeConfig: process.env.FLAGS_EDGE_CONFIG,
     flagsEdgeConfigKey: process.env.FLAGS_EDGE_CONFIG_KEY,
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
