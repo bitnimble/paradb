@@ -525,6 +525,7 @@ export const submitErrorMap: Record<
   ],
   [ValidateMapError.MISSING_ALBUM_ART]: [400, 'Missing album art'],
   [ValidateMapError.NO_DATA]: [400, 'Invalid map archive; could not find map data'],
+  [ValidateMapError.DESCRIPTION_TOO_LONG]: [400, 'Description is too long'],
   [ValidateMapDifficultyError.NO_AUDIO]: [400, 'Invalid map archive; missing audio files'],
   [ValidateMapDifficultyError.INVALID_FORMAT]: [
     400,

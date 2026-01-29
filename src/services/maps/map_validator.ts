@@ -16,6 +16,7 @@ export const enum ValidateMapError {
   INCORRECT_FOLDER_NAME = 'incorrect_folder_name',
   NO_DATA = 'no_data',
   MISSING_ALBUM_ART = 'missing_album_art',
+  DESCRIPTION_TOO_LONG = 'description_too_long',
 }
 export const enum ValidateMapDifficultyError {
   INVALID_FORMAT = 'invalid_format',
@@ -117,6 +118,12 @@ async function validateMapFiles(opts: {
         };
       }
     }
+  }
+
+  if (
+    validDifficultyResults.some((d) => d.value.description && d.value.description.length > 50000)
+  ) {
+    return { success: false, errors: [{ type: ValidateMapError.DESCRIPTION_TOO_LONG }] };
   }
 
   const albumArtFiles = validDifficultyResults
