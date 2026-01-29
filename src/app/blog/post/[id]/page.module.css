@@ -1,0 +1,25 @@
+.post {
+    position: relative;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    max-width: calc(var(--gridBaseline) * 120);
+}
+
+.backLink {
+    position: absolute;
+    top: calc(var(--gridBaseline) * 3);
+}
+
+.header {
+    margin: calc(var(--gridBaseline) * 8) 0 calc(var(--gridBaseline) * 2) 0;
+}
+
+.title {
+    margin-bottom: calc(var(--gridBaseline) * 1);
+}
+
+.content {
+    line-height: 1.6;
+    margin-bottom: calc(var(--gridBaseline) * 8);
+}

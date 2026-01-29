@@ -10,6 +10,8 @@ export const enum RoutePath {
   SIGNUP = 'signup',
   SUBMIT = 'submit',
   INSTRUCTIONS = 'instructions',
+  BLOG = 'blog',
+  POST = 'post',
 }
 
 export type RouteSegments =
@@ -22,7 +24,9 @@ export type RouteSegments =
   | [RoutePath.PASSWORD, RoutePath.RESET, RoutePath.UPDATE]
   | [RoutePath.SETTINGS]
   | [RoutePath.SIGNUP]
-  | [RoutePath.INSTRUCTIONS];
+  | [RoutePath.INSTRUCTIONS]
+  | [RoutePath.BLOG]
+  | [RoutePath.BLOG, RoutePath.POST, string]; // string = post ID
 
 export const routeFor = (segments: RouteSegments) => {
   return '/' + segments.join('/');

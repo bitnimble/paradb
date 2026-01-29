@@ -1,11 +1,13 @@
 import { NextConfig } from 'next';
 
+import createMDX from '@next/mdx';
 import { withSentryConfig } from '@sentry/nextjs';
 
 const s3Url = process.env.PUBLIC_S3_BASE_URL;
 const nextConfig: NextConfig = {
   distDir: process.env.BUILD_DIR || '.next',
   reactStrictMode: true,
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   images: {
     // Album art s3 buckets
     remotePatterns: [
@@ -16,7 +18,9 @@ const nextConfig: NextConfig = {
   },
 };
 
-module.exports = withSentryConfig(nextConfig, {
+const withMDX = createMDX({});
+
+module.exports = withSentryConfig(withMDX(nextConfig), {
   org: 'bitnimble',
   project: 'paradb',
 

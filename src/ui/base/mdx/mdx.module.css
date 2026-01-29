@@ -1,0 +1,47 @@
+.prose {
+    line-height: 1.6;
+}
+
+.prose > *:first-child {
+    margin-top: 0;
+}
+
+.paragraph {
+    margin-top: calc(var(--gridBaseline) * 3);
+}
+
+.heading {
+    margin-top: calc(var(--gridBaseline) * 3);
+    margin-bottom: calc(var(--gridBaseline) * 1);
+}
+
+.list {
+    margin-top: var(--gridBaseline);
+    padding-left: calc(var(--gridBaseline) * 3);
+}
+
+.list li {
+    margin: calc(var(--gridBaseline) * 1) 0;
+}
+
+.link {
+    color: var(--colorAccent);
+    text-decoration: underline;
+}
+
+.link:hover {
+    opacity: 0.8;
+}
+
+.blockquote {
+    margin: calc(var(--gridBaseline) * 2) 0;
+    padding-left: calc(var(--gridBaseline) * 2);
+    border-left: 3px solid var(--colorAccent);
+    color: var(--colorForegroundSecondary);
+}
+
+.hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: calc(var(--gridBaseline) * 3) 0;
+}

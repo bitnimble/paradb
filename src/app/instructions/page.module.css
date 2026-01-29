@@ -1,16 +1,4 @@
 .instructions {
     margin: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     max-width: calc(var(--gridBaseline) * 120);
-}
-
-.section {
-    margin: calc(var(--gridBaseline) * 2) 0;
-}
-
-.instructionList li::marker {
-    line-height: 2;
-    font-weight: bold;
 }

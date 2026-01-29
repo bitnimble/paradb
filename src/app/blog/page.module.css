@@ -1,0 +1,39 @@
+.blog {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    max-width: calc(var(--gridBaseline) * 120);
+}
+
+.header {
+    margin: calc(var(--gridBaseline) * 8) 0 calc(var(--gridBaseline) * 4) 0;
+}
+
+.postList {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--gridBaseline) * 5);
+}
+
+.postCard {
+    padding: calc(var(--gridBaseline) * 2);
+    border: 1px solid var(--colorGreyA30);
+    text-decoration: none;
+    transition: border-color 0.15s ease;
+}
+
+.postCard:hover {
+    border-color: var(--colorAccent);
+}
+
+.postTitle {
+    margin-bottom: calc(var(--gridBaseline) * 0.5);
+}
+
+.postDate {
+    margin-bottom: calc(var(--gridBaseline) * 1);
+}
+
+.postSummary {
+    margin-top: calc(var(--gridBaseline) * 1);
+}

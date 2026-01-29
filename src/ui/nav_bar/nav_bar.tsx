@@ -28,6 +28,11 @@ export const NavBar = observer(() => {
           <>
             <span className={styles.menuItem}>
               <T.Small color="white">
+                <RouteLink href={routeFor([RoutePath.BLOG])}>Blog</RouteLink>
+              </T.Small>
+            </span>
+            <span className={styles.menuItem}>
+              <T.Small color="white">
                 <RouteLink href={routeFor([RoutePath.INSTRUCTIONS])}>
                   Install instructions
                 </RouteLink>
