@@ -30,9 +30,9 @@
     box-shadow: 0 0 0 1px var(--colorGreyA15);
 }
 
-.loadMoreButton {
-    display: block;
-    margin: auto;
+.loadMoreContainer {
+    display: flex;
+    justify-content: center;
 }
 
 .mapListTable {

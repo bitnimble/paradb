@@ -101,13 +101,11 @@ const Home = observer(() => {
       >
         <MapListTable store={store} presenter={presenter} />
         {store.hasMore && (
-          <Button
-            className={styles.loadMoreButton}
-            onClick={presenter.onLoadMore}
-            loading={store.loadingMore}
-          >
-            Load more
-          </Button>
+          <div className={styles.loadMoreContainer}>
+            <Button onClick={presenter.onLoadMore} loading={store.loadingMore}>
+              Load more
+            </Button>
+          </div>
         )}
       </div>
     </div>
