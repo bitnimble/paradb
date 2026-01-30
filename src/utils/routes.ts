@@ -12,6 +12,7 @@ export const enum RoutePath {
   INSTRUCTIONS = 'instructions',
   BLOG = 'blog',
   POST = 'post',
+  EMAIL_VERIFICATION = 'email-verification',
 }
 
 export type RouteSegments =
@@ -24,6 +25,7 @@ export type RouteSegments =
   | [RoutePath.PASSWORD, RoutePath.RESET, RoutePath.UPDATE]
   | [RoutePath.SETTINGS]
   | [RoutePath.SIGNUP]
+  | [RoutePath.SIGNUP, RoutePath.EMAIL_VERIFICATION]
   | [RoutePath.INSTRUCTIONS]
   | [RoutePath.BLOG]
   | [RoutePath.BLOG, RoutePath.POST, string]; // string = post ID

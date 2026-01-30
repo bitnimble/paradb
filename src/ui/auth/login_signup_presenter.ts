@@ -90,12 +90,10 @@ export class LoginSignupPresenter extends FormPresenter<LoginSignupField> {
           access_token: resp.session.accessToken,
           refresh_token: resp.session.refreshToken,
         });
+        window.location.href = routeFor([RoutePath.MAP_LIST]);
       } else {
-        // TODO: show message that they need to confirm their email. Currently not needed as email
-        // verification is not enabled in the Supabase project settings.
+        window.location.href = routeFor([RoutePath.SIGNUP, RoutePath.EMAIL_VERIFICATION]);
       }
-      this.setSubmitting(false);
-      window.location.href = routeFor([RoutePath.MAP_LIST]);
     } else {
       this.setSubmitting(false);
       if (resp.email) {
