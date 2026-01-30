@@ -1,5 +1,6 @@
 import NotFound from 'app/not-found';
 import { Metadata } from 'next';
+import { parse } from 'node-html-parser';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 import { MapActions } from './map_actions';
@@ -15,13 +16,16 @@ export async function generateMetadata(props: {
     return;
   }
   const map = result.value;
+  const description = map.description ? getMapDescription(map.description) : '';
+  const content = parse(description).innerText;
+
   return {
     title: `${map.title} - ParaDB`,
     openGraph: {
       siteName: 'ParaDB',
       title: `${map.title}`,
       images: [getAlbumArtUrl(map)],
-      description: map.description ? getMapDescription(map.description) : undefined,
+      description: content,
     },
   };
 }
