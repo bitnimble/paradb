@@ -2,7 +2,6 @@ import { ApiProvider } from 'app/api/api_provider';
 import { MaintenanceBanner } from 'app/maintenance_banner';
 import { SkeletonProvider } from 'app/skeleton_provider';
 import type { Metadata } from 'next';
-import { getEnvVars } from 'services/env';
 import { Flags } from 'services/flags/flag_definitions';
 import { getUserSession } from 'services/session/session';
 import { colors } from 'ui/base/design_system/design_tokens';
@@ -15,7 +14,8 @@ import styles from './layout.module.css';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
-  metadataBase: new URL(getEnvVars().baseUrl || 'http://localhost:3000'),
+  // Note: do not use getEnvVars() here as it isn't available yet
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://paradb.net'),
 };
 
 export const viewport = {
