@@ -2,6 +2,7 @@ import { ApiProvider } from 'app/api/api_provider';
 import { MaintenanceBanner } from 'app/maintenance_banner';
 import { SkeletonProvider } from 'app/skeleton_provider';
 import type { Metadata } from 'next';
+import { getEnvVars } from 'services/env';
 import { Flags } from 'services/flags/flag_definitions';
 import { getUserSession } from 'services/session/session';
 import { colors } from 'ui/base/design_system/design_tokens';
@@ -14,14 +15,12 @@ import styles from './layout.module.css';
 
 export const metadata: Metadata = {
   title: 'ParaDB',
-  metadataBase: new URL(process.env.BASE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(getEnvVars().baseUrl || 'http://localhost:3000'),
 };
 
 export const viewport = {
-  themeColor: colors.purple,
+  themeColor: colors.accent,
 };
-
-export const dynamic = 'force-dynamic';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getUserSession();
