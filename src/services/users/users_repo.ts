@@ -159,6 +159,11 @@ export async function createUser(
   }
 }
 
+export async function markUserVerified(id: string) {
+  const { pool } = await getServerContext();
+  return db.update('users', snakeCaseKeys({ emailStatus: EmailStatus.VERIFIED }), { id }).run(pool);
+}
+
 type ChangePasswordOpts = { user: User; newPassword: string };
 export const enum ChangePasswordError {
   INSECURE_PASSWORD = 'insecure_password',
