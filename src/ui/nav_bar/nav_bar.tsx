@@ -19,8 +19,8 @@ export const NavBar = observer(() => {
   return (
     <div className={styles.navbar}>
       <T.Large style="title" color="white">
-        <RouteLink additionalClassName={styles.logo} href={routeFor([RoutePath.MAP_LIST])}>
-          paraDB&nbsp;&nbsp;
+        <RouteLink additionalClassName={styles.logo} href={routeFor([RoutePath.MAP_LIST])} force>
+          paraDB
         </RouteLink>
       </T.Large>
       <div className={styles.navbarActions}>
