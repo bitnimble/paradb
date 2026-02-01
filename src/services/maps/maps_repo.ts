@@ -58,7 +58,6 @@ export const enum SearchIndexError {
 export class MapsRepo {
   constructor(private readonly searchIndex: SearchIndex) {}
 
-  // TODO: add search parameters to findMaps
   // TODO: pull `userId` out as RequestContext
   async findMaps(findBy: FindMapsBy, userId?: string): PromisedResult<PDMap[], DbError> {
     const pool = await getDbPool();
@@ -176,6 +175,10 @@ export class MapsRepo {
     return { success: true, value: searchResults.map((m) => maps.get(m.id)).filter(exists) };
   }
 
+  /**
+   * Note: currently unused.
+   * @returns
+   */
   async advancedSearchMaps(searchOptions: AdvancedSearchMapRequest) {
     // TODO: prevent escaping the search query lol
     const filterParts = [
@@ -265,7 +268,17 @@ export class MapsRepo {
               .run(pool)),
           }
         : undefined;
-      return { success: true, value: PDMap.parse({ ...camelCaseKeys(map), userProjection }) };
+      return {
+        success: true,
+        value: PDMap.decode({
+          ...camelCaseKeys({
+            ...map,
+            visibility: mapVisibilityEnum.parse(map.visibility),
+            validity: mapValidityEnum.parse(map.validity),
+          }),
+          userProjection,
+        }),
+      };
     } catch (e) {
       return { success: false, errors: [wrapError(e, GetMapError.UNKNOWN_DB_ERROR)] };
     }
@@ -311,30 +324,46 @@ export class MapsRepo {
   async incrementMapDownloadCount(mapId: string): PromisedResult<void, GetMapError> {
     const { pool } = await getServerContext();
     try {
-      await db.serializable(pool, async (client) => {
+      return db.serializable<Result<void, GetMapError>>(pool, async (client) => {
         const map = await db
           .selectOne('maps', { id: mapId }, { columns: ['download_count'] })
           .run(client);
         if (map == null) {
           // TODO: wire a proper ResultError out of the `db.serializable`
-          throw new Error(`Could not find map id ${mapId} to increment download count`);
+          return {
+            success: false,
+            errors: [
+              {
+                type: GetMapError.MISSING_MAP,
+                internalMessage: `Could not find map id ${mapId} to increment download count`,
+              },
+            ],
+          };
         }
         const updatedMap = await db
           .update('maps', snakeCaseKeys({ downloadCount: map.download_count + 1 }), { id: mapId })
           .run(client);
 
-        const searchIndexResp = await this.updateSearchIndex(
-          PDMap.parse(camelCaseKeys(updatedMap[0]))
-        );
+        const searchIndexResp = await this.updateSearchIndex({
+          ...PDMap.partial().parse(camelCaseKeys(updatedMap[0])),
+          id: updatedMap[0].id,
+        });
         if (!searchIndexResp.success) {
-          // TODO: wire a proper ResultError out of the `db.serializable`
-          throw new Error(`Could not update search index`);
+          return {
+            success: false,
+            errors: [
+              {
+                type: GetMapError.MISSING_MAP,
+                internalMessage: `Could not update search index for map id ${mapId}`,
+              },
+            ],
+          };
         }
+        return { success: true, value: undefined };
       });
     } catch (e) {
       return { success: false, errors: [wrapError(e, GetMapError.UNKNOWN_DB_ERROR)] };
     }
-    return { success: true, value: undefined };
   }
 
   async deleteMap({
@@ -473,9 +502,11 @@ export class MapsRepo {
 
       await promoteTempMapFiles(id);
 
-      const mapResult = PDMap.parse(
+      const mapResult = PDMap.decode(
         camelCaseKeys({
           ...insertedMap,
+          validity: mapValidityEnum.parse(insertedMap.validity),
+          visibility: mapVisibilityEnum.parse(insertedMap.visibility),
           difficulties: insertedDifficulties,
           favorites: (existingMap.success && existingMap.value.favorites) || 0,
           userProjection: {
