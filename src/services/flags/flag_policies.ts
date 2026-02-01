@@ -36,11 +36,22 @@ const createFlagConfigStore = () => {
   const envVars = getEnvVars();
   if (envVars.flagsImplementation === 'edge-config') {
     const config = createClient(envVars.flagsEdgeConfig);
+    let cachedDigest = '';
+    let cachedFlags: Record<string, Policy> | undefined;
+
+    const maybeUpdateFlags = async () => {
+      const digest = await config.digest();
+      if (cachedDigest !== digest) {
+        cachedFlags = await config.get<Record<string, Policy>>(envVars.flagsEdgeConfigKey);
+        cachedDigest = digest;
+      }
+    };
+
     return {
       origin: envVars.flagsEdgeConfig,
       getPolicy: async (key: string) => {
-        const flags = await config.get<Record<string, Policy>>(envVars.flagsEdgeConfigKey);
-        return flags?.[key];
+        await maybeUpdateFlags();
+        return cachedFlags?.[key];
       },
     };
   } else if (envVars.flagsImplementation === 'local') {

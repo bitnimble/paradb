@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "sudo docker compose -f docker/docker-compose.dev.yml --env-file .env up --build",
+    "dev:local": "dotenv -e .env.localdev -- bun next dev",
+    "dev:dev": "dotenv -e .env.dev -- bun next dev",
+    "dev:prod": "dotenv -e .env.prod -- bun next dev",
     "build": "sudo docker compose -f docker/docker-compose.yml --env-file .env build",
     "start": "sudo docker compose -f docker/docker-compose.yml --env-file .env up --build",
     "check": "bun tsc && bun eslint .",
@@ -67,6 +69,7 @@
     "@types/supertest": "^2.0.12",
     "@types/unzipper": "^0.10.7",
     "@types/zxcvbn": "^4.4.2",
+    "dotenv-cli": "^11.0.0",
     "jest": "^29.7.0",
     "postcss-preset-env": "^9.3.0",
     "prettier": "^3.0.3",
