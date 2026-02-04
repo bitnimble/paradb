@@ -71,24 +71,33 @@ export class PostgresIndex implements SearchIndex {
           string
         >`to_tsquery('english', ${db.param(tsquery)} || ':*')`;
 
+        const lowerQuery = query.toLowerCase();
+        const exactMatch = db.sql<maps.SQL, boolean>`(
+          LOWER(${'title'}) = ${db.param(lowerQuery)} OR
+          LOWER(${'artist'}) = ${db.param(lowerQuery)} OR
+          LOWER(${'author'}) = ${db.param(lowerQuery)}
+        )`;
+        const ftsMatch = db.sql<maps.SQL, boolean>`${'fts'} @@ ${tsqueryFragment}`;
         const rank = db.sql<maps.SQL, number>`ts_rank_cd(${'fts'}, ${tsqueryFragment})`;
+
         results = await db
           .select(
             'maps',
             db.conditions.and(
               { visibility: MapVisibility.PUBLIC },
-              { fts: db.sql`${db.self} @@ ${tsqueryFragment}` }
+              db.sql`(${exactMatch} OR ${ftsMatch})`
             ),
             {
               columns: ['id'],
-              order: sortOrder ?? {
-                by: rank,
-                direction: 'DESC',
-              },
+              order: sortOrder ?? [
+                { by: exactMatch, direction: 'DESC' },
+                { by: rank, direction: 'DESC' },
+              ],
               limit,
               offset,
               extras: {
                 rank,
+                exactMatch,
               },
             }
           )
