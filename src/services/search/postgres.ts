@@ -66,10 +66,7 @@ export class PostgresIndex implements SearchIndex {
       if (tsquery.trim() === '') {
         results = await queryMostRecent();
       } else {
-        const tsqueryFragment = db.sql<
-          maps.SQL,
-          string
-        >`to_tsquery('english', ${db.param(tsquery)} || ':*')`;
+        const tsqueryPartial = db.sql<maps.SQL, string>`(${db.param(tsquery)} || ':*')::tsquery`;
 
         const lowerQuery = query.toLowerCase();
         const exactMatch = db.sql<maps.SQL, boolean>`(
@@ -77,8 +74,8 @@ export class PostgresIndex implements SearchIndex {
           LOWER(${'artist'}) = ${db.param(lowerQuery)} OR
           LOWER(${'author'}) = ${db.param(lowerQuery)}
         )`;
-        const ftsMatch = db.sql<maps.SQL, boolean>`${'fts'} @@ ${tsqueryFragment}`;
-        const rank = db.sql<maps.SQL, number>`ts_rank_cd(${'fts'}, ${tsqueryFragment})`;
+        const ftsMatch = db.sql<maps.SQL, boolean>`${'fts'} @@ ${tsqueryPartial}`;
+        const rank = db.sql<maps.SQL, number>`ts_rank_cd(${'fts'}, ${tsqueryPartial})`;
 
         results = await db
           .select(
