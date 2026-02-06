@@ -51,22 +51,24 @@ export function actionError<P, E extends string>(opts: {
   const { errorBody, message, resultError } = opts;
 
   // Attach error message and tags for Sentry. Just pick the details out of the first error for now.
-  const details = resultError?.errors[0];
-  const internalMessage = details?.internalMessage;
+  const primaryError = resultError?.errors[0];
+  const internalMessage = primaryError?.internalMessage;
   const error = new Error(
     internalMessage ? `Internal message: ${internalMessage}\n${message}` : message
   );
-  if (details?.stack) {
-    error.stack = details.stack;
+  if (primaryError?.stack) {
+    error.stack = primaryError.stack;
   }
-  if (details) {
-    Sentry.setTag('type', details.type);
+  if (primaryError) {
+    Sentry.setTag('type', primaryError.type);
+    if (primaryError.details) {
+      Sentry.setExtras(primaryError.details);
+    }
   }
   Sentry.captureException(error);
   if (opts.shouldLog) {
     log.error('Server error: ' + message, {
-      error,
-      details,
+      ...primaryError,
     });
   }
 

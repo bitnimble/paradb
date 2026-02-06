@@ -9,18 +9,22 @@ export type ResultError<E extends string> = {
     userMessage?: string;
     internalMessage?: string;
     stack?: string;
+    details?: Record<string, string | number | boolean | unknown>;
   }[];
 };
 export function wrapError<E extends string, _Error extends ResultError<E>>(
   e: unknown,
   type: E,
-  userMessage?: string
-) {
+  details?: Record<string, string | number | boolean | unknown>
+): _Error['errors'][number] {
   return {
     type,
-    userMessage,
     internalMessage: (e as Error).message,
     stack: (new Error().stack || '') + ((e as Error).stack || ''),
+    details: {
+      ...details,
+      cause: (e as Error).cause,
+    },
   };
 }
 export type Result<T, E extends string> = ResultSuccess<T> | ResultError<E>;

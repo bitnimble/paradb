@@ -64,6 +64,7 @@ async function s3Get(key: string): PromisedResult<Buffer, S3Error> {
           {
             type: S3Error.S3_GET_ERROR,
             internalMessage: 'Missing S3 body',
+            details: { key },
           },
         ],
       };
@@ -75,7 +76,7 @@ async function s3Get(key: string): PromisedResult<Buffer, S3Error> {
   } catch (e) {
     return {
       success: false,
-      errors: [wrapError(e, S3Error.S3_GET_ERROR)],
+      errors: [wrapError(e, S3Error.S3_GET_ERROR, { key })],
     };
   }
 }
@@ -107,6 +108,7 @@ async function s3Put(
           type: S3Error.S3_WRITE_ERROR,
           internalMessage: (e as Error).message,
           stack: (e as Error).stack,
+          details: { key, contentType, contentLength: buffer.length },
         },
       ],
     };
@@ -128,8 +130,8 @@ async function s3Delete(keys: string[]): PromisedResult<undefined, S3Error> {
       })
     );
     return { success: true, value: undefined };
-  } catch {
-    return { success: false, errors: [{ type: S3Error.S3_DELETE_ERROR }] };
+  } catch (e) {
+    return { success: false, errors: [wrapError(e, S3Error.S3_DELETE_ERROR, { keys })] };
   }
 }
 
@@ -160,6 +162,7 @@ async function s3Move(oldKey: string, newKey: string): PromisedResult<undefined,
           type: S3Error.S3_WRITE_ERROR,
           internalMessage: (e as Error).message,
           stack: (e as Error).stack,
+          details: { oldKey, newKey },
         },
       ],
     };
@@ -285,13 +288,7 @@ export async function promoteTempMapFiles(id: string): PromisedResult<undefined,
   } catch (e) {
     return {
       success: false,
-      errors: [
-        {
-          type: S3Error.S3_WRITE_ERROR,
-          internalMessage: (e as Error).message,
-          stack: (e as Error).stack,
-        },
-      ],
+      errors: [wrapError(e, S3Error.S3_WRITE_ERROR, { id })],
     };
   }
 
