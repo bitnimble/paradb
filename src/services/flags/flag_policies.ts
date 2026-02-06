@@ -32,20 +32,27 @@ const getCachedRequestContext = dedupe(() => {
   return getUserSession();
 });
 
-const createFlagConfigStore = () => {
+type FlagStore = {
+  origin: string;
+  getPolicy: (key: string) => Promise<Policy | undefined> | Policy;
+};
+
+function createFlagConfigStore(): FlagStore {
   const envVars = getEnvVars();
   if (envVars.flagsImplementation === 'edge-config') {
     const config = createClient(envVars.flagsEdgeConfig);
     let cachedDigest = '';
     let cachedFlags: Record<string, Policy> | undefined;
 
-    const maybeUpdateFlags = async () => {
+    const maybeUpdateFlags = dedupe(async () => {
       const digest = await config.digest();
-      if (cachedDigest !== digest) {
+      // Even though the digest type is `string`, it actually returns `null` when the config has
+      // not changed, so skip update if null.
+      if (digest != null && cachedDigest !== digest) {
         cachedFlags = await config.get<Record<string, Policy>>(envVars.flagsEdgeConfigKey);
         cachedDigest = digest;
       }
-    };
+    });
 
     return {
       origin: envVars.flagsEdgeConfig,
@@ -64,10 +71,9 @@ const createFlagConfigStore = () => {
   } else {
     throw new Error('Unknown flags implementation: ' + envVars.flagsImplementation);
   }
-};
+}
 
-const createTypedAdapter = <T>(schema: z.ZodType<T>, typeDefaultValue: T) => {
-  const flagStore = createFlagConfigStore();
+const createTypedAdapter = <T>(flagStore: FlagStore, schema: z.ZodType<T>, typeDefaultValue: T) => {
   const policySchema = z.intersection(policy, z.object({ value: schema }));
 
   return (): Adapter<T, UserSession> => {
@@ -131,8 +137,9 @@ const createTypedAdapter = <T>(schema: z.ZodType<T>, typeDefaultValue: T) => {
   };
 };
 
-export const stringFlagAdapter = createTypedAdapter(z.string(), '');
-export const booleanFlagAdapter = createTypedAdapter(z.boolean(), false);
+const flagStore = createFlagConfigStore();
+export const stringFlagAdapter = createTypedAdapter(flagStore, z.string(), '');
+export const booleanFlagAdapter = createTypedAdapter(flagStore, z.boolean(), false);
 
 export const stringFlag = (flagKey: string) =>
   flag({
