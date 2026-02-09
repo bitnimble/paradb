@@ -16,11 +16,12 @@ export default async function globalSetup() {
   const pool = new Pool();
 
   // Verify tables exist (they should from supabase start + migrations)
+  const expectedTables = ['maps', 'users', 'favorites', 'difficulties'];
   const result = await pool.query(`
     SELECT table_name FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name IN ('maps', 'users', 'favorites', 'difficulties')
-  `);
-  if (result.rows.length < 4) {
+    WHERE table_schema = 'public' AND table_name = ANY($1)
+  `, [expectedTables]);
+  if (result.rows.length < expectedTables.length) {
     throw new Error(
       'Expected database tables not found. Make sure `supabase start` has been run ' +
         'and migrations have been applied.'

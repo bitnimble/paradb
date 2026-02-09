@@ -7,21 +7,24 @@ import { getServerContext } from 'services/server_context';
 const projectDir = process.cwd();
 loadEnvConfig(projectDir);
 
-async function deleteAllAuthUsers() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SECRET_KEY!;
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SECRET_KEY!
+);
 
-  const { data, error } = await supabase.auth.admin.listUsers();
+async function deleteAllAuthUsers() {
+  const { data, error } = await supabaseAdmin.auth.admin.listUsers();
   if (error) {
     throw new Error(`Failed to list auth users: ${error.message}`);
   }
-  for (const user of data.users) {
-    const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
-    if (deleteError) {
-      throw new Error(`Failed to delete auth user ${user.id}: ${deleteError.message}`);
-    }
-  }
+  await Promise.all(
+    data.users.map(async (user) => {
+      const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+      if (deleteError) {
+        throw new Error(`Failed to delete auth user ${user.id}: ${deleteError.message}`);
+      }
+    })
+  );
 }
 
 async function resetTestData() {
