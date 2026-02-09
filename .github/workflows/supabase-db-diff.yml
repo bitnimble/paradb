@@ -1,0 +1,53 @@
+name: Generate Supabase Migration
+on:
+  workflow_dispatch:
+    inputs:
+      migration_name:
+        description: 'Name for the migration (optional, defaults to timestamp)'
+        required: false
+        type: string
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  generate-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup development environment
+        uses: ./.github/actions/copilot-setup-steps
+      - name: Start Supabase
+        run: |
+          supabase start
+          echo "Supabase started successfully"
+      - name: Generate migration from schema changes
+        run: |
+          if [ -n "${{ inputs.migration_name }}" ]; then
+            supabase db diff -f "${{ inputs.migration_name }}"
+          else
+            supabase db diff
+          fi
+          echo "Migration generated successfully"
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [ -n "$(git status --porcelain supabase/migrations/)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            git status --porcelain supabase/migrations/
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No migration changes detected"
+          fi
+      - name: Commit and push migration
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add supabase/migrations/
+          git commit -m "chore: generate migration from schema changes"
+          git push
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
+

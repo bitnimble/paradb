@@ -1,0 +1,21 @@
+name: 'Setup Development Environment'
+description: 'Sets up the required development environment for paradb (bun, Supabase CLI, etc.)'
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+    - name: Install dependencies
+      shell: bash
+      run: bun install
+    - name: Setup Supabase CLI
+      uses: supabase/setup-cli@v1
+      with:
+        version: latest
+    - name: Verify installations
+      shell: bash
+      run: |
+        echo "Bun version: $(bun --version)"
+        echo "Supabase version: $(supabase --version)"
