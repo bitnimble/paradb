@@ -10,7 +10,7 @@ loadEnvConfig(projectDir);
  */
 export default async function globalSetup() {
   console.log('Resetting Supabase database for tests...');
-  execSync('bun supabase db reset', {
+  execSync('bun supabase db reset --yes', {
     cwd: projectDir,
     stdio: 'inherit',
   });
