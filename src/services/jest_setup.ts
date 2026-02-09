@@ -1,28 +1,18 @@
+import { execSync } from 'child_process';
 import { loadEnvConfig } from '@next/env';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { getServerContext } from 'services/server_context';
 
 const projectDir = process.cwd();
 loadEnvConfig(projectDir);
 
-async function initTestData() {
-  const { pool } = await getServerContext();
-  const seedSqlPath = path.resolve(__dirname, '../../supabase/seed.sql');
-  const seedSql = await fs.readFile(seedSqlPath).then((b) => b.toString());
-  await pool.query(`
-TRUNCATE maps, difficulties, users, favorites CASCADE;
-${seedSql}
-`);
-}
-
 beforeEach(async () => {
-  // TODO: figure out a better way to do this now that Next and Jest don't run in the same server
-  // context.
   if (process.env.NODE_ENV === 'production' || (process.env.NODE_ENV as string) === 'prod') {
     throw new Error('Almost dropped DB on prod env');
   }
-  await initTestData();
+  execSync('bun supabase db reset', {
+    cwd: projectDir,
+    stdio: 'inherit',
+  });
 });
 afterAll(async () => {
   const { pool } = await getServerContext();

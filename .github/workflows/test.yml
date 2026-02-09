@@ -1,0 +1,44 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase
+        run: supabase start
+
+      - name: Set Supabase env vars
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$(supabase status -o env | grep ANON_KEY | cut -d '=' -f2)" >> $GITHUB_ENV
+          echo "SUPABASE_SECRET_KEY=$(supabase status -o env | grep SERVICE_ROLE_KEY | cut -d '=' -f2)" >> $GITHUB_ENV
+
+      - name: Typecheck and lint
+        run: bun check
+
+      - name: Run tests
+        run: bun test
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
