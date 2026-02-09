@@ -26,13 +26,36 @@ The codebase uses Docker to run third-party services locally (Meilisearch for se
 - Avoid use of `any` unless absolutely necessary.
 - Prefer early-exit if statements rather than nested if statements.
 - Avoid the use of barrel files
-- When writing code interacting with the Postgres database, use Zapatos helper functions where possible and ideally avoid direct SQL. If possible, use Zapatos conditions helpers (via db.conditions) over db.sql template function. If you absolutely must use SQL, use the Zapatos db.sql template function.
+- When writing code interacting with the Postgres database, use Zapatos helper functions where possible and ideally avoid direct SQL. If possible, use Zapatos conditions helpers (via db.conditions) over db.sql template function. If you absolutely must use SQL, use the Zapatos db.sql template function. Never use `db.raw`.
+- Types that are only used internally within a file should not be exported. Only export types that are needed by other modules.
+
+# React
+
+- Use `mobx-react-lite` instead of `mobx-react` for observer components
+- For client-side pages with forms, prefer the simple pattern: `useState` for the store, instantiate the presenter directly in the component, access store fields directly (e.g. `store.email`, `store.errors.get('field')`) rather than destructuring into intermediate variables or passing as props to a separate component
+- Avoid creating factory functions like `createXyzPage()` that return observer components. Instead, export `observer(() => { ... })` directly as the default export
+- Avoid separating page.tsx into multiple component files when the component is simple; inline the JSX directly in page.tsx
+
+# MobX
+
+- Use MobX decorators (`@observable`, `@action`, `@computed`) instead of `makeObservable`
+- Use `@action.bound` for methods that modify state, rather than wrapping calls in `runInAction()`
+- For simple setters (e.g. `setSubmitting`, `setSuccess`), use `@action.bound` decorator on arrow function properties
+
+# Dependency injection
+
+- For Supabase client access on the client side, prefer calling `createClient()` directly at the point of use rather than passing it as a constructor parameter or through context. This keeps components simpler and avoids unnecessary prop drilling.
 
 # CSS
 
 - Use design tokens present in the root layout as CSS variables
 - Any metric should be based on a multiple of gridBaseline. Fractional multipliers are okay if necessary, e.g. calc(1.5 \* var(--gridBaseline))
 - Metrics that aren't dependent on "UI scale" should not be based on gridBaseline, e.g. font sizes, line heights, percentage border radii, 1px thin borders, etc.
+
+# Routing
+
+- Prefer nested routes over flat routes with hyphens (e.g. `/password/reset` instead of `/reset-password`, `/password/reset/update` instead of `/update-password`)
+- Route segments should be short, single words where possible
 
 # Commands
 
@@ -53,10 +76,12 @@ If you're receiving a request through an issue or PR comment, always:
   - Ensure that anything renamed is correctly refactored in any usage
   - Always look around the rest of the codebase first to see if a similar problem is solved elsewhere, and either copy the strategy and adjust where necessary, or refactor it to be shared.
   - Any unused or unreachable code is deleted
+  - If experiencing issues and applying multiple fixes, once the issue is resolved, go back and clean up any old fixes that are no longer applicable or weren't actually the fix
   - Keep solutions minimal and as simple as possible, and avoid adding additional complexity or structures unless absolutely necessary
   - Avoid adding new third party libraries unless necessary - if so, confirm with the requester that the dependency is okay to add first before proceeding
   - Output code is correctly formatted with Prettier, imports are organised, and both typechecking and lint passes
   - Before finishing, remove all of your bias and clear your context as much as possible, and pretend to be another agent and review your own code. Make note of any review comments or suggestions, and then apply them.
+  - Before assigning reviewers in a PR, start a subagent acting as a code reviewer to review the changes.
   - If this is a request on an issue, commit the result and raise a PR, and add the person who requested the task as a reviewer. Come up with a very short and descriptive PR description.
   - If asked to make a PR, do not provide a PR creation link. You should push the branch and actually create the actual PR yourself using `gh pr create`.
   - If this is a follow up comment on a PR, commit the result and push to the PR branch, and then ping the person who requested it to re-review, along with a very short and descriptive comment describing the latest commit changes.
