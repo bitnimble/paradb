@@ -2,6 +2,7 @@ import { loadEnvConfig } from '@next/env';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import pg from 'pg';
+import { DatabaseError } from 'pg-protocol';
 
 const projectDir = process.cwd();
 loadEnvConfig(projectDir);
@@ -62,11 +63,11 @@ export default async function globalSetup() {
         const sql = await fs.readFile(filePath, 'utf-8');
         await testPool.query(sql);
       } catch (e: unknown) {
-        const pgError = e as { code?: string };
         // 42P07 = duplicate_table, 42710 = duplicate_object — schema already applied
-        if (pgError.code !== '42P07' && pgError.code !== '42710') {
-          console.warn(`Warning: failed to apply ${file}:`, e);
+        if (e instanceof DatabaseError && (e.code === '42P07' || e.code === '42710')) {
+          continue;
         }
+        console.warn(`Warning: failed to apply ${file}:`, e);
       }
     }
   } finally {
