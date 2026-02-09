@@ -30,8 +30,10 @@ jobs:
 
       - name: Set Supabase env vars
         run: |
-          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$(supabase status -o env | grep ANON_KEY | cut -d '=' -f2)" >> $GITHUB_ENV
-          echo "SUPABASE_SECRET_KEY=$(supabase status -o env | grep SERVICE_ROLE_KEY | cut -d '=' -f2)" >> $GITHUB_ENV
+          supabase status -o env > /tmp/supabase_env
+          source /tmp/supabase_env
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> $GITHUB_ENV
+          echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY" >> $GITHUB_ENV
 
       - name: Typecheck and lint
         run: bun check
