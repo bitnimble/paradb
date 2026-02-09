@@ -12,6 +12,9 @@ async function resetTestData() {
   const seedSql = await fs.readFile(seedSqlPath).then((b) => b.toString());
   // Full schema reset is handled once by `supabase db reset` in jest_global_setup.ts.
   // Here we just truncate all data and re-seed for each test.
+  // Clear Supabase Auth users first (separate from app users table) to avoid
+  // "email already registered" / "username already taken" errors across tests.
+  await pool.query(`TRUNCATE auth.users CASCADE`);
   await pool.query(`
 TRUNCATE maps, difficulties, users, favorites RESTART IDENTITY CASCADE;
 ${seedSql}
