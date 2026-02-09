@@ -31,13 +31,12 @@ async function resetTestData() {
   const { pool } = await getServerContext();
   const seedSqlPath = path.resolve(__dirname, '../../supabase/seed.sql');
   const seedSql = await fs.readFile(seedSqlPath).then((b) => b.toString());
-  // Full schema setup is handled by `supabase start` (migrations + schemas).
-  // Here we just truncate all data and re-seed for each test.
+  // Tests use the `paradb_test` schema to avoid clobbering dev data in `public`.
   // Clear Supabase Auth users via the admin SDK to avoid
   // "email already registered" / "username already taken" errors across tests.
   await deleteAllAuthUsers();
   await pool.query(`
-TRUNCATE maps, difficulties, users, favorites RESTART IDENTITY CASCADE;
+TRUNCATE paradb_test.maps, paradb_test.difficulties, paradb_test.users, paradb_test.favorites RESTART IDENTITY CASCADE;
 ${seedSql}
 `);
 }
