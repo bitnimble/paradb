@@ -12,16 +12,23 @@ loadEnvConfig(projectDir);
  * from the local dev environment.
  */
 export default async function globalSetup() {
-  const testDb = process.env.PGDATABASE!;
-  const host = process.env.PGHOST!;
-  const port = Number(process.env.PGPORT!);
-  const user = process.env.PGUSER!;
-  const password = process.env.PGPASSWORD!;
+  const testDb = process.env.PGDATABASE;
+  const host = process.env.PGHOST;
+  const port = process.env.PGPORT;
+  const user = process.env.PGUSER;
+  const password = process.env.PGPASSWORD;
+
+  if (!testDb || !host || !port || !user || !password) {
+    throw new Error('Missing required PG* environment variables for test setup');
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(testDb)) {
+    throw new Error(`Invalid test database name: ${testDb}`);
+  }
 
   // Connect to the default `postgres` database to create the test database
   const adminPool = new pg.Pool({
     host,
-    port,
+    port: Number(port),
     database: 'postgres',
     user,
     password,
@@ -39,7 +46,7 @@ export default async function globalSetup() {
   // Connect to the test database and apply the schema
   const testPool = new pg.Pool({
     host,
-    port,
+    port: Number(port),
     database: testDb,
     user,
     password,
@@ -54,8 +61,12 @@ export default async function globalSetup() {
       try {
         const sql = await fs.readFile(filePath, 'utf-8');
         await testPool.query(sql);
-      } catch {
-        // Schema already exists, skip
+      } catch (e: unknown) {
+        const pgError = e as { code?: string };
+        // 42P07 = duplicate_table, 42710 = duplicate_object — schema already applied
+        if (pgError.code !== '42P07' && pgError.code !== '42710') {
+          console.warn(`Warning: failed to apply ${file}:`, e);
+        }
       }
     }
   } finally {
