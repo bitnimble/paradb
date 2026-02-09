@@ -20,6 +20,15 @@ loadEnvConfig(projectDir);
  * 4. Deletes any leftover Supabase Auth users from previous test runs
  */
 export default async function globalSetup() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
+  if (!supabaseUrl || !supabaseSecretKey) {
+    throw new Error(
+      'NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY must be set in .env.test. ' +
+        'Run `supabase status` and copy the anon key and service_role key.'
+    );
+  }
+
   const pool = new Pool();
 
   // Create the test schema and set search_path so CREATE TABLE lands there
@@ -34,7 +43,8 @@ export default async function globalSetup() {
     DROP TABLE IF EXISTS paradb_test.maps CASCADE;
   `);
 
-  // Apply schema DDL files in dependency order
+  // Apply schema DDL files in dependency order:
+  // maps.sql creates maps + difficulties; users.sql creates users; favorites.sql creates favorites (FK to both)
   const schemaDir = path.resolve(projectDir, 'supabase/schemas');
   const schemaFiles = ['maps.sql', 'users.sql', 'favorites.sql'];
   for (const file of schemaFiles) {
@@ -54,10 +64,7 @@ export default async function globalSetup() {
   await pool.query(seedSql);
 
   // Delete any leftover Supabase Auth users from previous test runs
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!
-  );
+  const supabaseAdmin = createClient(supabaseUrl, supabaseSecretKey);
   const { data } = await supabaseAdmin.auth.admin.listUsers();
   if (data?.users) {
     await Promise.all(
