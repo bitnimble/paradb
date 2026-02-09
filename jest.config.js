@@ -5,6 +5,7 @@ const createJestConfig = nextJest({ dir: './' });
 
 const config = {
   testMatch: ['**/tests/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+  globalSetup: '<rootDir>/src/services/jest_global_setup.ts',
   setupFilesAfterEnv: ['<rootDir>/src/services/jest_setup.ts'],
   modulePaths: ['<rootDir>/src'],
 };
