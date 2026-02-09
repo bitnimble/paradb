@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js';
 import { loadEnvConfig } from '@next/env';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -6,15 +7,32 @@ import { getServerContext } from 'services/server_context';
 const projectDir = process.cwd();
 loadEnvConfig(projectDir);
 
+async function deleteAllAuthUsers() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SECRET_KEY!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+  const { data, error } = await supabase.auth.admin.listUsers();
+  if (error) {
+    throw new Error(`Failed to list auth users: ${error.message}`);
+  }
+  for (const user of data.users) {
+    const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
+    if (deleteError) {
+      throw new Error(`Failed to delete auth user ${user.id}: ${deleteError.message}`);
+    }
+  }
+}
+
 async function resetTestData() {
   const { pool } = await getServerContext();
   const seedSqlPath = path.resolve(__dirname, '../../supabase/seed.sql');
   const seedSql = await fs.readFile(seedSqlPath).then((b) => b.toString());
-  // Full schema reset is handled once by `supabase db reset` in jest_global_setup.ts.
+  // Full schema setup is handled by `supabase start` (migrations + schemas).
   // Here we just truncate all data and re-seed for each test.
-  // Clear Supabase Auth users first (separate from app users table) to avoid
+  // Clear Supabase Auth users via the admin SDK to avoid
   // "email already registered" / "username already taken" errors across tests.
-  await pool.query(`TRUNCATE auth.users CASCADE`);
+  await deleteAllAuthUsers();
   await pool.query(`
 TRUNCATE maps, difficulties, users, favorites RESTART IDENTITY CASCADE;
 ${seedSql}
