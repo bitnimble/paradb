@@ -58,7 +58,7 @@ export class MeilisearchIndex implements SearchIndex {
     const response = (await this._index.search<SearchableMap>(query, {
       offset: options?.offset,
       limit: options?.limit,
-      sort: options?.sort,
+      sort: options?.sort?.map((s) => `${s.attribute}:${s.direction}`),
       filter: options?.filter,
       page: options?.page,
       hitsPerPage: options?.hitsPerPage,

@@ -1,4 +1,4 @@
-import { PDMap } from 'schema/maps';
+import { MapSortableAttributes, PDMap } from 'schema/maps';
 
 // Input type for indexing maps - accepts PDMap or partial with required id
 export type MapDocument = Partial<PDMap> & { id: string };
@@ -11,11 +11,16 @@ export type SearchResult = {
   hitsPerPage?: number;
 };
 
+export type SortOption = {
+  attribute: MapSortableAttributes;
+  direction: 'asc' | 'desc';
+};
+
 // Search options
 export type SearchOptions = {
   offset?: number;
   limit?: number;
-  sort?: string[];
+  sort?: SortOption[];
   filter?: string;
   page?: number;
   hitsPerPage?: number;

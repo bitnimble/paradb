@@ -157,7 +157,7 @@ export class MapsRepo {
     const response = await this.searchIndex.search(query, {
       offset,
       limit,
-      sort: sort && sortDirection ? [`${sort}:${sortDirection}`] : undefined,
+      sort: sort && sortDirection ? [{ attribute: sort, direction: sortDirection }] : undefined,
     });
     const searchResults = response.hits;
     const ids = searchResults.map((r) => r.id);

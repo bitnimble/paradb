@@ -1,18 +1,25 @@
-import { MapVisibility } from 'schema/maps';
+import { MapSortableAttributes, MapVisibility } from 'schema/maps';
 import { getDbPool } from 'services/db/pool';
 import * as db from 'zapatos/db';
 import { maps } from 'zapatos/schema';
 import { MapDocument, SearchIndex, SearchOptions, SearchResult } from './types';
 
-// Valid sortable fields mapping to snake_case column names
-type SortableColumn = 'title' | 'artist' | 'author' | 'submission_date' | 'download_count';
-const SORTABLE_FIELDS: Record<string, SortableColumn> = {
+const SORTABLE_COLUMNS: Partial<
+  Record<MapSortableAttributes, maps.Column | db.SQLFragment<any, never>>
+> = {
   title: 'title',
   artist: 'artist',
   author: 'author',
+  favorites: db.sql`lateral_favorites`,
   submissionDate: 'submission_date',
   downloadCount: 'download_count',
 };
+
+const SORTABLE_LATERAL: Partial<Record<MapSortableAttributes, db.SQLFragment<number, never>>> = {
+  favorites: db.count('favorites', { map_id: db.parent('id') }),
+};
+
+type SortDirection = 'ASC' | 'DESC';
 
 export class PostgresIndex implements SearchIndex {
   async search(query: string, options?: SearchOptions): Promise<SearchResult> {
@@ -22,16 +29,19 @@ export class PostgresIndex implements SearchIndex {
     const offset = options?.offset ?? 0;
     const limit = options?.limit ?? 20;
 
-    // Build order option from sort, default to most recent submissions
-    let sortOrder: { by: SortableColumn; direction: 'ASC' | 'DESC' } | undefined;
+    // Build sort config from options
+    let sortOrder:
+      | { by: maps.Column | db.SQLFragment<any, never>; direction: SortDirection }
+      | undefined;
+    let sortLateral: Record<string, db.SQLFragment<number, never>> | undefined;
     if (options?.sort && options.sort.length > 0) {
-      const [field, direction] = options.sort[0].split(':');
-      const columnName = SORTABLE_FIELDS[field];
-      if (columnName) {
-        sortOrder = {
-          by: columnName,
-          direction: direction.toUpperCase() === 'DESC' ? 'DESC' : 'ASC',
-        };
+      const { attribute, direction } = options.sort[0];
+      const by = SORTABLE_COLUMNS[attribute];
+      if (by) {
+        sortOrder = { by, direction: direction.toUpperCase() as SortDirection };
+        if (attribute in SORTABLE_LATERAL) {
+          sortLateral = { [attribute]: SORTABLE_LATERAL[attribute]! };
+        }
       }
     }
 
@@ -45,6 +55,7 @@ export class PostgresIndex implements SearchIndex {
           },
           {
             columns: ['id'],
+            lateral: sortLateral,
             order: sortOrder ?? {
               by: 'submission_date',
               direction: 'DESC',
@@ -86,6 +97,7 @@ export class PostgresIndex implements SearchIndex {
             ),
             {
               columns: ['id'],
+              lateral: sortLateral,
               order: sortOrder ?? [
                 { by: exactMatch, direction: 'DESC' },
                 { by: rank, direction: 'DESC' },
