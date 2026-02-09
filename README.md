@@ -6,19 +6,22 @@ git clone https://github.com/bitnimble/paradb.git
 cd paradb
 bun install
 
-# Install and start postgres
-sudo apt install postgresql
-sudo service postgresql start
+# Start local Supabase (requires Supabase CLI)
+bun supabase start
 
-# Create postgres user for yourself
-sudo -u postgres createuser --interactive --pwprompt
+# Copy the example env file and fill in any missing values
+cp .env.test .env.localdev
 
-# Edit .env to fill out your username and password!
+# Start the dev server
+bun dev:local
+```
 
-# Create db and instantiate schema
-createdb paradb
-db/init.sh
+## Running tests
 
-# Start server
-bun dev
+```
+# Ensure local Supabase is running
+bun supabase start
+
+# Run tests
+bun test
 ```

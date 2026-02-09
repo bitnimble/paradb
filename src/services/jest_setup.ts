@@ -8,11 +8,11 @@ loadEnvConfig(projectDir);
 
 async function initTestData() {
   const { pool } = await getServerContext();
-  const initialDataSqlPath = path.resolve(__dirname, '../../db/fake_data.sql');
-  const initialDataSql = await fs.readFile(initialDataSqlPath).then((b) => b.toString());
+  const seedSqlPath = path.resolve(__dirname, '../../supabase/seed.sql');
+  const seedSql = await fs.readFile(seedSqlPath).then((b) => b.toString());
   await pool.query(`
 TRUNCATE maps, difficulties, users, favorites CASCADE;
-${initialDataSql}
+${seedSql}
 `);
 }
 

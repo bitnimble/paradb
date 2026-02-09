@@ -6,13 +6,11 @@
     "dev:local": "dotenv -e .env.localdev -- bun next dev",
     "dev:dev": "dotenv -e .env.dev -- bun next dev",
     "dev:prod": "dotenv -e .env.prod -- bun next dev",
-    "build": "sudo docker compose -f docker/docker-compose.yml --env-file .env build",
-    "start": "sudo docker compose -f docker/docker-compose.yml --env-file .env up --build",
     "check": "bun tsc && bun eslint .",
     "lint": "eslint .",
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",
-    "test": "sudo docker compose -f docker/docker-compose.test.yml --env-file .env.test up --build --abort-on-container-exit"
+    "test": "dotenv -e .env.test -- bun jest --runInBand"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.958.0",
