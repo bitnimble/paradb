@@ -37,12 +37,26 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY" >> $GITHUB_ENV
           echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY" >> $GITHUB_ENV
 
+      - name: Load test env vars
+        run: |
+          # Load .env.test into GITHUB_ENV, skipping comments and blank lines
+          while IFS= read -r line; do
+            # Skip comments and empty lines
+            [[ -z "$line" || "$line" =~ ^# ]] && continue
+            key="${line%%=*}"
+            value="${line#*=}"
+            # Only set if not already defined (Supabase keys from previous step take precedence)
+            if [[ -z "${!key}" ]]; then
+              echo "$key=$value" >> $GITHUB_ENV
+            fi
+          done < .env.test
+
       - name: Typecheck and lint
         run: bun check
 
       - name: Start dev server
         run: |
-          dotenv -e .env.test -- bun next dev &
+          bun next dev &
           # Wait for the server to be ready
           for i in $(seq 1 30); do
             if curl -s http://localhost:3000 > /dev/null 2>&1; then

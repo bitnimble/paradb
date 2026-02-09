@@ -51,9 +51,16 @@ async function createServerContext(): Promise<ServerContext> {
 
 export const getServerContext = async () => {
   const serverContext = await getSingleton('_serverContext', createServerContext);
-  // Supabase client must be re-created on each incoming request as it's dependent on cookies/JWT
+  // Supabase client must be re-created on each incoming request as it's dependent on cookies/JWT.
+  // In test environments (outside Next.js request scope), fall back to a cookie-less client.
+  let supabase;
+  try {
+    supabase = await createSupabaseServerClient();
+  } catch {
+    supabase = await createSupabaseServerClient(true);
+  }
   return {
-    supabase: await createSupabaseServerClient(),
+    supabase,
     ...serverContext,
   };
 };
