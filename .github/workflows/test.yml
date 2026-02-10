@@ -30,10 +30,15 @@ jobs:
       - name: Start Supabase
         run: supabase start
 
-      - name: Write Supabase tokens into .env.test
+      - name: Write Supabase config into .env.test
         run: |
           supabase status -o env > /tmp/supabase_env
           source /tmp/supabase_env
+          # CI uses the main Supabase instance (default ports), so override
+          # the test-instance ports that .env.test defaults to.
+          sed -i "s|^PGPORT=.*|PGPORT=54322|" .env.test
+          sed -i "s|^S3_ENDPOINT=.*|S3_ENDPOINT=http://127.0.0.1:54321/storage/v1/s3|" .env.test
+          sed -i "s|^NEXT_PUBLIC_SUPABASE_URL=.*|NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321|" .env.test
           sed -i "s|^NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=.*|NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$ANON_KEY|" .env.test
           sed -i "s|^SUPABASE_SECRET_KEY=.*|SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY|" .env.test
 

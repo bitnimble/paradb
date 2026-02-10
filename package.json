@@ -10,6 +10,8 @@
     "lint": "eslint .",
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",
+    "supabase:test:start": "tools/start_test_supabase.sh",
+    "supabase:test:stop": "supabase stop --workdir supabase-test",
     "test": "dotenv -e .env.test -- bun jest --runInBand"
   },
   "dependencies": {
