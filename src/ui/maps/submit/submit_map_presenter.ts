@@ -77,8 +77,13 @@ export class ThrottledMapUploader {
       xhr.upload.onprogress = action((e: ProgressEvent) => {
         (upload as ActiveUpload).progress = e.loaded / e.total;
       });
-      xhr.upload.onload = action(async () => {
+      xhr.upload.onload = action(() => {
         upload.state = 'processing';
+      });
+      xhr.onload = async () => {
+        if (xhr.status !== 200) {
+          throw new Error(`(${xhr.status}): ${xhr.responseText}`);
+        }
         const processMapResp = await reportUploadComplete(submitMapResp.id, !!reuploadMapId);
         runInAction(() => {
           if (!processMapResp.success) {
@@ -89,7 +94,10 @@ export class ThrottledMapUploader {
             (upload as UploadSuccess).id = submitMapResp.id;
           }
         });
-      });
+      };
+      xhr.onerror = () => {
+        throw new Error(`(${xhr.status}): ${xhr.responseText}`);
+      };
       xhr.open('PUT', submitMapResp.url);
       xhr.setRequestHeader('Content-Type', 'application/zip');
       xhr.send(mapData);
