@@ -162,6 +162,7 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
         additionalClassName={classNames(styles.routeLink, additionalClassName)}
         href={routeFor([RoutePath.MAP, map.id])}
         onClick={onSelect}
+        prefetch={false}
       >
         {contents}
       </RouteLink>
