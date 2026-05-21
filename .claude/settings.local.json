@@ -1,6 +1,25 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
-    "allow": ["Bash(bun check:*)", "Bash(bun tsc:*)", "Bash(bun format:*)"],
+    "allow": [
+      "Bash(bunx tsc:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(bun add:*)",
+      "Bash(bun test:*)",
+      "Bash(bunx playwright test:*)",
+      "Bash(bun run:*)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)"
+    ],
+    "deny": [
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node -e:*)",
+      "Bash(sed:*)",
+      "Bash(grep:*)",
+      "Bash(awk:*)"
+    ],
     "defaultMode": "acceptEdits"
   }
 }
