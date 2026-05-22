@@ -13,21 +13,12 @@ services:
   #     - S3_MAPS_BUCKET=${S3_MAPS_BUCKET}
   #     - BASE_URL=${BASE_URL}
   #     - S3_ENDPOINT=http://localhost:9000
-  #     - MEILISEARCH_HOST=localhost:7700
   #     - DYNAMIC_CONFIG_ENDPOINT=http://minio:9000
   #   volumes:
   #     - ..:/etc/paradb/paradb
   #   depends_on:
-  #     meilisearch:
-  #       condition: service_healthy
   #     minio:
   #       condition: service_healthy
-  meilisearch:
-    extends:
-      file: docker-compose.yml
-      service: meilisearch
-    ports:
-      - 7700:7700
   minio:
     image: minio/minio:latest
     container_name: paradb_minio

@@ -16,9 +16,6 @@ export type EnvVars = {
   s3AccessKeyId: string;
   s3AccessKeySecret: string;
   s3MapsBucket: string;
-  searchImplementation: string;
-  meilisearchHost: string;
-  meilisearchKey: string;
   flagsImplementation: string;
   flagsEdgeConfig: string;
   flagsEdgeConfigKey: string;
@@ -54,9 +51,6 @@ function createEnvVars(): EnvVars {
     s3AccessKeyId: process.env.S3_ACCESS_KEY_ID,
     s3AccessKeySecret: process.env.S3_ACCESS_KEY_SECRET,
     s3MapsBucket: process.env.S3_MAPS_BUCKET,
-    searchImplementation: process.env.SEARCH_IMPLEMENTATION || 'meilisearch',
-    meilisearchHost: process.env.MEILISEARCH_HOST,
-    meilisearchKey: process.env.MEILISEARCH_KEY,
     flagsImplementation: process.env.FLAGS_IMPLEMENTATION,
     flagsEdgeConfig: process.env.FLAGS_EDGE_CONFIG,
     flagsEdgeConfigKey: process.env.FLAGS_EDGE_CONFIG_KEY,
