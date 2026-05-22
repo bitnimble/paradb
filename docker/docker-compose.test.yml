@@ -4,10 +4,6 @@ services:
       file: docker-compose.dev.yml
       service: paradb
     entrypoint: ['tools/docker/test.sh']
-  meilisearch:
-    extends:
-      file: docker-compose.dev.yml
-      service: meilisearch
   minio:
     extends:
       file: docker-compose.dev.yml

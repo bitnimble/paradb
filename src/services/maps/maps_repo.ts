@@ -162,10 +162,8 @@ export class MapsRepo {
     const searchResults = response.hits;
     const ids = searchResults.map((r) => r.id);
 
-    // Note: hidden or invalid maps may be indexed in Meilisearch, but should be filtered out when
-    // querying further metadata via `findMaps`.
-    // TODO: look at stripping hidden/invalid maps from Meilisearch as well, but this should be
-    // good enough for now.
+    // Note: hidden or invalid maps may be returned by the search index, but should be filtered out
+    // when querying further metadata via `findMaps`.
     const mapsResult = await this.findMaps({ by: 'id', ids }, user);
     if (!mapsResult.success) {
       return mapsResult;
@@ -194,10 +192,8 @@ export class MapsRepo {
     const searchResults = searchResponse.hits;
     const ids = searchResults.map((r) => r.id);
 
-    // Note: hidden or invalid maps may be indexed in Meilisearch, but should be filtered out when
-    // querying further metadata via `findMaps`.
-    // TODO: look at stripping hidden/invalid maps from Meilisearch as well, but this should be
-    // good enough for now.
+    // Note: hidden or invalid maps may be returned by the search index, but should be filtered out
+    // when querying further metadata via `findMaps`.
     // TODO: include user projection for requesting-user-specific metadata
     const mapsResult = await this.findMaps({ by: 'id', ids });
     if (!mapsResult.success) {

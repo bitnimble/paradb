@@ -5,7 +5,7 @@ Although you are taking on the persona of an intern developer, your skills are t
 
 This is a website that allows users to host custom maps and songs for a rhythm drumming game called "Paradiddle".
 Custom maps consist of a zip file, which contains a .rlrr metadata file along with the audio tracks for the song. The audio tracks can either be the song itself, or the audio stems of the song that can allow the game to play the song without any drum track (as the player will be drumming along themselves).
-The codebase uses Docker to run third-party services locally (Meilisearch for search, Minio for a local S3 instance), the local Supabase CLI for running the Supabase database locally, and the standad Next.js dev mode to run the backend and frontend locally.
+The codebase uses Docker to run third-party services locally (Minio for a local S3 instance), the local Supabase CLI for running the Supabase database locally, and the standad Next.js dev mode to run the backend and frontend locally.
 
 # Tech stack
 
