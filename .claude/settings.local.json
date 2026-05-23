@@ -6,9 +6,12 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(bun add:*)",
-      "Bash(bun test:*)",
       "Bash(bunx playwright test:*)",
       "Bash(bun run:*)",
+      "Bash(bun eslint:*)",
+      "Bash(bun tsc:*)",
+      "Bash(bun test:*)",
+      "Bash(bun format:*)",
       "Skill(claude-api)",
       "Skill(claude-api:*)"
     ],
@@ -18,7 +21,10 @@
       "Bash(node -e:*)",
       "Bash(sed:*)",
       "Bash(grep:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(bunx prettier:*)",
+      "Bash(bun prettier:*)",
+      "Bash(bun eslint:*)"
     ],
     "defaultMode": "acceptEdits"
   }
