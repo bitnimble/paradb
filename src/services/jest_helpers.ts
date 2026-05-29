@@ -71,7 +71,9 @@ export const testAuthenticate = async (user?: {
       )
     );
 
-  expect(SignupResponse.parse(JSON.parse(resp.body))).toEqual({ success: true });
+  expect(SignupResponse.parse(JSON.parse(resp.body))).toEqual(
+    expect.objectContaining({ success: true })
+  );
 
   return resp.headers['set-cookie'];
 };

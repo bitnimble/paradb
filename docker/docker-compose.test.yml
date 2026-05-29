@@ -1,6 +1,0 @@
-services:
-  paradb:
-    extends:
-      file: docker-compose.dev.yml
-      service: paradb
-    entrypoint: ['tools/docker/test.sh']

@@ -1,0 +1,5 @@
+# `bun test` runs Bun's built-in test runner, which this project does not use (tests run under Jest
+# via the test:unit / test:integration scripts). This preload intercepts `bun test` and prints a
+# pointer to the right scripts. It only affects `bun test`, not `bun run` / `bun jest`.
+[test]
+preload = ["./tools/no-bun-test.ts"]

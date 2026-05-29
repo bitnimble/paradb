@@ -18,6 +18,10 @@ export type EnvVars = {
   s3MapsBucket: string;
   /** 'real' talks to S3; 'fake' returns hardcoded data (for tests, no bucket required). */
   s3Implementation: string;
+  /** 'real' talks to Supabase; 'fake' uses an in-repo fake (for tests, no Supabase required). */
+  supabaseImplementation: string;
+  /** 'real' ships logs to Axiom; 'fake' logs only to the console sink (for tests). */
+  axiomImplementation: string;
   flagsImplementation: string;
   flagsEdgeConfig: string;
   flagsEdgeConfigKey: string;
@@ -73,6 +77,8 @@ function createEnvVars(): EnvVars {
     s3AccessKeySecret: () => requireString('S3_ACCESS_KEY_SECRET'),
     s3MapsBucket: () => requireString('S3_MAPS_BUCKET'),
     s3Implementation: () => process.env.S3_IMPLEMENTATION || 'real',
+    supabaseImplementation: () => process.env.SUPABASE_IMPLEMENTATION || 'real',
+    axiomImplementation: () => process.env.AXIOM_IMPLEMENTATION || 'real',
     flagsImplementation: () => requireString('FLAGS_IMPLEMENTATION'),
     flagsEdgeConfig: () => requireString('FLAGS_EDGE_CONFIG'),
     flagsEdgeConfigKey: () => requireString('FLAGS_EDGE_CONFIG_KEY'),

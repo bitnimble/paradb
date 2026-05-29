@@ -16,8 +16,8 @@ describe('signup handler', () => {
       password: testUser2.password,
       username: testUser2.username,
     });
-    expect(resp1).toEqual({ success: true });
-    expect(resp2).toEqual({ success: true });
+    expect(resp1).toEqual({ success: true, id: expect.stringMatching(/^U[A-Z0-9]{6}$/) });
+    expect(resp2).toEqual({ success: true, id: expect.stringMatching(/^U[A-Z0-9]{6}$/) });
   });
 
   it('does not allow users to sign up with the same username', async () => {
@@ -32,7 +32,7 @@ describe('signup handler', () => {
       username: testUser.username,
     });
 
-    expect(resp1).toEqual({ success: true });
+    expect(resp1).toEqual({ success: true, id: expect.stringMatching(/^U[A-Z0-9]{6}$/) });
     expect(resp2).toEqual({
       success: false,
       statusCode: 400,
@@ -53,7 +53,7 @@ describe('signup handler', () => {
       username: testUser2.username,
     });
 
-    expect(resp1).toEqual({ success: true });
+    expect(resp1).toEqual({ success: true, id: expect.stringMatching(/^U[A-Z0-9]{6}$/) });
     expect(resp2).toEqual({
       success: false,
       statusCode: 400,
