@@ -4,7 +4,6 @@ import * as Sentry from '@sentry/nextjs';
 import { MapValidity } from 'schema/maps';
 import { actionError } from 'services/helpers';
 import { submitErrorMap } from 'services/maps/maps_repo';
-import { deleteFiles, getMapFile } from 'services/maps/s3_handler';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 
@@ -17,7 +16,7 @@ import { getUserSession } from 'services/session/session';
  */
 export async function reportUploadComplete(id: string, isReupload: boolean) {
   return Sentry.withServerActionInstrumentation('upload_complete', async () => {
-    const { mapsRepo } = await getServerContext();
+    const { mapsRepo, s3Handler } = await getServerContext();
 
     const validityResult = await mapsRepo.setValidity(
       id,
@@ -43,7 +42,7 @@ export async function reportUploadComplete(id: string, isReupload: boolean) {
         await mapsRepo.deleteMap({ id });
       } else {
         // Delete temp files
-        await deleteFiles(id, true);
+        await s3Handler.deleteFiles(id, true);
         // This is a reupload, so reset validity back to valid
         await mapsRepo.setValidity(id, MapValidity.VALID);
       }
@@ -77,7 +76,7 @@ export async function reportUploadComplete(id: string, isReupload: boolean) {
     }
 
     // Fetch it and begin processing
-    const getMapResult = await getMapFile(id, true);
+    const getMapResult = await s3Handler.getMapFile(id, true);
     if (!getMapResult.success) {
       await cleanupFailedUpload();
       return actionError({

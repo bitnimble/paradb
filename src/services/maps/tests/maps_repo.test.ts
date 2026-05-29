@@ -3,6 +3,9 @@ import { GetMapError } from 'services/maps/maps_repo';
 import { getServerContext } from 'services/server_context';
 import { createUser } from 'services/users/users_repo';
 
+// This suite exercises the maps repo, not auth. Supabase is faked globally via
+// SUPABASE_IMPLEMENTATION=fake (see .env.test), so `createUser` (used only as setup for the
+// favorites test) doesn't require a real Supabase instance.
 describe('maps repo', () => {
   it('can get maps', async () => {
     const { mapsRepo } = await getServerContext();

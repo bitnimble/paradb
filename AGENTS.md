@@ -63,7 +63,9 @@ The codebase uses Docker to run third-party services locally (Minio for a local 
 - `bun supabase start` will start Supabase locally
 - `bun next dev` will run Next.js in dev mode
 - `bun format` will format the codebase with Prettier
-- `bun check` will typecheck and lint
+- `bun typecheck` will typecheck the codebase, and `bun lint` will lint it
+- `bun run test:unit` runs the pure unit tests (`*.unit.test.ts`)
+- `bun run test:integration` runs the integration suite. It needs no live services: the database is an ephemeral in-memory PGlite (started by `tools/test.sh`, with the schema loaded from `supabase/config.toml`'s `schema_paths`), and Supabase, S3, and Axiom are faked (see `.env.test`). Do not run `bun test` (Bun's built-in runner); it's intercepted with a pointer to these scripts.
 
 # How you should work
 

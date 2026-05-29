@@ -1,6 +1,7 @@
 import { _unwrap } from 'base/result';
 import { testUser } from 'services/jest_helpers';
 import { getServerContext } from 'services/server_context';
+import { _setCurrentUserForTesting } from 'services/session/supabase_fake';
 import { changePassword, createUser, getUser } from 'services/users/users_repo';
 import * as db from 'zapatos/db';
 
@@ -21,13 +22,9 @@ describe('user repository', () => {
     expect(actualUsers.length).toEqual(1);
     const user = actualUsers[0];
 
-    // Should be hashed
-    expect(user).toEqual(
-      expect.objectContaining({ email: testUser.email, username: testUser.username })
-    );
-    expect(createdUser).toEqual(
-      expect.objectContaining({ email: testUser.email, username: testUser.username })
-    );
+    // The users table stores username + supabase_id; the email lives in Supabase, not this table.
+    expect(user).toEqual(expect.objectContaining({ username: testUser.username }));
+    expect(createdUser).toEqual(expect.objectContaining({ success: true }));
     expect(/U[A-Z0-9]{6}/.test(createdUser.id)).toEqual(true);
     expect(/U[A-Z0-9]{6}/.test(user.id)).toEqual(true);
     expect(createdUser.id).toEqual(user.id);
@@ -52,6 +49,9 @@ describe('user repository', () => {
     });
     const originalUser = await _unwrap(getUser({ by: 'username', username: testUser.username }));
 
+    // changePassword reads the current session's email via `supabase.auth.getUser`. There's no
+    // request scope here, so install the test user explicitly.
+    _setCurrentUserForTesting({ email: testUser.email });
     const result = await changePassword({
       user: originalUser,
       newPassword: 'ThisIsANewPassword457',

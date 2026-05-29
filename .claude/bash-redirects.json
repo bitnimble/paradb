@@ -1,0 +1,32 @@
+{
+  "$comment": "Project-specific Bash redirects consumed by the global hook at ~/.claude/hooks/redirect-bash-commands.py. Each entry tests every `commands` pattern (`Bash(...)`-style glob, mirrors permissions.deny syntax) against the proposed Bash command; the first match denies the tool call and surfaces `reason` back to the agent. See AGENTS.md §3 for why these scripts exist.",
+  "redirects": [
+    {
+      "commands": [
+        "Bash(bun eslint *)",
+        "Bash(bunx stylelint *)",
+        "Bash(bunx tsc *)",
+        "Bash(bun tsc *)",
+        "Bash(bun prettier *)",
+        "Bash(tsc *)"
+      ],
+      "reason": "Use bun lint, bun typecheck, or bun format instead of invoking tools directly."
+    },
+    {
+      "commands": ["Bash(gh *)"],
+      "reason": "Use the GitHub API via Fetch() instead of invoking gh directly"
+    },
+    {
+      "commands": ["Bash(sed *)", "Bash(grep *)", "Bash(find *)", "Bash(rg *)", "Bash(awk *)"],
+      "reason": "Use the Read(), Write(), Edit() and Find() tools instead of invoking sed, grep, find, rg or awk directly"
+    },
+    {
+      "commands": ["Bash(bun dev *)", "Bash(bun run dev *)"],
+      "reason": "Do not start the dev server as the user probably has their own dev server running, and it will fail to bind to the same port."
+    },
+    {
+      "commands": ["Bash(npm *)", "Bash(npx *)", "Bash(node *)"],
+      "reason": "Use bun instead of node, npm, npx"
+    }
+  ]
+}

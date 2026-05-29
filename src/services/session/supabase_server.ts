@@ -5,9 +5,13 @@ import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { Database } from 'services/db/db.types';
 import { getEnvVars } from 'services/env';
+import { fakeSupabaseClient } from './supabase_fake';
 
-export async function createSupabaseServerClient(skipCookies?: true) {
+export function createSupabaseServerClient(skipCookies?: true) {
   const envVars = getEnvVars();
+  if (envVars.supabaseImplementation === 'fake') {
+    return fakeSupabaseClient();
+  }
   if (skipCookies) {
     return createServerClient<Database>(envVars.supabaseUrl, envVars.supabasePublishableKey, {
       cookies: {
@@ -17,14 +21,16 @@ export async function createSupabaseServerClient(skipCookies?: true) {
       },
     });
   }
-  const cookieStore = await cookies();
+  // The cookie store is fetched lazily inside the handlers so that the client can be created
+  // synchronously (and without a request context) until it actually needs to read/write cookies.
   return createServerClient<Database>(envVars.supabaseUrl, envVars.supabasePublishableKey, {
     cookies: {
-      getAll() {
-        return cookieStore.getAll();
+      async getAll() {
+        return (await cookies()).getAll();
       },
-      setAll(cookiesToSet) {
+      async setAll(cookiesToSet) {
         try {
+          const cookieStore = await cookies();
           cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
         } catch {
           // The `setAll` method was called from a Server Component.
@@ -38,6 +44,9 @@ export async function createSupabaseServerClient(skipCookies?: true) {
 
 export async function _unsafeCreateAdminSupabaseServerClient() {
   const envVars = getEnvVars();
+  if (envVars.supabaseImplementation === 'fake') {
+    return fakeSupabaseClient();
+  }
   return createServerClient<Database>(envVars.supabaseUrl, envVars.supabaseSecretKey, {
     auth: {
       autoRefreshToken: false,
@@ -56,6 +65,11 @@ export async function updateSession(request: NextRequest) {
     request,
   });
   const envVars = getEnvVars();
+  if (envVars.supabaseImplementation === 'fake') {
+    // The fake uses a self-contained cookie that needs no server-side refresh, and constructing a
+    // real client here would fail on the placeholder Supabase URL.
+    return supabaseResponse;
+  }
 
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.

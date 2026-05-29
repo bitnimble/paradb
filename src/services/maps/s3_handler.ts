@@ -13,6 +13,7 @@ import { PromisedResult, Result, wrapError } from 'base/result';
 import * as path from 'path';
 import { getEnvVars } from 'services/env';
 import * as unzipper from 'unzipper';
+import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 let s3: { client: S3Client; bucket: string } | undefined;
 
@@ -20,12 +21,6 @@ let s3: { client: S3Client; bucket: string } | undefined;
 // times at the same time
 const mapKey = (id: string, temp: boolean) => `maps/${id}.zip` + (temp ? '.temp' : '');
 const albumArtPrefix = (id: string, temp: boolean) => `albumArt/${id}` + (temp ? '_temp/' : '/');
-
-export const enum S3Error {
-  S3_GET_ERROR = 's3_get_error',
-  S3_WRITE_ERROR = 's3_write_error',
-  S3_DELETE_ERROR = 's3_delete_error',
-}
 
 function getS3Client() {
   if (s3 == null) {
@@ -184,113 +179,115 @@ function guessContentType(filename: string): string {
   return 'application/octet-stream';
 }
 
-export async function uploadAlbumArtFiles(
-  id: string,
-  albumArtFiles: unzipper.File[],
-  temp: boolean
-): Promise<Result<string | undefined, S3Error>> {
-  // Write album art files to S3
-  // TODO: display all of the album arts in the FE, e.g. in a carousel, or when selecting a difficulty
-  await Promise.all(
-    albumArtFiles.map(async (a) => {
-      const albumArt = checkExists(a, 'albumArt');
-      const buffer = await albumArt.buffer();
-      const filename = path.basename(albumArt.path);
-      return s3Put(`${albumArtPrefix(id, temp)}${filename}`, buffer, guessContentType(filename));
-    })
-  );
-
-  return {
-    success: true,
-    value: albumArtFiles.length > 0 ? path.basename(albumArtFiles[0]!.path) : undefined,
-  };
-}
-
-export async function getMapFile(id: string, temp: boolean) {
-  return s3Get(mapKey(id, temp));
-}
-
-export async function mintUploadUrl(id: string) {
-  try {
-    const s3 = getS3Client();
-    const resp = await getSignedUrl(
-      s3.client,
-      new PutObjectCommand({
-        Bucket: s3.bucket,
-        Key: mapKey(id, true),
-        ContentType: 'application/zip',
-      }),
-      { expiresIn: 3600 } // 1 hour
-    );
-    return { success: true, value: resp } as const;
-  } catch (e) {
-    return { success: false, error: e } as const;
-  }
-}
-
-export async function deleteFiles(id: string, temp: boolean): Promise<Result<undefined, S3Error>> {
-  const [mapDeleteResult] = await Promise.all([
-    // Delete map file
-    s3Delete([mapKey(id, temp)]),
-    // Delete album art
-    (async () => {
-      try {
-        const s3 = getS3Client();
-        const albumArtFiles = await s3.client.send(
-          new ListObjectsV2Command({
-            Bucket: s3.bucket,
-            Prefix: albumArtPrefix(id, temp),
-          })
-        );
-
-        // May throw error if key doesn't exist - that's fine, maybe it was a pre-S3 map
-        await s3Delete(
-          albumArtFiles.Contents?.map((c) => c.Key).filter((k): k is string => k != null) || []
-        );
-      } catch {
-        // TODO: log error to Sentry?
-      }
-    })(),
-  ]);
-
-  if (!mapDeleteResult.success) {
-    return mapDeleteResult;
-  }
-  return { success: true, value: undefined };
-}
-
-export async function promoteTempMapFiles(id: string): PromisedResult<undefined, S3Error> {
-  // Delete originals, if they exist - this may error if this is a new map
-  await deleteFiles(id, false);
-
-  // Move temp to permanent
-  const moveMapResult = await s3Move(mapKey(id, true), mapKey(id, false));
-  if (!moveMapResult.success) {
-    return moveMapResult;
-  }
-
-  // Move album art files
-  try {
-    const s3 = getS3Client();
-    const albumArtFiles = await s3.client.send(
-      new ListObjectsV2Command({
-        Bucket: s3.bucket,
-        Prefix: albumArtPrefix(id, true),
+export class RealS3Handler implements S3Handler {
+  async uploadAlbumArtFiles(
+    id: string,
+    albumArtFiles: unzipper.File[],
+    temp: boolean
+  ): Promise<Result<string | undefined, S3Error>> {
+    // Write album art files to S3
+    // TODO: display all of the album arts in the FE, e.g. in a carousel, or when selecting a difficulty
+    await Promise.all(
+      albumArtFiles.map(async (a) => {
+        const albumArt = checkExists(a, 'albumArt');
+        const buffer = await albumArt.buffer();
+        const filename = path.basename(albumArt.path);
+        return s3Put(`${albumArtPrefix(id, temp)}${filename}`, buffer, guessContentType(filename));
       })
     );
-    const albumArtKeys =
-      albumArtFiles.Contents?.map((c) => c.Key).filter((k): k is string => k != null) || [];
-    await Promise.all(
-      albumArtKeys.map((key) =>
-        s3Move(key, key.replace(albumArtPrefix(id, true), albumArtPrefix(id, false)))
-      )
-    );
-  } catch (e) {
+
     return {
-      success: false,
-      errors: [wrapError(e, S3Error.S3_WRITE_ERROR, { id })],
+      success: true,
+      value: albumArtFiles.length > 0 ? path.basename(albumArtFiles[0]!.path) : undefined,
     };
   }
 
-  return { success: true, value: undefined };
+  async getMapFile(id: string, temp: boolean): PromisedResult<Buffer, S3Error> {
+    return s3Get(mapKey(id, temp));
+  }
+
+  async mintUploadUrl(id: string): Promise<MintUploadUrlResult> {
+    try {
+      const s3 = getS3Client();
+      const resp = await getSignedUrl(
+        s3.client,
+        new PutObjectCommand({
+          Bucket: s3.bucket,
+          Key: mapKey(id, true),
+          ContentType: 'application/zip',
+        }),
+        { expiresIn: 3600 } // 1 hour
+      );
+      return { success: true, value: resp };
+    } catch (e) {
+      return { success: false, error: e };
+    }
+  }
+
+  async deleteFiles(id: string, temp: boolean): Promise<Result<undefined, S3Error>> {
+    const [mapDeleteResult] = await Promise.all([
+      // Delete map file
+      s3Delete([mapKey(id, temp)]),
+      // Delete album art
+      (async () => {
+        try {
+          const s3 = getS3Client();
+          const albumArtFiles = await s3.client.send(
+            new ListObjectsV2Command({
+              Bucket: s3.bucket,
+              Prefix: albumArtPrefix(id, temp),
+            })
+          );
+
+          // May throw error if key doesn't exist - that's fine, maybe it was a pre-S3 map
+          await s3Delete(
+            albumArtFiles.Contents?.map((c) => c.Key).filter((k): k is string => k != null) || []
+          );
+        } catch {
+          // TODO: log error to Sentry?
+        }
+      })(),
+    ]);
+
+    if (!mapDeleteResult.success) {
+      return mapDeleteResult;
+    }
+    return { success: true, value: undefined };
+  }
+
+  async promoteTempMapFiles(id: string): PromisedResult<undefined, S3Error> {
+    // Delete originals, if they exist - this may error if this is a new map
+    await this.deleteFiles(id, false);
+
+    // Move temp to permanent
+    const moveMapResult = await s3Move(mapKey(id, true), mapKey(id, false));
+    if (!moveMapResult.success) {
+      return moveMapResult;
+    }
+
+    // Move album art files
+    try {
+      const s3 = getS3Client();
+      const albumArtFiles = await s3.client.send(
+        new ListObjectsV2Command({
+          Bucket: s3.bucket,
+          Prefix: albumArtPrefix(id, true),
+        })
+      );
+      const albumArtKeys =
+        albumArtFiles.Contents?.map((c) => c.Key).filter((k): k is string => k != null) || [];
+      await Promise.all(
+        albumArtKeys.map((key) =>
+          s3Move(key, key.replace(albumArtPrefix(id, true), albumArtPrefix(id, false)))
+        )
+      );
+    } catch (e) {
+      return {
+        success: false,
+        errors: [wrapError(e, S3Error.S3_WRITE_ERROR, { id })],
+      };
+    }
+
+    return { success: true, value: undefined };
+  }
 }
