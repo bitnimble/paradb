@@ -5,7 +5,7 @@ import { getServerContext } from 'services/server_context';
 import { _setCurrentUserForTesting } from 'services/session/supabase_fake';
 
 async function initTestData() {
-  const { pool } = await getServerContext();
+  const { pool } = getServerContext();
   const seedSqlPath = path.resolve(__dirname, '../../supabase/seed.sql');
   const seedSql = await fs.readFile(seedSqlPath).then((b) => b.toString());
   await pool.query(`
@@ -21,14 +21,14 @@ beforeEach(async () => {
     throw new Error('Almost dropped DB on prod env');
   }
   _setCurrentUserForTesting(null);
-  const { s3Handler } = await getServerContext();
+  const { s3Handler } = getServerContext();
   if (s3Handler instanceof FakeS3Handler) {
     s3Handler._resetForTesting();
   }
   await initTestData();
 });
 afterAll(async () => {
-  const { pool } = await getServerContext();
+  const { pool } = getServerContext();
   await pool.end();
 });
 

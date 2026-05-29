@@ -42,7 +42,7 @@ async function setSessionCookie(session: FakeSession) {
   // In a route handler this attaches a Set-Cookie header. Outside a request scope (in-process tests)
   // cookies() throws, which we ignore since those tests don't read the session back via a cookie.
   try {
-    (await cookies()).set(FAKE_SESSION_COOKIE, encode(session), { path: '/' });
+    (await cookies()).set(FAKE_SESSION_COOKIE, encode(session), { path: '/', httpOnly: true });
   } catch {
     /* no request scope */
   }

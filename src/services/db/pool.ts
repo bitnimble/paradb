@@ -25,6 +25,8 @@ function initPool(maxConnections?: number) {
     max: maxConnections,
   });
   pool.on('error', (error) => log.error('Could not initialise db pool connection', { error }));
-  attachDatabasePool(pool);
+  if (typeof attachDatabasePool === 'function') {
+    attachDatabasePool(pool);
+  }
   return pool;
 }
