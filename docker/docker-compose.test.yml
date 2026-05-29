@@ -4,10 +4,3 @@ services:
       file: docker-compose.dev.yml
       service: paradb
     entrypoint: ['tools/docker/test.sh']
-  minio:
-    extends:
-      file: docker-compose.dev.yml
-      service: minio
-
-volumes:
-  paradb_minio_data:

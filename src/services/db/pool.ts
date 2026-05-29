@@ -6,28 +6,15 @@ import { getSingleton } from 'services/singleton';
 
 const log = getLog(['db']);
 
-export async function getDbPool(maxConnections?: number) {
-  return getSingleton('_dbPool', async () => {
-    const pool = initPool(maxConnections);
-    try {
-      // Quickly test connection to check that DB is running
-      const client = await pool.connect();
-      client.release();
-    } catch (e) {
-      const envVars = getEnvVars();
-      const message =
-        'Could not connect to database, is it running? Connection string: ' +
-        `postgresql://${envVars.pgUser}:<password>@${envVars.pgHost}:${envVars.pgPort}/${envVars.pgDatabase}\n${e}`;
-      log.error(message);
-      throw new Error(message);
-    }
-    return pool;
-  });
+// Returns the (lazily-created, memoized) connection pool. The pool is created synchronously and
+// only opens a connection on first query, so callers that don't query — or that mock the DB —
+// don't trigger a real connection.
+export function getDbPool(maxConnections?: number) {
+  return getSingleton('_dbPool', () => initPool(maxConnections));
 }
 
 function initPool(maxConnections?: number) {
   log.info('Initialising db pool connection');
-  // Test DB
   const envVars = getEnvVars();
   const pool = new pg.Pool({
     host: envVars.pgHost,

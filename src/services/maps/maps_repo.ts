@@ -21,7 +21,7 @@ import { SearchIndex } from 'services/search/types';
 import { getServerContext } from 'services/server_context';
 import snakeCaseKeys from 'snakecase-keys';
 import * as db from 'zapatos/db';
-import { S3Error, deleteFiles, promoteTempMapFiles, uploadAlbumArtFiles } from './s3_handler';
+import { S3Error, S3Handler } from './s3_handler_types';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
 
@@ -56,7 +56,10 @@ export const enum SearchIndexError {
 }
 
 export class MapsRepo {
-  constructor(private readonly searchIndex: SearchIndex) {}
+  constructor(
+    private readonly searchIndex: SearchIndex,
+    private readonly s3Handler: S3Handler
+  ) {}
 
   // TODO: pull `userId` out as RequestContext
   async findMaps(findBy: FindMapsBy, userId?: string): PromisedResult<PDMap[], DbError> {
@@ -382,7 +385,10 @@ export class MapsRepo {
       }
       await this.searchIndex.deleteDocument(id);
       // Attempt to delete any orphaned S3 temp files just in case
-      await Promise.all([deleteFiles(id, true), deleteFiles(id, false)]);
+      await Promise.all([
+        this.s3Handler.deleteFiles(id, true),
+        this.s3Handler.deleteFiles(id, false),
+      ]);
       return { success: true, value: undefined };
     } catch (e) {
       return { success: false, errors: [wrapError(e, DbError.UNKNOWN_DB_ERROR)] };
@@ -452,7 +458,7 @@ export class MapsRepo {
       validatedMapResult.value;
 
     // We are updating a map; delete the old file off S3 first
-    const uploadResult = await uploadAlbumArtFiles(id, albumArtFiles, true);
+    const uploadResult = await this.s3Handler.uploadAlbumArtFiles(id, albumArtFiles, true);
     if (!uploadResult.success) {
       return uploadResult;
     }
@@ -496,7 +502,7 @@ export class MapsRepo {
         )
         .run(pool);
 
-      await promoteTempMapFiles(id);
+      await this.s3Handler.promoteTempMapFiles(id);
 
       const mapResult = PDMap.decode(
         camelCaseKeys({

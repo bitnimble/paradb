@@ -3,6 +3,15 @@ import { GetMapError } from 'services/maps/maps_repo';
 import { getServerContext } from 'services/server_context';
 import { createUser } from 'services/users/users_repo';
 
+// This suite exercises the maps repo, not auth. Mock Supabase so `createUser` (used only as setup
+// for the favorites test) doesn't require a real Supabase instance. Only `createSupabaseServerClient`
+// is reached from this test's import graph, so a partial mock is sufficient.
+jest.mock('services/session/supabase_server', () => ({
+  createSupabaseServerClient: () =>
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('services/session/supabase_mock').fakeSupabaseClient(),
+}));
+
 describe('maps repo', () => {
   it('can get maps', async () => {
     const { mapsRepo } = await getServerContext();

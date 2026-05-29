@@ -16,6 +16,8 @@ export type EnvVars = {
   s3AccessKeyId: string;
   s3AccessKeySecret: string;
   s3MapsBucket: string;
+  /** 'real' talks to S3; 'fake' returns hardcoded data (for tests, no bucket required). */
+  s3Implementation: string;
   flagsImplementation: string;
   flagsEdgeConfig: string;
   flagsEdgeConfigKey: string;
@@ -29,53 +31,72 @@ export type EnvVars = {
 };
 
 /**
- * Retrieves and validates the environment variables.
+ * Retrieves the environment variables. Each variable is validated lazily on first access (see
+ * `createEnvVars`), so reading one variable never forces unrelated ones to be present. This lets
+ * code paths (and tests) that don't touch a given service avoid requiring its config — e.g. the
+ * S3 credentials are never read when the fake S3 implementation is in use.
  */
 export function getEnvVars() {
   return getSingleton('_envVars', createEnvVars);
 }
 
-function createEnvVars(): EnvVars {
-  const envVars: { [K in keyof EnvVars]: EnvVars[K] | undefined } = {
-    baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
-    pgHost: process.env.PGHOST,
-    pgPort: Number(process.env.PGPORT || undefined),
-    pgDatabase: process.env.PGDATABASE,
-    pgUser: process.env.PGUSER,
-    pgPassword: process.env.PGPASSWORD,
-    sentryDsn: process.env.SENTRY_DSN,
-    sentryEnvironment: process.env.SENTRY_ENV,
-    publicS3BaseUrl: process.env.PUBLIC_S3_BASE_URL,
-    s3Endpoint: process.env.S3_ENDPOINT,
-    s3Region: process.env.S3_REGION,
-    s3AccessKeyId: process.env.S3_ACCESS_KEY_ID,
-    s3AccessKeySecret: process.env.S3_ACCESS_KEY_SECRET,
-    s3MapsBucket: process.env.S3_MAPS_BUCKET,
-    flagsImplementation: process.env.FLAGS_IMPLEMENTATION,
-    flagsEdgeConfig: process.env.FLAGS_EDGE_CONFIG,
-    flagsEdgeConfigKey: process.env.FLAGS_EDGE_CONFIG_KEY,
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    supabasePublishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-    supabaseSecretKey: process.env.SUPABASE_SECRET_KEY,
-    axiomApiToken: process.env.AXIOM_API_TOKEN,
-    axiomDataset: process.env.AXIOM_DATASET,
-    axiomPublicApiToken: process.env.NEXT_PUBLIC_AXIOM_API_TOKEN,
-    axiomPublicDataset: process.env.NEXT_PUBLIC_AXIOM_DATASET,
-  };
-  let fail = false;
-  for (const [key, value] of Object.entries(envVars)) {
-    if (
-      value == null ||
-      (typeof value === 'string' && value.trim() === '') ||
-      (typeof value === 'number' && isNaN(value))
-    ) {
-      console.error(`${key} has been left blank in .env -- intentional?`);
-      fail = true;
-    }
+function requireString(envKey: string): string {
+  const value = process.env[envKey];
+  if (value == null || value.trim() === '') {
+    throw new Error(`${envKey} has been left blank in .env -- intentional?`);
   }
-  if (fail) {
-    throw new Error('One or more environment variables were missing, see above.');
-  }
+  return value;
+}
 
-  return envVars as EnvVars;
+function requireNumber(envKey: string): number {
+  const value = Number(process.env[envKey] || undefined);
+  if (isNaN(value)) {
+    throw new Error(`${envKey} is missing or not a number in .env -- intentional?`);
+  }
+  return value;
+}
+
+function createEnvVars(): EnvVars {
+  const getters: { [K in keyof EnvVars]: () => EnvVars[K] } = {
+    baseUrl: () => requireString('NEXT_PUBLIC_BASE_URL'),
+    pgHost: () => requireString('PGHOST'),
+    pgPort: () => requireNumber('PGPORT'),
+    pgDatabase: () => requireString('PGDATABASE'),
+    pgUser: () => requireString('PGUSER'),
+    pgPassword: () => requireString('PGPASSWORD'),
+    sentryDsn: () => requireString('SENTRY_DSN'),
+    sentryEnvironment: () => requireString('SENTRY_ENV'),
+    publicS3BaseUrl: () => requireString('PUBLIC_S3_BASE_URL'),
+    s3Endpoint: () => requireString('S3_ENDPOINT'),
+    s3Region: () => requireString('S3_REGION'),
+    s3AccessKeyId: () => requireString('S3_ACCESS_KEY_ID'),
+    s3AccessKeySecret: () => requireString('S3_ACCESS_KEY_SECRET'),
+    s3MapsBucket: () => requireString('S3_MAPS_BUCKET'),
+    s3Implementation: () => process.env.S3_IMPLEMENTATION || 'real',
+    flagsImplementation: () => requireString('FLAGS_IMPLEMENTATION'),
+    flagsEdgeConfig: () => requireString('FLAGS_EDGE_CONFIG'),
+    flagsEdgeConfigKey: () => requireString('FLAGS_EDGE_CONFIG_KEY'),
+    supabaseUrl: () => requireString('NEXT_PUBLIC_SUPABASE_URL'),
+    supabasePublishableKey: () => requireString('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'),
+    supabaseSecretKey: () => requireString('SUPABASE_SECRET_KEY'),
+    axiomApiToken: () => requireString('AXIOM_API_TOKEN'),
+    axiomDataset: () => requireString('AXIOM_DATASET'),
+    axiomPublicApiToken: () => requireString('NEXT_PUBLIC_AXIOM_API_TOKEN'),
+    axiomPublicDataset: () => requireString('NEXT_PUBLIC_AXIOM_DATASET'),
+  };
+
+  const cache = new Map<keyof EnvVars, EnvVars[keyof EnvVars]>();
+  const envVars = {} as EnvVars;
+  for (const key of Object.keys(getters) as (keyof EnvVars)[]) {
+    Object.defineProperty(envVars, key, {
+      enumerable: true,
+      get() {
+        if (!cache.has(key)) {
+          cache.set(key, getters[key]());
+        }
+        return cache.get(key);
+      },
+    });
+  }
+  return envVars;
 }

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { MapValidity, SubmitMapRequest, SubmitMapResponse } from 'schema/maps';
 import { error } from 'services/helpers';
 import { getLog } from 'services/logging/server_logger';
-import { mintUploadUrl } from 'services/maps/s3_handler';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
 
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
   const submitMapReq = submitMapReqResult.data;
 
-  const { mapsRepo } = await getServerContext();
+  const { mapsRepo, s3Handler } = await getServerContext();
   let id;
   if (submitMapReq.id != null) {
     const mapResult = await mapsRepo.getMap(submitMapReq.id);
@@ -79,7 +78,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
     id = createMapResult.value.id;
   }
-  const urlResp = await mintUploadUrl(id);
+  const urlResp = await s3Handler.mintUploadUrl(id);
   if (!urlResp.success) {
     log.error('Could not mint the URL for uploading the map.', {
       error: urlResp.error,

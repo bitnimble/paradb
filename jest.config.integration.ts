@@ -1,12 +1,13 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const nextJest = require('next/jest');
+import nextJest from 'next/jest';
 
 const createJestConfig = nextJest({ dir: './' });
 
 const config = {
   testMatch: ['**/tests/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+  // Unit tests run in their own config (jest.config.unit.ts) without DB/server setup.
+  testPathIgnorePatterns: ['/node_modules/', '\\.unit\\.test\\.[jt]sx?$'],
   setupFilesAfterEnv: ['<rootDir>/src/services/jest_setup.ts'],
   modulePaths: ['<rootDir>/src'],
 };
 
-module.exports = createJestConfig(config);
+export default createJestConfig(config);

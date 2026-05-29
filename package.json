@@ -12,7 +12,9 @@
     "lint": "eslint .",
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",
-    "test": "sudo docker compose -f docker/docker-compose.test.yml --env-file .env.test up --build --abort-on-container-exit"
+    "test": "bun run test:unit",
+    "test:unit": "bun jest --config jest.config.unit.ts",
+    "test:integration": "sudo docker compose -f docker/docker-compose.test.yml --env-file .env.test up --build --abort-on-container-exit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.958.0",
@@ -73,7 +75,8 @@
     "postcss-preset-env": "^9.3.0",
     "prettier": "^3.0.3",
     "supabase": "^2.67.3",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.3",
+    "ts-node": "^10.9.2"
   },
   "resolutions": {
     "@types/react": "19.2.5",
