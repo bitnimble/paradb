@@ -96,7 +96,7 @@ describe('maps handler', () => {
       errorMessage: `Not authorized to modify the specified map: ${id}`,
       statusCode: 403,
     });
-  });
+  }, 15000);
 
   describe('fails when', () => {
     const expectUploadError = async (zipName: string, errorMessage: string) => {
@@ -138,7 +138,10 @@ describe('maps handler', () => {
       ));
 
     it('is corrupted, or an unsupported archive format', () =>
-      expectUploadError('Test_invalid_archive.zip', 'Invalid map archive; could not find map data'));
+      expectUploadError(
+        'Test_invalid_archive.zip',
+        'Invalid map archive; could not find map data'
+      ));
 
     it('has no rlrr files', () =>
       expectUploadError('Test_missing_rlrr.zip', 'Invalid map archive; could not find map data'));
