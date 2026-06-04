@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev:local": "dotenv -e .env.localdev -- bun next dev",
+    "dev": "dotenv -e .env.localdev -- bash tools/dev.sh",
     "dev:dev": "dotenv -e .env.dev -- bun next dev",
     "dev:prod": "dotenv -e .env.prod -- bun next dev",
     "build": "sudo docker compose -f docker/docker-compose.yml --env-file .env build",
