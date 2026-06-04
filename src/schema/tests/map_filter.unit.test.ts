@@ -30,7 +30,7 @@ describe('map_filter schema', () => {
           {
             type: 'or',
             children: [
-              { type: 'cmp', field: 'complexity', op: 'gte', value: 3 },
+              { type: 'cmp', field: 'downloadCount', op: 'gte', value: 3 },
               { type: 'not', child: { type: 'cmp', field: 'author', op: 'eq', value: 'anon' } },
             ],
           },
@@ -42,7 +42,7 @@ describe('map_filter schema', () => {
     it('rejects an op that is illegal for the field kind', () => {
       const result = FilterNode.safeParse({
         type: 'cmp',
-        field: 'complexity',
+        field: 'downloadCount',
         op: 'contains',
         value: 'x',
       });
@@ -52,7 +52,7 @@ describe('map_filter schema', () => {
     it('rejects a non-numeric value for a number field', () => {
       const result = FilterNode.safeParse({
         type: 'cmp',
-        field: 'complexity',
+        field: 'downloadCount',
         op: 'gte',
         value: 'three',
       });
@@ -127,7 +127,7 @@ describe('map_filter schema', () => {
         type: 'and',
         children: [
           { type: 'cmp', field: 'artist', op: 'contains', value: 'Smash Möuth' },
-          { type: 'cmp', field: 'complexity', op: 'gte', value: 3 },
+          { type: 'cmp', field: 'downloadCount', op: 'gte', value: 3 },
         ],
       };
       const decoded = decodeFilter(encodeFilter(node));
@@ -142,7 +142,7 @@ describe('map_filter schema', () => {
     it('fails to decode a structurally invalid tree', () => {
       const bad = encodeFilter({
         type: 'cmp',
-        field: 'complexity',
+        field: 'downloadCount',
         op: 'contains',
         value: 'x',
       } as unknown as FilterNode);

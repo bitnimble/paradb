@@ -15,11 +15,11 @@ describe('compileFilter', () => {
   it('compiles numeric comparisons', () => {
     const { text, values } = compile({
       type: 'cmp',
-      field: 'complexity',
+      field: 'downloadCount',
       op: 'gte',
       value: 3,
     });
-    expect(text).toContain('"complexity"');
+    expect(text).toContain('"download_count"');
     expect(text).toContain('>=');
     expect(values).toEqual([3]);
   });

@@ -1,124 +1,147 @@
 import { FilterNode } from 'schema/map_filter';
 import {
-  SimpleFilter,
-  extractSimpleFilter,
-  nodeToSimpleFilter,
-  simpleFilterToNode,
+  SimpleField,
+  getFieldValue,
+  isSimpleFilter,
+  setFieldValue,
+  toSimpleFilter,
 } from 'app/filter_modes';
 
-describe('simpleFilterToNode', () => {
-  it('returns undefined when all fields are blank', () => {
-    expect(simpleFilterToNode({})).toBeUndefined();
-    expect(simpleFilterToNode({ artist: '  ' })).toBeUndefined();
+const artist: SimpleField = { field: 'artist', op: 'contains' };
+const author: SimpleField = { field: 'author', op: 'contains' };
+const after: SimpleField = { field: 'submissionDate', op: 'after' };
+
+describe('isSimpleFilter', () => {
+  it('treats an empty filter as simple', () => {
+    expect(isSimpleFilter(undefined)).toBe(true);
   });
 
-  it('compiles non-blank text fields to contains cmps under an and', () => {
-    const node = simpleFilterToNode({ artist: 'Smash', description: 'star' });
-    expect(node).toEqual({
-      type: 'and',
-      children: [
-        { type: 'cmp', field: 'artist', op: 'contains', value: 'Smash' },
-        { type: 'cmp', field: 'description', op: 'contains', value: 'star' },
-      ],
-    });
+  it('accepts a bare single slot cmp', () => {
+    expect(isSimpleFilter({ type: 'cmp', field: 'author', op: 'contains', value: 'anon' })).toBe(
+      true
+    );
   });
 
-  it('compiles date fields to submissionDate before/after', () => {
-    const node = simpleFilterToNode({ after: '2021-01-01', before: '2021-12-31' });
-    expect(node).toEqual({
-      type: 'and',
-      children: [
-        { type: 'cmp', field: 'submissionDate', op: 'after', value: '2021-01-01' },
-        { type: 'cmp', field: 'submissionDate', op: 'before', value: '2021-12-31' },
-      ],
-    });
-  });
-});
-
-describe('nodeToSimpleFilter', () => {
-  it('round-trips a simple-shaped filter', () => {
-    const simple: SimpleFilter = { artist: 'Smash', after: '2021-01-01' };
-    const node = simpleFilterToNode(simple)!;
-    expect(nodeToSimpleFilter(node)).toEqual(simple);
+  it('accepts a flat and of distinct slots', () => {
+    expect(
+      isSimpleFilter({
+        type: 'and',
+        children: [
+          { type: 'cmp', field: 'artist', op: 'contains', value: 'a' },
+          { type: 'cmp', field: 'submissionDate', op: 'after', value: '2021-01-01' },
+        ],
+      })
+    ).toBe(true);
   });
 
-  it('accepts a bare single cmp', () => {
-    const node: FilterNode = { type: 'cmp', field: 'author', op: 'contains', value: 'anon' };
-    expect(nodeToSimpleFilter(node)).toEqual({ author: 'anon' });
+  it('rejects OR and NOT nodes', () => {
+    expect(
+      isSimpleFilter({
+        type: 'or',
+        children: [{ type: 'cmp', field: 'artist', op: 'contains', value: 'a' }],
+      })
+    ).toBe(false);
+    expect(
+      isSimpleFilter({
+        type: 'not',
+        child: { type: 'cmp', field: 'artist', op: 'contains', value: 'a' },
+      })
+    ).toBe(false);
   });
 
-  it('rejects an OR node', () => {
-    const node: FilterNode = {
-      type: 'or',
-      children: [
-        { type: 'cmp', field: 'artist', op: 'contains', value: 'a' },
-        { type: 'cmp', field: 'author', op: 'contains', value: 'b' },
-      ],
-    };
-    expect(nodeToSimpleFilter(node)).toBeUndefined();
+  it('rejects a non-slot field/op (e.g. downloadCount gte, or artist eq)', () => {
+    expect(
+      isSimpleFilter({
+        type: 'and',
+        children: [{ type: 'cmp', field: 'downloadCount', op: 'gte', value: 3 }],
+      })
+    ).toBe(false);
+    expect(
+      isSimpleFilter({
+        type: 'and',
+        children: [{ type: 'cmp', field: 'artist', op: 'eq', value: 'a' }],
+      })
+    ).toBe(false);
   });
 
-  it('rejects a NOT node', () => {
-    const node: FilterNode = {
-      type: 'not',
-      child: { type: 'cmp', field: 'artist', op: 'contains', value: 'a' },
-    };
-    expect(nodeToSimpleFilter(node)).toBeUndefined();
-  });
-
-  it('rejects an unsupported field/op (e.g. complexity gte)', () => {
-    const node: FilterNode = {
-      type: 'and',
-      children: [{ type: 'cmp', field: 'complexity', op: 'gte', value: 3 }],
-    };
-    expect(nodeToSimpleFilter(node)).toBeUndefined();
-  });
-
-  it('rejects a non-contains op on a text field', () => {
-    const node: FilterNode = {
-      type: 'and',
-      children: [{ type: 'cmp', field: 'artist', op: 'eq', value: 'a' }],
-    };
-    expect(nodeToSimpleFilter(node)).toBeUndefined();
-  });
-
-  it('rejects a duplicated simple field (two artist clauses)', () => {
-    const node: FilterNode = {
-      type: 'and',
-      children: [
-        { type: 'cmp', field: 'artist', op: 'contains', value: 'a' },
-        { type: 'cmp', field: 'artist', op: 'contains', value: 'b' },
-      ],
-    };
-    expect(nodeToSimpleFilter(node)).toBeUndefined();
+  it('rejects a duplicated field', () => {
+    expect(
+      isSimpleFilter({
+        type: 'and',
+        children: [
+          { type: 'cmp', field: 'artist', op: 'contains', value: 'a' },
+          { type: 'cmp', field: 'artist', op: 'contains', value: 'b' },
+        ],
+      })
+    ).toBe(false);
   });
 
   it('rejects nested groups', () => {
-    const node: FilterNode = {
-      type: 'and',
-      children: [
-        {
-          type: 'and',
-          children: [{ type: 'cmp', field: 'artist', op: 'contains', value: 'a' }],
-        },
-      ],
-    };
-    expect(nodeToSimpleFilter(node)).toBeUndefined();
+    expect(
+      isSimpleFilter({
+        type: 'and',
+        children: [
+          { type: 'and', children: [{ type: 'cmp', field: 'artist', op: 'contains', value: 'a' }] },
+        ],
+      })
+    ).toBe(false);
   });
 });
 
-describe('extractSimpleFilter', () => {
+describe('getFieldValue / setFieldValue', () => {
+  it('returns an empty string for an absent field', () => {
+    expect(getFieldValue(undefined, artist)).toBe('');
+  });
+
+  it('adds a field, building a flat and', () => {
+    const filter = setFieldValue(undefined, artist, 'Smash');
+    expect(filter).toEqual({
+      type: 'and',
+      children: [{ type: 'cmp', field: 'artist', op: 'contains', value: 'Smash' }],
+    });
+    expect(getFieldValue(filter, artist)).toBe('Smash');
+  });
+
+  it('updates an existing field in place without touching others', () => {
+    let filter = setFieldValue(undefined, artist, 'Smash');
+    filter = setFieldValue(filter, after, '2021-01-01');
+    filter = setFieldValue(filter, artist, 'Mouth');
+    expect(filter).toEqual({
+      type: 'and',
+      children: [
+        { type: 'cmp', field: 'artist', op: 'contains', value: 'Mouth' },
+        { type: 'cmp', field: 'submissionDate', op: 'after', value: '2021-01-01' },
+      ],
+    });
+  });
+
+  it('clears a field when set to blank, and drops the filter when none remain', () => {
+    let filter = setFieldValue(undefined, artist, 'Smash');
+    filter = setFieldValue(filter, author, 'anon');
+    filter = setFieldValue(filter, artist, '   ');
+    expect(filter).toEqual({
+      type: 'and',
+      children: [{ type: 'cmp', field: 'author', op: 'contains', value: 'anon' }],
+    });
+    expect(setFieldValue(filter, author, '')).toBeUndefined();
+  });
+});
+
+describe('toSimpleFilter', () => {
   it('collects simple-representable cmps from an OR tree, dropping the rest', () => {
     const node: FilterNode = {
       type: 'or',
       children: [
         { type: 'cmp', field: 'artist', op: 'contains', value: 'Smash' },
-        { type: 'cmp', field: 'complexity', op: 'gte', value: 3 },
+        { type: 'cmp', field: 'downloadCount', op: 'gte', value: 3 },
         { type: 'not', child: { type: 'cmp', field: 'author', op: 'contains', value: 'anon' } },
       ],
     };
-    // artist is kept; complexity (unsupported) and the negated author clause are dropped.
-    expect(extractSimpleFilter(node)).toEqual({ artist: 'Smash' });
+    // artist is kept; downloadCount (not a slot) and the negated author clause are dropped.
+    expect(toSimpleFilter(node)).toEqual({
+      type: 'and',
+      children: [{ type: 'cmp', field: 'artist', op: 'contains', value: 'Smash' }],
+    });
   });
 
   it('keeps the first occurrence per slot', () => {
@@ -129,6 +152,17 @@ describe('extractSimpleFilter', () => {
         { type: 'cmp', field: 'artist', op: 'contains', value: 'second' },
       ],
     };
-    expect(extractSimpleFilter(node)).toEqual({ artist: 'first' });
+    expect(toSimpleFilter(node)).toEqual({
+      type: 'and',
+      children: [{ type: 'cmp', field: 'artist', op: 'contains', value: 'first' }],
+    });
+  });
+
+  it('returns undefined when nothing is representable', () => {
+    const node: FilterNode = {
+      type: 'not',
+      child: { type: 'cmp', field: 'artist', op: 'contains', value: 'a' },
+    };
+    expect(toSimpleFilter(node)).toBeUndefined();
   });
 });

@@ -13,14 +13,14 @@ async function insertMap(m: {
   author?: string;
   description?: string;
   tags?: string[];
-  complexity?: number;
+  downloadCount?: number;
   submissionDate?: string;
 }) {
   const { pool } = await getServerContext();
   await pool.query(
     `INSERT INTO maps
        (id, visibility, validity, submission_date, title, artist, author, uploader, download_count, description, tags, complexity)
-     VALUES ($1, $2, 'valid', $3, $4, $5, $6, 'tester', 0, $7, $8, $9)`,
+     VALUES ($1, $2, 'valid', $3, $4, $5, $6, 'tester', $7, $8, $9, 1)`,
     [
       m.id,
       m.visibility ?? MapVisibility.PUBLIC,
@@ -28,9 +28,9 @@ async function insertMap(m: {
       m.title ?? 'Title',
       m.artist ?? 'Artist',
       m.author ?? null,
+      m.downloadCount ?? 0,
       m.description ?? null,
       m.tags ?? null,
-      m.complexity ?? 1,
     ]
   );
 }
@@ -69,8 +69,8 @@ describe('maps repo search filters', () => {
   });
 
   it('filters on a numeric column', async () => {
-    await insertMap({ id: '100', artist: 'Numeric', complexity: 9 });
-    const ids = await searchIds({ type: 'cmp', field: 'complexity', op: 'gte', value: 5 });
+    await insertMap({ id: '100', artist: 'Numeric', downloadCount: 9 });
+    const ids = await searchIds({ type: 'cmp', field: 'downloadCount', op: 'gte', value: 5 });
     expect(ids).toEqual(['100']);
   });
 
@@ -115,7 +115,7 @@ describe('maps repo search filters', () => {
   });
 
   it('applies the filter on top of a free-text query', async () => {
-    await insertMap({ id: '200', title: 'Unrelated', artist: 'All Star', complexity: 1 });
+    await insertMap({ id: '200', title: 'Unrelated', artist: 'All Star' });
     // FTS query "All Star" matches the seed maps and '200' (artist), but the filter keeps only '200'.
     const ids = await searchIds(
       { type: 'cmp', field: 'title', op: 'eq', value: 'Unrelated' },

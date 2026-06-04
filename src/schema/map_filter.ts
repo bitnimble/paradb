@@ -21,7 +21,6 @@ export const FILTER_FIELDS = {
   uploader: { kind: 'string', column: 'uploader' },
   description: { kind: 'string', column: 'description' },
   tags: { kind: 'stringArray', column: 'tags' },
-  complexity: { kind: 'number', column: 'complexity' },
   downloadCount: { kind: 'number', column: 'download_count' },
   submissionDate: { kind: 'date', column: 'submission_date' },
 } as const satisfies Record<string, { kind: FieldKind; column: maps.Column }>;

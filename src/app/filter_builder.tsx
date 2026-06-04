@@ -2,10 +2,12 @@
 
 import { MapListStore } from 'app/map_list_presenter';
 import {
-  SimpleFilter,
-  extractSimpleFilter,
-  nodeToSimpleFilter,
-  simpleFilterToNode,
+  SIMPLE_FIELDS,
+  SimpleField,
+  getFieldValue,
+  isSimpleFilter,
+  setFieldValue,
+  toSimpleFilter,
 } from 'app/filter_modes';
 import { action } from 'mobx';
 import { observer } from 'mobx-react-lite';
@@ -42,12 +44,21 @@ const FIELD_LABELS: Record<FilterableField, string> = {
   uploader: 'Uploader',
   description: 'Description',
   tags: 'Tags',
-  complexity: 'Complexity',
   downloadCount: 'Downloads',
   submissionDate: 'Upload date',
 };
 
 const ALL_FIELDS = Object.keys(FILTER_FIELDS) as FilterableField[];
+
+// Display labels for simple mode's fixed fields, keyed by `field:op`.
+const SIMPLE_FIELD_LABELS: Record<string, string> = {
+  'artist:contains': 'Artist',
+  'author:contains': 'Mapper',
+  'description:contains': 'Description',
+  'submissionDate:after': 'Uploaded after',
+  'submissionDate:before': 'Uploaded before',
+};
+const simpleFieldKey = (simpleField: SimpleField) => `${simpleField.field}:${simpleField.op}`;
 
 export const FilterBuilder = observer((props: { store: MapListStore }) => {
   const { store } = props;
@@ -65,39 +76,32 @@ export const FilterBuilder = observer((props: { store: MapListStore }) => {
 
 const SimpleBuilder = observer((props: { store: MapListStore }) => {
   const { store } = props;
-  const set = action((patch: Partial<SimpleFilter>) => {
-    store.simpleFilter = { ...store.simpleFilter, ...patch };
+  const setField = action((simpleField: SimpleField, value: string) => {
+    store.filter = setFieldValue(store.filter, simpleField, value);
   });
   return (
     <div className={styles.simple}>
-      <Textbox
-        label="Artist"
-        error={undefined}
-        value={store.simpleFilter.artist ?? ''}
-        onChange={(v) => set({ artist: v })}
-      />
-      <Textbox
-        label="Mapper"
-        error={undefined}
-        value={store.simpleFilter.author ?? ''}
-        onChange={(v) => set({ author: v })}
-      />
-      <Textbox
-        label="Description"
-        error={undefined}
-        value={store.simpleFilter.description ?? ''}
-        onChange={(v) => set({ description: v })}
-      />
-      <DateField
-        label="Uploaded after"
-        value={store.simpleFilter.after ?? ''}
-        onChange={(v) => set({ after: v || undefined })}
-      />
-      <DateField
-        label="Uploaded before"
-        value={store.simpleFilter.before ?? ''}
-        onChange={(v) => set({ before: v || undefined })}
-      />
+      {SIMPLE_FIELDS.map((simpleField) => {
+        const key = simpleFieldKey(simpleField);
+        const label = SIMPLE_FIELD_LABELS[key];
+        const value = getFieldValue(store.filter, simpleField);
+        return FILTER_FIELDS[simpleField.field].kind === 'date' ? (
+          <DateField
+            key={key}
+            label={label}
+            value={value}
+            onChange={(v) => setField(simpleField, v)}
+          />
+        ) : (
+          <Textbox
+            key={key}
+            label={label}
+            error={undefined}
+            value={value}
+            onChange={(v) => setField(simpleField, v)}
+          />
+        );
+      })}
     </div>
   );
 });
@@ -117,12 +121,12 @@ const DateField = (props: { label: string; value: string; onChange: (v: string) 
 const AdvancedBuilder = observer((props: { store: MapListStore }) => {
   const { store } = props;
   // The root must be a group so conditions/groups can be added to it.
-  const node = store.advancedFilter;
+  const node = store.filter;
   const root: FilterNode =
     node && (node.type === 'and' || node.type === 'or')
       ? node
       : { type: 'and', children: node ? [node] : [] };
-  const setRoot = action((n: FilterNode) => (store.advancedFilter = n));
+  const setRoot = action((n: FilterNode) => (store.filter = n));
   return <GroupEditor node={root} onChange={setRoot} />;
 });
 
@@ -332,14 +336,12 @@ const ToggleButton = (props: {
 
 const ModeSwitch = observer((props: { store: MapListStore }) => {
   const { store } = props;
+  // Simple and advanced edit the same AST, so switching to advanced needs no conversion.
   const toAdvanced = action(() => {
-    store.advancedFilter = simpleFilterToNode(store.simpleFilter) ?? { type: 'and', children: [] };
     store.filterMode = 'advanced';
   });
   const toSimple = action(() => {
-    const simple = store.advancedFilter ? nodeToSimpleFilter(store.advancedFilter) : {};
-    if (simple != null) {
-      store.simpleFilter = simple;
+    if (isSimpleFilter(store.filter)) {
       store.filterMode = 'simple';
       return;
     }
@@ -347,7 +349,7 @@ const ModeSwitch = observer((props: { store: MapListStore }) => {
       'Switching to simple filters will discard the parts of your filter that simple mode cannot represent. Continue?'
     );
     if (ok) {
-      store.simpleFilter = extractSimpleFilter(store.advancedFilter);
+      store.filter = toSimpleFilter(store.filter);
       store.filterMode = 'simple';
     }
   });

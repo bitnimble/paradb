@@ -1,94 +1,112 @@
-import { CmpNode, FilterNode } from 'schema/map_filter';
+import { CmpNode, FilterNode, FilterOp, FilterableField } from 'schema/map_filter';
 
 /**
- * The flat shape that simple mode edits. Each text field compiles to a `contains` cmp and the date
- * fields to `submissionDate` `after`/`before`. Simple mode is just a constrained editor that emits
- * the same {@link FilterNode} AST as advanced mode.
+ * Simple and advanced filtering differ only in the UI: both edit the same {@link FilterNode}. Simple
+ * mode is a constrained editor over a flat `and` of cmps with pre-selected fields, each
+ * {@link SimpleField} fixes a `(field, op)` pair so the user only supplies a value. The helpers here
+ * read and write those fields on the shared AST.
  */
-export type SimpleFilter = {
-  artist?: string;
-  author?: string;
-  description?: string;
-  after?: string;
-  before?: string;
-};
+export type SimpleField = { field: FilterableField; op: FilterOp };
 
-type SimpleTextField = 'artist' | 'author' | 'description';
-const SIMPLE_TEXT_FIELDS: SimpleTextField[] = ['artist', 'author', 'description'];
+export const SIMPLE_FIELDS: SimpleField[] = [
+  { field: 'artist', op: 'contains' },
+  { field: 'author', op: 'contains' },
+  { field: 'description', op: 'contains' },
+  { field: 'submissionDate', op: 'after' },
+  { field: 'submissionDate', op: 'before' },
+];
 
-export function simpleFilterToNode(simple: SimpleFilter): FilterNode | undefined {
-  const children: CmpNode[] = [];
-  for (const field of SIMPLE_TEXT_FIELDS) {
-    const value = simple[field]?.trim();
-    if (value) {
-      children.push({ type: 'cmp', field, op: 'contains', value });
-    }
-  }
-  if (simple.after) {
-    children.push({ type: 'cmp', field: 'submissionDate', op: 'after', value: simple.after });
-  }
-  if (simple.before) {
-    children.push({ type: 'cmp', field: 'submissionDate', op: 'before', value: simple.before });
-  }
-  if (children.length === 0) {
-    return undefined;
-  }
-  return { type: 'and', children };
-}
+const matches = (node: CmpNode, simpleField: SimpleField) =>
+  node.field === simpleField.field && node.op === simpleField.op;
 
-// Maps a simple-representable cmp back to the SimpleFilter slot it occupies; null if not simple.
-function cmpToSimpleEntry(node: CmpNode): { key: keyof SimpleFilter; value: string } | null {
-  if (typeof node.value !== 'string') {
-    return null;
+const simpleFieldOf = (node: CmpNode) => SIMPLE_FIELDS.find((sf) => matches(node, sf));
+
+// The cmp children of a simple-shaped filter (a flat `and`, a bare cmp, or empty/undefined).
+function simpleCmps(filter: FilterNode | undefined): CmpNode[] {
+  if (filter == null) {
+    return [];
   }
-  if (SIMPLE_TEXT_FIELDS.includes(node.field as SimpleTextField) && node.op === 'contains') {
-    return { key: node.field as SimpleTextField, value: node.value };
+  if (filter.type === 'cmp') {
+    return [filter];
   }
-  if (node.field === 'submissionDate' && node.op === 'after') {
-    return { key: 'after', value: node.value };
+  if (filter.type === 'and') {
+    return filter.children.filter((c): c is CmpNode => c.type === 'cmp');
   }
-  if (node.field === 'submissionDate' && node.op === 'before') {
-    return { key: 'before', value: node.value };
-  }
-  return null;
+  return [];
 }
 
 /**
- * Returns the {@link SimpleFilter} for a node that fits simple's shape, a bare cmp or a flat `and`
- * of supported `contains`/date cmps, with no field used twice. Returns undefined for anything that
- * needs advanced mode (OR/NOT/nesting, other operators/fields, or duplicate slots).
+ * True if the node fits simple mode: empty, a bare cmp, or a flat `and` whose children are all
+ * distinct simple fields. Anything else (OR/NOT/nesting, other fields/operators, duplicates) needs
+ * advanced mode.
  */
-export function nodeToSimpleFilter(node: FilterNode): SimpleFilter | undefined {
+export function isSimpleFilter(node: FilterNode | undefined): boolean {
+  if (node == null) {
+    return true;
+  }
   if (node.type !== 'cmp' && node.type !== 'and') {
-    return undefined;
+    return false;
   }
   const children: FilterNode[] = node.type === 'cmp' ? [node] : node.children;
-  const simple: SimpleFilter = {};
+  const seen = new Set<SimpleField>();
   for (const child of children) {
     if (child.type !== 'cmp') {
-      return undefined;
+      return false;
     }
-    const entry = cmpToSimpleEntry(child);
-    if (entry == null || simple[entry.key] != null) {
-      return undefined;
+    const simpleField = simpleFieldOf(child);
+    if (simpleField == null || seen.has(simpleField)) {
+      return false;
     }
-    simple[entry.key] = entry.value;
+    seen.add(simpleField);
   }
-  return simple;
+  return true;
+}
+
+export function getFieldValue(filter: FilterNode | undefined, simpleField: SimpleField): string {
+  const cmp = simpleCmps(filter).find((c) => matches(c, simpleField));
+  return cmp == null ? '' : String(cmp.value);
 }
 
 /**
- * Best-effort extraction of the simple-representable parts of an arbitrary tree, used when the user
- * switches advanced → simple and accepts discarding the incompatible parts. Collects the first
- * simple cmp per slot; `not` subtrees are dropped since a negated clause has no simple form.
+ * Immutably sets (or, for a blank value, clears) a simple field on the filter, returning the rebuilt
+ * flat `and`, or undefined when no fields remain. Other fields keep their position.
  */
-export function extractSimpleFilter(node: FilterNode | undefined): SimpleFilter {
-  const simple: SimpleFilter = {};
+export function setFieldValue(
+  filter: FilterNode | undefined,
+  simpleField: SimpleField,
+  value: string
+): FilterNode | undefined {
+  const children = [...simpleCmps(filter)];
+  const idx = children.findIndex((c) => matches(c, simpleField));
+  if (value.trim() === '') {
+    if (idx >= 0) {
+      children.splice(idx, 1);
+    }
+  } else {
+    const cmp: CmpNode = { type: 'cmp', field: simpleField.field, op: simpleField.op, value };
+    if (idx >= 0) {
+      children[idx] = cmp;
+    } else {
+      children.push(cmp);
+    }
+  }
+  return children.length === 0 ? undefined : { type: 'and', children };
+}
+
+/**
+ * Best-effort reduction of an arbitrary tree to its simple-representable parts, used when the user
+ * switches advanced → simple and accepts discarding the incompatible parts. Keeps the first cmp per
+ * simple field; `not` subtrees are dropped since a negated clause has no simple form.
+ */
+export function toSimpleFilter(node: FilterNode | undefined): FilterNode | undefined {
+  const children: CmpNode[] = [];
+  const seen = new Set<SimpleField>();
   const visit = (n: FilterNode) => {
     if (n.type === 'cmp') {
-      const entry = cmpToSimpleEntry(n);
-      if (entry != null && simple[entry.key] == null) {
-        simple[entry.key] = entry.value;
+      const simpleField = simpleFieldOf(n);
+      if (simpleField != null && !seen.has(simpleField)) {
+        seen.add(simpleField);
+        children.push({ ...n });
       }
       return;
     }
@@ -100,5 +118,5 @@ export function extractSimpleFilter(node: FilterNode | undefined): SimpleFilter 
   if (node) {
     visit(node);
   }
-  return simple;
+  return children.length === 0 ? undefined : { type: 'and', children };
 }
