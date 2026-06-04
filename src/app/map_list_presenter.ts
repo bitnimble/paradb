@@ -1,11 +1,15 @@
 import { Api } from 'app/api/api';
+import { SimpleFilter, nodeToSimpleFilter, simpleFilterToNode } from 'app/filter_modes';
 import { checkExists } from 'base/preconditions';
 import { action, observable, runInAction } from 'mobx';
+import { FilterNode } from 'schema/map_filter';
 import { MapSortableAttributes, PDMap, mapSortableAttributes } from 'schema/maps';
 import { TableSortStore } from 'ui/base/table/table_presenter';
 import { getMapFileLink } from 'utils/maps';
 
 const SEARCH_LIMIT = 20;
+
+export type FilterMode = 'simple' | 'advanced';
 
 export class MapListStore {
   @observable accessor enableBulkSelect = false;
@@ -18,11 +22,43 @@ export class MapListStore {
   @observable accessor hasMore = true;
   @observable accessor loadingMore = false;
 
+  /* Filtering */
+  @observable accessor filtersExpanded = false;
+  @observable accessor filterMode: FilterMode = 'simple';
+  @observable accessor simpleFilter: SimpleFilter = {};
+  @observable accessor advancedFilter: FilterNode | undefined = undefined;
+
   constructor(
     query: string,
-    readonly tableSortStore: TableSortStore<PDMap, 7>
+    readonly tableSortStore: TableSortStore<PDMap, 7>,
+    initialFilter?: FilterNode
   ) {
     this.query = query;
+    if (initialFilter == null) {
+      return;
+    }
+    // Open simple mode pre-populated if the rehydrated filter fits its shape; otherwise advanced.
+    const simple = nodeToSimpleFilter(initialFilter);
+    if (simple != null) {
+      this.simpleFilter = simple;
+    } else {
+      this.filterMode = 'advanced';
+      this.advancedFilter = initialFilter;
+    }
+    this.filtersExpanded = true;
+  }
+
+  /** The active mode compiled to a single AST. The backend, API and URL only ever see this. */
+  get activeFilter(): FilterNode | undefined {
+    if (this.filterMode === 'simple') {
+      return simpleFilterToNode(this.simpleFilter);
+    }
+    const advanced = this.advancedFilter;
+    // Omit an empty group so an untouched advanced builder behaves like no filter.
+    if (advanced == null || (advanced.type === 'and' && advanced.children.length === 0)) {
+      return undefined;
+    }
+    return advanced;
   }
 }
 
@@ -134,6 +170,7 @@ export class MapListPresenter {
       query: this.store.query,
       limit: SEARCH_LIMIT,
       offset: 0,
+      filter: this.store.activeFilter,
       ...(sort || {}),
     });
     if (resp.success) {
@@ -152,6 +189,7 @@ export class MapListPresenter {
       query: this.store.query,
       limit: SEARCH_LIMIT,
       offset: this.store.maps?.length || 0,
+      filter: this.store.activeFilter,
       ...(sort || {}),
     });
     runInAction(() => (this.store.loadingMore = false));

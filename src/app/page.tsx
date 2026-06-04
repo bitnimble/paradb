@@ -5,9 +5,10 @@ import { MapListPresenter, MapListStore } from 'app/map_list_presenter';
 import { useSkeletonRef } from 'app/skeleton_provider';
 import classNames from 'classnames';
 import { action, computed, observable, reaction } from 'mobx';
-import { observer, useLocalObservable } from 'mobx-react';
+import { observer, useLocalObservable } from 'mobx-react-lite';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import { decodeFilter } from 'schema/map_filter';
 import { Difficulty, PDMap } from 'schema/maps';
 import { Button } from 'ui/base/button/button';
 import { metrics } from 'ui/base/design_system/design_tokens';
@@ -32,37 +33,40 @@ export default function Page() {
 const Home = observer(() => {
   const api = useApi();
   const searchParams = useSearchParams();
-  const store = useLocalObservable(
-    () =>
-      new MapListStore(
-        searchParams.get('q') || '',
-        new TableSortStore(
-          [
-            { content: <div></div>, style: { minWidth: '8px', width: '8px' } },
-            { content: <T.Small weight="bold">Song title</T.Small>, sortLabel: 'title' },
-            { content: <T.Small weight="bold">Artist</T.Small>, sortLabel: 'artist' },
-            { content: <T.Small weight="bold">Mapper</T.Small>, sortLabel: 'author' },
-            {
-              content: <T.Small weight="bold">Favorites</T.Small>,
-              sortLabel: 'favorites',
-              style: { width: `${metrics.gridBaseline * 15}px` },
-            },
-            {
-              content: <T.Small weight="bold">Downloads</T.Small>,
-              sortLabel: 'downloadCount',
-              style: { width: `${metrics.gridBaseline * 15}px` },
-            },
-            {
-              content: <T.Small weight="bold">Upload date</T.Small>,
-              sortLabel: 'submissionDate',
-              style: { width: `${metrics.gridBaseline * 20}px` },
-            },
-          ],
-          6,
-          'desc'
-        )
-      )
-  );
+  const store = useLocalObservable(() => {
+    const rawFilter = searchParams.get('filter');
+    const decoded = rawFilter ? decodeFilter(rawFilter) : undefined;
+    const initialFilter = decoded?.success ? decoded.value : undefined;
+    return new MapListStore(
+      searchParams.get('q') || '',
+      new TableSortStore(
+        [
+          { content: <div></div>, style: { minWidth: '8px', width: '8px' } },
+          { content: <T.Small weight="bold">Song title</T.Small>, sortLabel: 'title' },
+          { content: <T.Small weight="bold">Artist</T.Small>, sortLabel: 'artist' },
+          { content: <T.Small weight="bold">Mapper</T.Small>, sortLabel: 'author' },
+          {
+            content: <T.Small weight="bold">Favorites</T.Small>,
+            sortLabel: 'favorites',
+            style: { width: `${metrics.gridBaseline * 15}px` },
+          },
+          {
+            content: <T.Small weight="bold">Downloads</T.Small>,
+            sortLabel: 'downloadCount',
+            style: { width: `${metrics.gridBaseline * 15}px` },
+          },
+          {
+            content: <T.Small weight="bold">Upload date</T.Small>,
+            sortLabel: 'submissionDate',
+            style: { width: `${metrics.gridBaseline * 20}px` },
+          },
+        ],
+        6,
+        'desc'
+      ),
+      initialFilter
+    );
+  });
   const presenter = useMemo(() => new MapListPresenter(api, store), [api, store]);
 
   const skeletonRef = useSkeletonRef();
@@ -90,7 +94,7 @@ const Home = observer(() => {
   return (
     <div className={styles.mapList}>
       <div className={styles.filter}>
-        <Search store={store} onSearch={() => presenter.onSearch('search')} />
+        <Search store={store} presenter={presenter} />
         <BulkSelectActions />
       </div>
       <div

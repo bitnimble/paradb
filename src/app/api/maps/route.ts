@@ -1,5 +1,6 @@
 import { getQueryParams, joinErrors } from 'app/api/helpers';
 import { NextRequest, NextResponse } from 'next/server';
+import { decodeFilter } from 'schema/map_filter';
 import { FindMapsResponse, MapSortableAttributes, mapSortableAttributes } from 'schema/maps';
 import { getOffsetLimit } from 'services/helpers';
 import { getServerContext } from 'services/server_context';
@@ -7,7 +8,12 @@ import { getUserSession } from 'services/session/session';
 
 const send = (res: FindMapsResponse) => NextResponse.json(FindMapsResponse.parse(res));
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const { query, sort: _sort, sortDirection: _sortDirection } = getQueryParams(req);
+  const {
+    query,
+    sort: _sort,
+    sortDirection: _sortDirection,
+    filter: _filter,
+  } = getQueryParams(req);
   if (_sort && !mapSortableAttributes.includes(_sort as MapSortableAttributes)) {
     return send({ success: false, statusCode: 400, errorMessage: `Invalid sort column: ${_sort}` });
   }
@@ -21,6 +27,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const sort = _sort as MapSortableAttributes | undefined;
   const sortDirection = _sortDirection as 'asc' | 'desc' | undefined;
 
+  // Fail loud on a malformed filter (bad base64/JSON/schema or depth/node-count breach).
+  let filter;
+  if (typeof _filter === 'string' && _filter !== '') {
+    const decoded = decodeFilter(_filter);
+    if (!decoded.success) {
+      return send({ success: false, statusCode: 400, errorMessage: 'Invalid filter' });
+    }
+    filter = decoded.value;
+  }
+
   const { offset, limit } = getOffsetLimit(req);
   const user = await getUserSession();
   const userId = user?.id;
@@ -33,6 +49,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     limit,
     sort,
     sortDirection,
+    filter,
   });
 
   if (!result.success) {

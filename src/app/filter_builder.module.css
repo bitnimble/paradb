@@ -1,0 +1,125 @@
+.builder {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gridBaseline);
+    padding: var(--gridBaseline) 0;
+}
+
+.simple {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(calc(var(--gridBaseline) * 20), 1fr));
+    gap: var(--gridBaseline);
+}
+
+.dateField {
+    display: flex;
+    flex-direction: column;
+}
+
+.dateInput,
+.select,
+.value {
+    border: 1px solid var(--colorGrey);
+    background: var(--colorBackground);
+    color: var(--colorForeground);
+    padding: calc(var(--gridBaseline) * 0.5) var(--gridBaseline);
+    font-family: 'Futura Light';
+    font-size: 16px;
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gridBaseline);
+    border: 1px solid var(--colorGreyA15);
+    padding: var(--gridBaseline);
+}
+
+.groupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.toggle {
+    display: flex;
+}
+
+.toggleActive,
+.toggleInactive {
+    border: 1px solid var(--colorAccent);
+    padding: calc(var(--gridBaseline) * 0.5) var(--gridBaseline);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.toggleActive {
+    background: var(--colorAccent);
+    color: var(--colorBackground);
+}
+
+.toggleInactive {
+    background: transparent;
+    color: var(--colorAccent);
+}
+
+.children {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gridBaseline);
+    padding-left: var(--gridBaseline);
+}
+
+.cmp {
+    display: flex;
+    align-items: center;
+    gap: var(--gridBaseline);
+    flex-wrap: wrap;
+}
+
+.value {
+    flex: 1;
+    min-width: calc(var(--gridBaseline) * 15);
+}
+
+.notNode {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gridBaseline);
+}
+
+.notChild {
+    flex: 1;
+}
+
+.addRow {
+    display: flex;
+    gap: var(--gridBaseline);
+    flex-wrap: wrap;
+}
+
+.add {
+    background: transparent;
+    border: 1px dashed var(--colorGrey);
+    color: var(--colorForeground);
+    padding: calc(var(--gridBaseline) * 0.5) var(--gridBaseline);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.remove {
+    background: transparent;
+    border: none;
+    color: var(--colorGrey);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.modeSwitch {
+    align-self: flex-start;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}

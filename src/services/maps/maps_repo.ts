@@ -1,7 +1,7 @@
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
+import { FilterNode } from 'schema/map_filter';
 import {
-  AdvancedSearchMapRequest,
   MapSortableAttributes,
   MapValidity,
   MapVisibility,
@@ -155,12 +155,14 @@ export class MapsRepo {
     sortDirection?: 'asc' | 'desc';
     offset: number;
     limit: number;
+    filter?: FilterNode;
   }): PromisedResult<PDMap[], DbError> {
-    const { user, query, offset, limit, sort, sortDirection } = searchOptions;
+    const { user, query, offset, limit, sort, sortDirection, filter } = searchOptions;
     const response = await this.searchIndex.search(query, {
       offset,
       limit,
       sort: sort && sortDirection ? [{ attribute: sort, direction: sortDirection }] : undefined,
+      filter,
     });
     const searchResults = response.hits;
     const ids = searchResults.map((r) => r.id);
@@ -174,51 +176,6 @@ export class MapsRepo {
 
     const maps = new Map(mapsResult.value.map((m) => [m.id, m]));
     return { success: true, value: searchResults.map((m) => maps.get(m.id)).filter(exists) };
-  }
-
-  /**
-   * Note: currently unused.
-   * @returns
-   */
-  async advancedSearchMaps(searchOptions: AdvancedSearchMapRequest) {
-    // TODO: prevent escaping the search query lol
-    const filterParts = [
-      searchOptions.artist ? `artist = "${searchOptions.artist}"` : null,
-      searchOptions.uploader ? `uploader = "${searchOptions.uploader}"` : null,
-    ].filter(exists);
-
-    const searchResponse = await this.searchIndex.search(searchOptions.title ?? '', {
-      filter: filterParts.join(' AND '),
-      hitsPerPage: searchOptions.limitPerPage || 20,
-      page: searchOptions.page || 1,
-    });
-    const searchResults = searchResponse.hits;
-    const ids = searchResults.map((r) => r.id);
-
-    // Note: hidden or invalid maps may be returned by the search index, but should be filtered out
-    // when querying further metadata via `findMaps`.
-    // TODO: include user projection for requesting-user-specific metadata
-    const mapsResult = await this.findMaps({ by: 'id', ids });
-    if (!mapsResult.success) {
-      return mapsResult;
-    }
-
-    const maps = new Map(mapsResult.value.map((m) => [m.id, m]));
-    return {
-      success: true,
-      totalCount: searchResponse.totalHits,
-      page: searchResponse.page,
-      maps: searchResults
-        .map((m) => maps.get(m.id))
-        .filter(exists)
-        .map((m) => {
-          const submissionDate = new Date(m.submissionDate);
-          return {
-            ...m,
-            submissionDate,
-          };
-        }),
-    } as const;
   }
 
   async getMap(mapId: string, userId?: string): PromisedResult<PDMap, GetMapError> {
