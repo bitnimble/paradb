@@ -34,20 +34,11 @@ export const OPS_BY_KIND = {
   date: ['before', 'after', 'gte', 'lte'],
 } as const satisfies Record<FieldKind, readonly string[]>;
 
-const FILTER_OPS = [
-  'eq',
-  'neq',
-  'contains',
-  'startsWith',
-  'has',
-  'gt',
-  'gte',
-  'lt',
-  'lte',
-  'before',
-  'after',
-] as const;
-export type FilterOp = (typeof FILTER_OPS)[number];
+export type FilterOp = (typeof OPS_BY_KIND)[keyof typeof OPS_BY_KIND][number];
+
+// Derived from OPS_BY_KIND (deduped) so a new operator only has to be added in one place; a missing
+// entry here would otherwise be accepted by validateCmp but rejected by the `z.enum` discriminator.
+const FILTER_OPS = [...new Set(Object.values(OPS_BY_KIND).flat())] as [FilterOp, ...FilterOp[]];
 
 const MAX_DEPTH = 5;
 const MAX_NODES = 50;
@@ -64,7 +55,10 @@ export type FilterNode =
   | { type: 'or'; children: FilterNode[] }
   | { type: 'not'; child: FilterNode };
 
-const filterableFields = Object.keys(FILTER_FIELDS) as [FilterableField, ...FilterableField[]];
+export const filterableFields = Object.keys(FILTER_FIELDS) as [
+  FilterableField,
+  ...FilterableField[],
+];
 
 const cmpNode = z.object({
   type: z.literal('cmp'),
@@ -94,7 +88,11 @@ const structuralFilterNode: z.ZodType<FilterNode> = z.lazy(() =>
   z.discriminatedUnion('type', [cmpNode, andNode, orNode, notNode])
 );
 
-const isIsoDateString = (value: string) => !Number.isNaN(Date.parse(value));
+// Accept a date (`YYYY-MM-DD`, from `<input type="date">`) or a full ISO datetime, and reject lenient
+// `Date.parse` inputs like '2021' or 'June 1'. The trailing `Date.parse` check rejects shapes that
+// look valid but aren't a real date (e.g. '2021-13-99').
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}([Tt ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?([Zz]|[+-]\d{2}:?\d{2})?)?$/;
+const isIsoDateString = (value: string) => ISO_DATE.test(value) && !Number.isNaN(Date.parse(value));
 
 function validateCmp(node: CmpNode, ctx: z.RefinementCtx) {
   const field = FILTER_FIELDS[node.field];
@@ -152,6 +150,35 @@ export const FilterNode: z.ZodType<FilterNode> = structuralFilterNode.superRefin
     ctx.addIssue({ code: 'custom', message: `Filter exceeds max node count of ${MAX_NODES}` });
   }
 });
+
+/**
+ * Normalizes a filter for sending to the backend, API and URL: trims string values, drops incomplete
+ * leaves (cmps blank after trimming) and the empty groups that result, returning undefined when
+ * nothing meaningful remains. Lets an untouched or partially-filled builder behave like no filter
+ * rather than erroring server-side or matching everything (e.g. `downloadCount >= 0` from a cleared
+ * number input, or `ILIKE '%%'` from a blank text input), and stops stray surrounding whitespace from
+ * breaking text matches.
+ */
+export function normalizeFilter(node: FilterNode | undefined): FilterNode | undefined {
+  if (node == null) {
+    return undefined;
+  }
+  if (node.type === 'cmp') {
+    // Numbers (incl. 0) are always real values. String values are trimmed and dropped when nothing
+    // remains, matching simple mode's setFieldValue.
+    if (typeof node.value !== 'string') {
+      return node;
+    }
+    const trimmed = node.value.trim();
+    return trimmed === '' ? undefined : { ...node, value: trimmed };
+  }
+  if (node.type === 'not') {
+    const child = normalizeFilter(node.child);
+    return child == null ? undefined : { type: 'not', child };
+  }
+  const children = node.children.map(normalizeFilter).filter((c): c is FilterNode => c != null);
+  return children.length === 0 ? undefined : { type: node.type, children };
+}
 
 /* Transport: one opaque base64url param, rather than nested `qs` brackets. */
 

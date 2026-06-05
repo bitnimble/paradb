@@ -36,6 +36,35 @@ describe('compileFilter', () => {
     expect(text).not.toContain('>=');
   });
 
+  it('compiles date comparisons against the timestamptz column, anchoring a bare date to UTC', () => {
+    const { text, values } = compile({
+      type: 'cmp',
+      field: 'submissionDate',
+      op: 'before',
+      value: '2021-06-03',
+    });
+    expect(text).toContain('"submission_date"');
+    expect(text).toContain('::timestamptz');
+    // A bare date is anchored to midnight UTC rather than left to the session timezone.
+    expect(values).toEqual(['2021-06-03T00:00:00Z']);
+  });
+
+  it('passes a full ISO date value through unchanged', () => {
+    const { values } = compile({
+      type: 'cmp',
+      field: 'submissionDate',
+      op: 'after',
+      value: '2021-06-01T12:00:00.000Z',
+    });
+    expect(values).toEqual(['2021-06-01T12:00:00.000Z']);
+  });
+
+  it('compiles neq as IS DISTINCT FROM so NULL rows are not silently dropped', () => {
+    const { text } = compile({ type: 'cmp', field: 'author', op: 'neq', value: 'anon' });
+    expect(text).toContain('IS DISTINCT FROM');
+    expect(text).not.toContain('!=');
+  });
+
   it('compiles contains as an ILIKE with surrounding wildcards', () => {
     const { text, values } = compile({
       type: 'cmp',

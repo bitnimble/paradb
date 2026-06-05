@@ -1,4 +1,10 @@
-import { FILTER_FIELDS, FilterNode, decodeFilter, encodeFilter } from 'schema/map_filter';
+import {
+  FILTER_FIELDS,
+  FilterNode,
+  decodeFilter,
+  encodeFilter,
+  normalizeFilter,
+} from 'schema/map_filter';
 
 describe('map_filter schema', () => {
   describe('FILTER_FIELDS registry', () => {
@@ -79,6 +85,28 @@ describe('map_filter schema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects lenient Date.parse inputs that are not ISO dates', () => {
+      for (const value of ['2021', 'June 1', '2021-13-99']) {
+        const result = FilterNode.safeParse({
+          type: 'cmp',
+          field: 'submissionDate',
+          op: 'after',
+          value,
+        });
+        expect(result.success).toBe(false);
+      }
+    });
+
+    it('accepts a bare YYYY-MM-DD date (from a date input)', () => {
+      const result = FilterNode.safeParse({
+        type: 'cmp',
+        field: 'submissionDate',
+        op: 'before',
+        value: '2021-06-03',
+      });
+      expect(result.success).toBe(true);
+    });
+
     it('accepts an ISO value for a date field', () => {
       const result = FilterNode.safeParse({
         type: 'cmp',
@@ -147,6 +175,48 @@ describe('map_filter schema', () => {
         value: 'x',
       } as unknown as FilterNode);
       expect(decodeFilter(bad).success).toBe(false);
+    });
+  });
+
+  describe('normalizeFilter', () => {
+    it('returns undefined for an empty group (so an empty OR is not compiled to FALSE)', () => {
+      expect(normalizeFilter({ type: 'or', children: [] })).toBeUndefined();
+      expect(normalizeFilter({ type: 'and', children: [] })).toBeUndefined();
+    });
+
+    it('drops cmps with a blank value and the groups that become empty', () => {
+      expect(
+        normalizeFilter({
+          type: 'and',
+          children: [
+            { type: 'cmp', field: 'artist', op: 'contains', value: 'Smash' },
+            { type: 'cmp', field: 'downloadCount', op: 'gte', value: '' },
+          ],
+        })
+      ).toEqual({
+        type: 'and',
+        children: [{ type: 'cmp', field: 'artist', op: 'contains', value: 'Smash' }],
+      });
+      expect(
+        normalizeFilter({ type: 'cmp', field: 'downloadCount', op: 'gte', value: '' })
+      ).toBeUndefined();
+    });
+
+    it('keeps a numeric 0, which is a real value rather than blank', () => {
+      const node: FilterNode = { type: 'cmp', field: 'downloadCount', op: 'gte', value: 0 };
+      expect(normalizeFilter(node)).toEqual(node);
+    });
+
+    it('drops a whitespace-only string value', () => {
+      expect(
+        normalizeFilter({ type: 'cmp', field: 'artist', op: 'contains', value: '   ' })
+      ).toBeUndefined();
+    });
+
+    it('trims leading and trailing whitespace from string values', () => {
+      expect(
+        normalizeFilter({ type: 'cmp', field: 'artist', op: 'contains', value: '  Smash Mouth  ' })
+      ).toEqual({ type: 'cmp', field: 'artist', op: 'contains', value: 'Smash Mouth' });
     });
   });
 });

@@ -40,7 +40,9 @@ export const PDMap = z.object({
   id: z.string(),
   visibility: mapVisibilityEnum,
   validity: mapValidityEnum,
-  submissionDate: z.iso.datetime({ local: true }),
+  // `submission_date` is a `timestamptz`, which Postgres serializes to JSON with an offset (e.g.
+  // `+00:00`); `offset` accepts that, `local` keeps accepting offset-less values (e.g. fixtures).
+  submissionDate: z.iso.datetime({ offset: true, local: true }),
   title: z.string(),
   artist: z.string(),
   author: z.string().nullish(),

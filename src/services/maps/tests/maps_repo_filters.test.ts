@@ -86,6 +86,31 @@ describe('maps repo search filters', () => {
     expect(ids).toEqual(['2']);
   });
 
+  it('treats the `before` boundary as a strict, timezone-correct exclusive bound on a public map', async () => {
+    await insertMap({
+      id: '500',
+      artist: 'BoundaryTest',
+      submissionDate: '2021-06-03T00:00:00.000Z',
+    });
+    const onBoundary = await searchIds({
+      type: 'and',
+      children: [
+        { type: 'cmp', field: 'artist', op: 'contains', value: 'BoundaryTest' },
+        { type: 'cmp', field: 'submissionDate', op: 'before', value: '2021-06-03T00:00:00.000Z' },
+      ],
+    });
+    // `before` compiles to `<`, so a map exactly on the boundary is excluded.
+    expect(onBoundary).toEqual([]);
+    const justAfter = await searchIds({
+      type: 'and',
+      children: [
+        { type: 'cmp', field: 'artist', op: 'contains', value: 'BoundaryTest' },
+        { type: 'cmp', field: 'submissionDate', op: 'before', value: '2021-06-03T00:01:00.000Z' },
+      ],
+    });
+    expect(justAfter).toEqual(['500']);
+  });
+
   it('supports OR composition', async () => {
     const ids = await searchIds({
       type: 'or',
@@ -106,6 +131,19 @@ describe('maps repo search filters', () => {
       ],
     });
     expect(ids).toEqual(['2']);
+  });
+
+  it('includes rows with a NULL column for a neq filter', async () => {
+    // A map with no author must still match "author != anon". NULL is "not anon".
+    await insertMap({ id: '400', artist: 'NullAuthorTest', author: undefined });
+    const ids = await searchIds({
+      type: 'and',
+      children: [
+        { type: 'cmp', field: 'artist', op: 'contains', value: 'NullAuthorTest' },
+        { type: 'cmp', field: 'author', op: 'neq', value: 'anon' },
+      ],
+    });
+    expect(ids).toEqual(['400']);
   });
 
   it('matches array membership for tags', async () => {

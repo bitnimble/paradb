@@ -15,9 +15,8 @@ import { maps } from 'zapatos/schema';
 export function compileFilter(node: FilterNode): db.SQLFragment<boolean> {
   switch (node.type) {
     case 'and':
-      return joinChildren(node.children, db.sql<maps.SQL, boolean>` AND `, 'TRUE');
     case 'or':
-      return joinChildren(node.children, db.sql<maps.SQL, boolean>` OR `, 'FALSE');
+      return joinChildren(node);
     case 'not':
       return db.sql<maps.SQL, boolean>`(NOT ${compileFilter(node.child)})`;
     case 'cmp':
@@ -25,15 +24,14 @@ export function compileFilter(node: FilterNode): db.SQLFragment<boolean> {
   }
 }
 
-function joinChildren(
-  children: FilterNode[],
-  separator: db.SQLFragment<boolean>,
-  empty: 'TRUE' | 'FALSE'
-): db.SQLFragment<boolean> {
+function joinChildren(node: Extract<FilterNode, { type: 'and' | 'or' }>): db.SQLFragment<boolean> {
+  const { type, children } = node;
   if (children.length === 0) {
-    // An empty group is normally omitted upstream; degrade to a constant so we never emit `()`.
-    return empty === 'TRUE' ? db.sql<maps.SQL, boolean>`TRUE` : db.sql<maps.SQL, boolean>`FALSE`;
+    // Identity element, so an empty group never emits `()`: AND of nothing is TRUE, OR is FALSE.
+    return type === 'and' ? db.sql<maps.SQL, boolean>`TRUE` : db.sql<maps.SQL, boolean>`FALSE`;
   }
+  const separator =
+    type === 'and' ? db.sql<maps.SQL, boolean>` AND ` : db.sql<maps.SQL, boolean>` OR `;
   const compiled = children.map(compileFilter);
   return db.sql<maps.SQL, boolean>`(${db.mapWithSeparator(compiled, separator, (c) => c)})`;
 }
@@ -43,24 +41,44 @@ function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, (c) => `\\${c}`);
 }
 
+// A bare `YYYY-MM-DD` (from `<input type="date">`) carries no timezone, so casting it to
+// `timestamptz` would resolve against the session timezone. Anchor it to midnight UTC instead; full
+// ISO values already carry their own offset and pass through unchanged.
+function toUtcInstant(value: string | number): string | number {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? `${value}T00:00:00Z`
+    : value;
+}
+
 function compileCmp(node: Extract<FilterNode, { type: 'cmp' }>): db.SQLFragment<boolean> {
-  const column = FILTER_FIELDS[node.field].column;
+  const field = FILTER_FIELDS[node.field];
+  const column = field.column;
   const { op, value } = node;
+
+  // `submission_date` is `timestamptz`. Bind date values as an absolute instant (anchoring a bare
+  // `YYYY-MM-DD` to midnight UTC) so comparisons are independent of the server session's timezone.
+  const param =
+    field.kind === 'date'
+      ? db.sql<maps.SQL>`${db.param(toUtcInstant(value))}::timestamptz`
+      : db.sql<maps.SQL>`${db.param(value)}`;
+
   switch (op) {
     case 'eq':
-      return db.sql<maps.SQL, boolean>`${column} = ${db.param(value)}`;
+      return db.sql<maps.SQL, boolean>`${column} = ${param}`;
     case 'neq':
-      return db.sql<maps.SQL, boolean>`${column} != ${db.param(value)}`;
+      // `IS DISTINCT FROM`, not `!=`, so rows where the column is NULL count as "not equal" rather
+      // than being silently dropped by SQL three-valued logic.
+      return db.sql<maps.SQL, boolean>`${column} IS DISTINCT FROM ${param}`;
     case 'gt':
     case 'after':
-      return db.sql<maps.SQL, boolean>`${column} > ${db.param(value)}`;
+      return db.sql<maps.SQL, boolean>`${column} > ${param}`;
     case 'gte':
-      return db.sql<maps.SQL, boolean>`${column} >= ${db.param(value)}`;
+      return db.sql<maps.SQL, boolean>`${column} >= ${param}`;
     case 'lt':
     case 'before':
-      return db.sql<maps.SQL, boolean>`${column} < ${db.param(value)}`;
+      return db.sql<maps.SQL, boolean>`${column} < ${param}`;
     case 'lte':
-      return db.sql<maps.SQL, boolean>`${column} <= ${db.param(value)}`;
+      return db.sql<maps.SQL, boolean>`${column} <= ${param}`;
     case 'contains':
       return db.sql<maps.SQL, boolean>`${column} ILIKE ${db.param(
         `%${escapeLike(String(value))}%`
@@ -70,6 +88,6 @@ function compileCmp(node: Extract<FilterNode, { type: 'cmp' }>): db.SQLFragment<
         `${escapeLike(String(value))}%`
       )} ESCAPE '\\'`;
     case 'has':
-      return db.sql<maps.SQL, boolean>`${db.param(value)} = ANY(${column})`;
+      return db.sql<maps.SQL, boolean>`${param} = ANY(${column})`;
   }
 }

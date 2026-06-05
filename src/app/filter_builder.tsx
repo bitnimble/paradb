@@ -18,6 +18,7 @@ import {
   FilterOp,
   FilterableField,
   OPS_BY_KIND,
+  filterableFields,
 } from 'schema/map_filter';
 import { Textbox } from 'ui/base/textbox/textbox';
 import { T } from 'ui/base/text/text';
@@ -48,17 +49,18 @@ const FIELD_LABELS: Record<FilterableField, string> = {
   submissionDate: 'Upload date',
 };
 
-const ALL_FIELDS = Object.keys(FILTER_FIELDS) as FilterableField[];
+// `tags` stays in the filter schema but is hidden from the builder until the tag write-path and its
+// dedicated UI land (next PR); today the column is never populated, so the field would match nothing.
+const ALL_FIELDS = filterableFields.filter((f) => f !== 'tags');
 
-// Display labels for simple mode's fixed fields, keyed by `field:op`.
-const SIMPLE_FIELD_LABELS: Record<string, string> = {
-  'artist:contains': 'Artist',
-  'author:contains': 'Mapper',
-  'description:contains': 'Description',
-  'submissionDate:after': 'Uploaded after',
-  'submissionDate:before': 'Uploaded before',
-};
 const simpleFieldKey = (simpleField: SimpleField) => `${simpleField.field}:${simpleField.op}`;
+
+// Derive each simple field's label from the shared field/op labels so they can't drift; date slots
+// read as "Uploaded before/after" rather than the bare field label.
+const simpleFieldLabel = (simpleField: SimpleField) =>
+  FILTER_FIELDS[simpleField.field].kind === 'date'
+    ? `Uploaded ${OP_LABELS[simpleField.op]}`
+    : FIELD_LABELS[simpleField.field];
 
 export const FilterBuilder = observer((props: { store: MapListStore }) => {
   const { store } = props;
@@ -83,7 +85,7 @@ const SimpleBuilder = observer((props: { store: MapListStore }) => {
     <div className={styles.simple}>
       {SIMPLE_FIELDS.map((simpleField) => {
         const key = simpleFieldKey(simpleField);
-        const label = SIMPLE_FIELD_LABELS[key];
+        const label = simpleFieldLabel(simpleField);
         const value = getFieldValue(store.filter, simpleField);
         return FILTER_FIELDS[simpleField.field].kind === 'date' ? (
           <DateField
@@ -295,8 +297,12 @@ const ValueWidget = (props: { node: CmpNode; onChange: (n: CmpNode) => void }) =
       <input
         type="number"
         className={styles.value}
+        // Keep the box blankable: an empty input stays empty (and is pruned before search) rather
+        // than snapping to 0, which would silently become e.g. `downloadCount >= 0` (match-all).
         value={typeof node.value === 'number' ? node.value : ''}
-        onChange={(e) => onChange({ ...node, value: Number(e.target.value) || 0 })}
+        onChange={(e) =>
+          onChange({ ...node, value: e.target.value === '' ? '' : Number(e.target.value) })
+        }
       />
     );
   }

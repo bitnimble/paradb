@@ -372,16 +372,16 @@ declare module 'zapatos/schema' {
       id: string;
       /**
       * **maps.submission_date**
-      * - `timestamp` in database
+      * - `timestamptz` in database
       * - `NOT NULL`, no default
       */
       submission_date: Date;
       /**
       * **maps.tags**
-      * - `text` in database
+      * - `_text` in database
       * - Nullable, no default
       */
-      tags: string | null;
+      tags: string[] | null;
       /**
       * **maps.title**
       * - `varchar` in database
@@ -464,16 +464,16 @@ declare module 'zapatos/schema' {
       id: string;
       /**
       * **maps.submission_date**
-      * - `timestamp` in database
+      * - `timestamptz` in database
       * - `NOT NULL`, no default
       */
-      submission_date: db.TimestampString;
+      submission_date: db.TimestampTzString;
       /**
       * **maps.tags**
-      * - `text` in database
+      * - `_text` in database
       * - Nullable, no default
       */
-      tags: string | null;
+      tags: string[] | null;
       /**
       * **maps.title**
       * - `varchar` in database
@@ -556,16 +556,16 @@ declare module 'zapatos/schema' {
       id?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
       /**
       * **maps.submission_date**
-      * - `timestamp` in database
+      * - `timestamptz` in database
       * - `NOT NULL`, no default
       */
-      submission_date?: (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment | db.ParentColumn>;
+      submission_date?: (db.TimestampTzString | Date) | db.Parameter<(db.TimestampTzString | Date)> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, (db.TimestampTzString | Date) | db.Parameter<(db.TimestampTzString | Date)> | db.SQLFragment | db.ParentColumn>;
       /**
       * **maps.tags**
-      * - `text` in database
+      * - `_text` in database
       * - Nullable, no default
       */
-      tags?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      tags?: string[] | db.Parameter<string[]> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string[] | db.Parameter<string[]> | db.SQLFragment | db.ParentColumn>;
       /**
       * **maps.title**
       * - `varchar` in database
@@ -642,16 +642,16 @@ declare module 'zapatos/schema' {
       id: string | db.Parameter<string> | db.SQLFragment;
       /**
       * **maps.submission_date**
-      * - `timestamp` in database
+      * - `timestamptz` in database
       * - `NOT NULL`, no default
       */
-      submission_date: (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment;
+      submission_date: (db.TimestampTzString | Date) | db.Parameter<(db.TimestampTzString | Date)> | db.SQLFragment;
       /**
       * **maps.tags**
-      * - `text` in database
+      * - `_text` in database
       * - Nullable, no default
       */
-      tags?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
+      tags?: string[] | db.Parameter<string[]> | null | db.DefaultType | db.SQLFragment;
       /**
       * **maps.title**
       * - `varchar` in database
@@ -728,16 +728,16 @@ declare module 'zapatos/schema' {
       id?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
       /**
       * **maps.submission_date**
-      * - `timestamp` in database
+      * - `timestamptz` in database
       * - `NOT NULL`, no default
       */
-      submission_date?: (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment | db.SQLFragment<any, (db.TimestampString | Date) | db.Parameter<(db.TimestampString | Date)> | db.SQLFragment>;
+      submission_date?: (db.TimestampTzString | Date) | db.Parameter<(db.TimestampTzString | Date)> | db.SQLFragment | db.SQLFragment<any, (db.TimestampTzString | Date) | db.Parameter<(db.TimestampTzString | Date)> | db.SQLFragment>;
       /**
       * **maps.tags**
-      * - `text` in database
+      * - `_text` in database
       * - Nullable, no default
       */
-      tags?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
+      tags?: string[] | db.Parameter<string[]> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string[] | db.Parameter<string[]> | null | db.DefaultType | db.SQLFragment>;
       /**
       * **maps.title**
       * - `varchar` in database

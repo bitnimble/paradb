@@ -52,9 +52,10 @@ export class PostgresIndex implements SearchIndex {
       return db
         .select(
           'maps',
-          filter
-            ? db.conditions.and({ visibility: MapVisibility.PUBLIC }, compileFilter(filter))
-            : { visibility: MapVisibility.PUBLIC },
+          db.conditions.and(
+            { visibility: MapVisibility.PUBLIC },
+            ...(filter ? [compileFilter(filter)] : [])
+          ),
           {
             columns: ['id'],
             lateral: sortLateral,
@@ -93,16 +94,11 @@ export class PostgresIndex implements SearchIndex {
         results = await db
           .select(
             'maps',
-            filter
-              ? db.conditions.and(
-                  { visibility: MapVisibility.PUBLIC },
-                  db.sql`(${exactMatch} OR ${ftsMatch})`,
-                  compileFilter(filter)
-                )
-              : db.conditions.and(
-                  { visibility: MapVisibility.PUBLIC },
-                  db.sql`(${exactMatch} OR ${ftsMatch})`
-                ),
+            db.conditions.and(
+              { visibility: MapVisibility.PUBLIC },
+              db.sql`(${exactMatch} OR ${ftsMatch})`,
+              ...(filter ? [compileFilter(filter)] : [])
+            ),
             {
               columns: ['id'],
               lateral: sortLateral,

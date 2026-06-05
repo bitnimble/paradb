@@ -1,8 +1,8 @@
 import { Api } from 'app/api/api';
 import { isSimpleFilter } from 'app/filter_modes';
 import { checkExists } from 'base/preconditions';
-import { action, observable, runInAction } from 'mobx';
-import { FilterNode } from 'schema/map_filter';
+import { action, computed, observable, runInAction } from 'mobx';
+import { FilterNode, normalizeFilter } from 'schema/map_filter';
 import { MapSortableAttributes, PDMap, mapSortableAttributes } from 'schema/maps';
 import { TableSortStore } from 'ui/base/table/table_presenter';
 import { getMapFileLink } from 'utils/maps';
@@ -42,14 +42,9 @@ export class MapListStore {
     this.filtersExpanded = true;
   }
 
-  /** The filter as sent to the backend, API and URL. */
-  get activeFilter(): FilterNode | undefined {
-    const filter = this.filter;
-    // Omit an empty group so an untouched advanced builder behaves like no filter.
-    if (filter == null || (filter.type === 'and' && filter.children.length === 0)) {
-      return undefined;
-    }
-    return filter;
+  /** The filter as sent to the backend, API and URL: trimmed, with incomplete leaves and empty groups dropped. */
+  @computed get activeFilter(): FilterNode | undefined {
+    return normalizeFilter(this.filter);
   }
 }
 
