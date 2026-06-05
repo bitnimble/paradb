@@ -4,7 +4,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { SubmitMapRequest, SubmitMapResponse } from 'schema/maps';
 import { testAuthenticate, testPost, testUser2 } from 'services/jest_helpers';
-import { FakeS3Handler } from 'services/maps/s3_handler_fake';
+import { MemoryFakeS3Handler } from 'services/maps/s3_handler_fake_memory';
 import { getServerContext } from 'services/server_context';
 import { _setCurrentUserForTesting } from 'services/session/supabase_fake';
 import { createUser } from 'services/users/users_repo';
@@ -28,7 +28,7 @@ describe('maps handler', () => {
     const id =
       opts.id ??
       (await _unwrap(mapsRepo.createNewMap({ title: 'placeholder', uploader: uploaderId }))).id;
-    (s3Handler as FakeS3Handler)._putMapFileForTesting(id, buffer);
+    (s3Handler as MemoryFakeS3Handler)._putMapFileForTesting(id, buffer);
     _setCurrentUserForTesting({ id: uploaderId, email: UPLOADER.email });
     const result = await reportUploadComplete(id, opts.isReupload ?? false);
     return { result, id };

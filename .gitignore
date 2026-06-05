@@ -37,3 +37,6 @@ next-env.d.ts
 
 # Sentry Auth Token
 .sentryclirc
+
+# Local dev fake-backend state (file-backed PGlite + on-disk fake S3)
+.fake_dev/

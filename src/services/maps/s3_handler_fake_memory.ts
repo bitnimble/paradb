@@ -10,7 +10,7 @@ import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
  * URL), and getMapFile / promoteTempMapFiles / deleteFiles then behave like the real handler's
  * temp-vs-permanent storage, so the upload-completion flow can be exercised end to end.
  */
-export class FakeS3Handler implements S3Handler {
+export class MemoryFakeS3Handler implements S3Handler {
   // Map archive bytes keyed by id. Pending uploads live in `temp` and are promoted to `permanent`
   // by promoteTempMapFiles, mirroring the real handler's `.temp` suffix scheme.
   private tempMapFiles = new Map<string, Buffer>();

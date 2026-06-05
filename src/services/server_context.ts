@@ -3,7 +3,8 @@ import { getDbPool } from 'services/db/pool';
 import { getEnvVars } from 'services/env';
 import { MapsRepo } from 'services/maps/maps_repo';
 import { RealS3Handler } from 'services/maps/s3_handler';
-import { FakeS3Handler } from 'services/maps/s3_handler_fake';
+import { FileFakeS3Handler } from 'services/maps/s3_handler_fake_disk';
+import { MemoryFakeS3Handler } from 'services/maps/s3_handler_fake_memory';
 import { S3Handler } from 'services/maps/s3_handler_types';
 import { getSingleton } from 'services/singleton';
 import { FavoritesRepo } from 'services/users/favorites_repo';
@@ -19,9 +20,19 @@ type ServerContextCore = {
   favoritesRepo: FavoritesRepo;
 };
 
+function createS3Handler(): S3Handler {
+  switch (getEnvVars().s3Implementation) {
+    case 'fake':
+      return new MemoryFakeS3Handler();
+    case 'dev':
+      return new FileFakeS3Handler();
+    default:
+      return new RealS3Handler();
+  }
+}
+
 function createServerContextCore(): ServerContextCore {
-  const s3Handler: S3Handler =
-    getEnvVars().s3Implementation === 'fake' ? new FakeS3Handler() : new RealS3Handler();
+  const s3Handler: S3Handler = createS3Handler();
   const searchIndex: SearchIndex = new PostgresIndex();
   const mapsRepo = new MapsRepo(searchIndex, s3Handler);
   const favoritesRepo = new FavoritesRepo(mapsRepo, searchIndex);

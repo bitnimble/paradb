@@ -5,11 +5,12 @@ import { Database } from 'services/db/db.types';
 import { getDbPool } from 'services/db/pool';
 import * as db from 'zapatos/db';
 
-// Fake Supabase client used by the integration tests (gated by SUPABASE_IMPLEMENTATION=fake), so the
-// suite can run without a live Supabase instance. Sessions are carried in a self-contained cookie
-// token rather than a real JWT, and email existence is derived from the local `users` table (which
-// the test harness truncates/seeds). The only in-memory state is `testUserOverride`, which is
-// reset per-test in jest_setup.ts.
+// Fake Supabase client used by both the integration tests and `bun dev` (gated by
+// SUPABASE_IMPLEMENTATION=fake), so neither needs a live Supabase instance. Sessions are carried
+// in a self-contained cookie token rather than a real JWT, and email existence is derived from
+// the local `users` table (truncated/seeded by the test harness; persisted in PGlite during dev).
+// The only in-memory state is `testUserOverride`, which is reset per-test in jest_setup.ts and
+// unused in dev.
 
 const FAKE_SESSION_COOKIE = 'fake-supabase-session';
 
@@ -146,12 +147,38 @@ export function fakeSupabaseClient(): SupabaseClient<Database> {
         return { error: null };
       },
 
-      // Login flows aren't exercised by the integration suite; these keep the surface from crashing
-      // if reached.
-      async signInWithPassword() {
+      // Local-dev login: looks up the user by their derived supabase_id (no password check, since
+      // the fake never stored one) and re-sets the session cookie. Lets you sign back in after
+      // signing out in `bun dev` without spinning up real Supabase. Not exercised by integration
+      // tests, which use `_setCurrentUserForTesting` instead.
+      async signInWithPassword(credentials: { email: string; password: string }) {
+        const supabaseId = emailToSupabaseId(credentials.email);
+        const user = await db
+          .selectOne('users', { supabase_id: supabaseId }, { columns: ['id', 'username'] })
+          .run(getDbPool());
+        if (user == null) {
+          return {
+            data: { session: null, user: null },
+            error: authError('Invalid login credentials'),
+          };
+        }
+        const session: FakeSession = {
+          id: user.id,
+          username: user.username,
+          email: credentials.email,
+          supabaseId,
+        };
+        await setSessionCookie(session);
         return {
-          data: { session: null, user: null },
-          error: authError('signInWithPassword not implemented in fake'),
+          data: {
+            user: {
+              id: supabaseId,
+              email: credentials.email,
+              user_metadata: { id: user.id, username: user.username },
+            },
+            session: null,
+          },
+          error: null,
         };
       },
       admin: {

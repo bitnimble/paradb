@@ -59,8 +59,8 @@ The codebase uses Docker to run third-party services locally (Minio for a local 
 
 # Commands
 
-- `bun dev` will start local services on Docker
-- `bun supabase start` will start Supabase locally
+- `bun dev` starts the full local dev stack with no external services: file-backed PGlite (data under `.fake_dev/pglite`), the dev S3 handler writing under `.fake_dev/s3`, and the fake Supabase/Axiom implementations. Uses `.env.localdev` (orchestrated by `tools/dev.sh`).
+- `bun supabase start` will start Supabase locally (only needed if you need real Supabase auth instead of the fake)
 - `bun next dev` will run Next.js in dev mode
 - `bun format` will format the codebase with Prettier
 - `bun typecheck` will typecheck the codebase, and `bun lint` will lint it

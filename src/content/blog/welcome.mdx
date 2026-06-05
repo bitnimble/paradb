@@ -8,6 +8,7 @@ export const metadata = {
 ### Welcome to the first ParaDB update post!
 
 I've recently started working on ParaDB again; there's been a lot of major changes already, and a lot more to come. I've decided to start posting updates here for a couple of reasons:
+
 - To let users know when there are cool new features or fixes
 - To notify in advance for any expected downtime, and for what reason
 - To give technical insight into some of the changes made, especially if something seems like a downgrade for now
@@ -16,6 +17,7 @@ I've recently started working on ParaDB again; there's been a lot of major chang
 - To have these updates persisted in a place where they won't get lost, e.g. Discord messages
 
 **A huge amount of recent work falls into the fourth point.** In no particular order:
+
 - The database has been migrated from a self-hosted Postgres instance running on my VPS over to **Supabase**, to provide better uptime, better security, smooth database migrations for future features, and rolling backups
 - The auth system and entire user database has been migrated from a handrolled bcrypt implementation to **Supabase Auth**, providing significantly better correctness and security, and allows for future features/requirements like **email verification**, **password resets**, security alerts via email, **2FA**, and **OAuth** (like logging in with your Google or Discord accounts)
 - **Email infrastructure** has been set up, for account transactional emails (you can now reset your password yourself without needing to DM me on Discord)

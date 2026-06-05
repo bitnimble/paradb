@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { FakeS3Handler } from 'services/maps/s3_handler_fake';
+import { MemoryFakeS3Handler } from 'services/maps/s3_handler_fake_memory';
 import { getServerContext } from 'services/server_context';
 import { _setCurrentUserForTesting } from 'services/session/supabase_fake';
 
@@ -22,7 +22,7 @@ beforeEach(async () => {
   }
   _setCurrentUserForTesting(null);
   const { s3Handler } = getServerContext();
-  if (s3Handler instanceof FakeS3Handler) {
+  if (s3Handler instanceof MemoryFakeS3Handler) {
     s3Handler._resetForTesting();
   }
   await initTestData();
