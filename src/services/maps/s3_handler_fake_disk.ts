@@ -12,7 +12,7 @@ import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 // the server-side reads/writes directly against the filesystem. The in-memory counterpart used
 // by tests is `MemoryFakeS3Handler` in s3_handler_fake_memory.ts.
 
-// Resolve to an absolute path once at module load so per-request handlers don't depend on cwd.
+// Resolve to an absolute path per call so handlers don't depend on the ambient cwd.
 function devS3Root(): string {
   return path.resolve(process.cwd(), process.env.DEV_S3_ROOT || '.fake_dev/s3');
 }

@@ -57,6 +57,6 @@ bun tools/load_schema.ts
 echo "Starting Next.js dev server..."
 # Backgrounded + wait so the EXIT trap can kill the whole process group (negative PID with set -m).
 # `bun next dev` forks a worker that holds the port and would leak if we just killed bash on Ctrl-C.
-bun next dev -p 5174 &
+bun next dev &
 NEXT_PID=$!
 wait "$NEXT_PID"
