@@ -105,7 +105,7 @@ async function main() {
   }
 }
 
-if (import.meta.main) {
+if ((import.meta as { main?: boolean }).main) {
   main().catch((err) => {
     console.error(err);
     process.exit(1);
