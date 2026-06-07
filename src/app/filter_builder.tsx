@@ -62,63 +62,43 @@ const simpleFieldLabel = (simpleField: SimpleField) =>
     ? `Uploaded ${OP_LABELS[simpleField.op]}`
     : FIELD_LABELS[simpleField.field];
 
-export const FilterBuilder = observer((props: { store: MapListStore }) => {
-  const { store } = props;
+export const FilterBuilder = observer((props: { store: MapListStore; onSearch: () => void }) => {
+  const { store, onSearch } = props;
   return (
     <div className={styles.builder}>
       {store.filterMode === 'simple' ? (
-        <SimpleBuilder store={store} />
+        <SimpleBuilder store={store} onSearch={onSearch} />
       ) : (
         <AdvancedBuilder store={store} />
       )}
-      <ModeSwitch store={store} />
+      {/* Advanced filters are incomplete and have no entry point yet, but a filter rehydrated from a
+            URL can still land in advanced mode, so offer switching back to simple (one-way). */}
+      {store.filterMode === 'advanced' && <ModeSwitch store={store} />}
     </div>
   );
 });
 
-const SimpleBuilder = observer((props: { store: MapListStore }) => {
-  const { store } = props;
+const SimpleBuilder = observer((props: { store: MapListStore; onSearch: () => void }) => {
+  const { store, onSearch } = props;
   const setField = action((simpleField: SimpleField, value: string) => {
     store.filter = setFieldValue(store.filter, simpleField, value);
   });
   return (
     <div className={styles.simple}>
-      {SIMPLE_FIELDS.map((simpleField) => {
-        const key = simpleFieldKey(simpleField);
-        const label = simpleFieldLabel(simpleField);
-        const value = getFieldValue(store.filter, simpleField);
-        return FILTER_FIELDS[simpleField.field].kind === 'date' ? (
-          <DateField
-            key={key}
-            label={label}
-            value={value}
-            onChange={(v) => setField(simpleField, v)}
-          />
-        ) : (
-          <Textbox
-            key={key}
-            label={label}
-            error={undefined}
-            value={value}
-            onChange={(v) => setField(simpleField, v)}
-          />
-        );
-      })}
+      {SIMPLE_FIELDS.map((simpleField) => (
+        <Textbox
+          key={simpleFieldKey(simpleField)}
+          label={simpleFieldLabel(simpleField)}
+          error={undefined}
+          inputType={FILTER_FIELDS[simpleField.field].kind === 'date' ? 'date' : 'text'}
+          value={getFieldValue(store.filter, simpleField)}
+          onChange={(v) => setField(simpleField, v)}
+          onSubmit={onSearch}
+        />
+      ))}
     </div>
   );
 });
-
-const DateField = (props: { label: string; value: string; onChange: (v: string) => void }) => (
-  <label className={styles.dateField}>
-    <T.Small color="fgSecondary">{props.label}</T.Small>
-    <input
-      type="date"
-      className={styles.dateInput}
-      value={props.value}
-      onChange={(e) => props.onChange(e.target.value)}
-    />
-  </label>
-);
 
 const AdvancedBuilder = observer((props: { store: MapListStore }) => {
   const { store } = props;

@@ -53,6 +53,17 @@ export const Search = observer((props: { store: MapListStore; presenter: MapList
     </button>
   );
 
+  const BulkSelectActions = observer(() => {
+    return store.enableBulkSelect ? (
+      <>
+        <Button onClick={presenter.onClickBulkDownload}>⭳ {store.selectedMaps.size}</Button>
+        <Button onClick={presenter.onClickCancelBulkSelect}>Cancel</Button>
+      </>
+    ) : (
+      <Button onClick={presenter.onClickBulkSelect}>Bulk select</Button>
+    );
+  });
+
   return (
     <div className={styles.searchArea}>
       <div className={styles.searchRow}>
@@ -68,8 +79,9 @@ export const Search = observer((props: { store: MapListStore; presenter: MapList
           trailing={filterToggle}
         />
         <Button onClick={onSearch}>{searchIcon} Search</Button>
+        <BulkSelectActions />
       </div>
-      {store.filtersExpanded && <FilterBuilder store={store} />}
+      {store.filtersExpanded && <FilterBuilder store={store} onSearch={onSearch} />}
     </div>
   );
 });

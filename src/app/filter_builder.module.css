@@ -11,12 +11,6 @@
     gap: var(--gridBaseline);
 }
 
-.dateField {
-    display: flex;
-    flex-direction: column;
-}
-
-.dateInput,
 .select,
 .value {
     border: 1px solid var(--colorGrey);

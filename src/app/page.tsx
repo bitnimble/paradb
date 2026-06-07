@@ -80,22 +80,10 @@ const Home = observer(() => {
     presenter.onSearch('search');
   }, [presenter]);
 
-  const BulkSelectActions = observer(() => {
-    return store.enableBulkSelect ? (
-      <>
-        <Button onClick={presenter.onClickBulkDownload}>⭳ {store.selectedMaps.size}</Button>
-        <Button onClick={presenter.onClickCancelBulkSelect}>Cancel</Button>
-      </>
-    ) : (
-      <Button onClick={presenter.onClickBulkSelect}>Bulk select</Button>
-    );
-  });
-
   return (
     <div className={styles.mapList}>
       <div className={styles.filter}>
         <Search store={store} presenter={presenter} />
-        <BulkSelectActions />
       </div>
       <div
         className={classNames(
