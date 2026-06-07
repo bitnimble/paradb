@@ -78,6 +78,68 @@ export const FilterBuilder = observer((props: { store: MapListStore; onSearch: (
   );
 });
 
+// Summarises the active filter as dismissable pills, shown when the builder is collapsed so it's
+// obvious why results are constrained. Simple mode lists one pill per filled field; advanced mode
+// can't be summarised cleanly, so it shows a single catch-all pill that clears the whole filter.
+export const ActiveFilterPills = observer(
+  (props: { store: MapListStore; onSearch: () => void }) => {
+    const { store, onSearch } = props;
+
+    if (store.filterMode === 'advanced') {
+      if (store.activeFilter == null) {
+        return null;
+      }
+      return (
+        <div className={styles.pills}>
+          <Pill
+            label="Filters are active (advanced)"
+            onRemove={action(() => {
+              store.filter = undefined;
+              onSearch();
+            })}
+          />
+        </div>
+      );
+    }
+
+    const active = SIMPLE_FIELDS.map((simpleField) => ({
+      simpleField,
+      value: getFieldValue(store.filter, simpleField),
+    })).filter(({ value }) => value.trim() !== '');
+    if (active.length === 0) {
+      return null;
+    }
+    return (
+      <div className={styles.pills}>
+        {active.map(({ simpleField, value }) => (
+          <Pill
+            key={simpleFieldKey(simpleField)}
+            label={`${simpleFieldLabel(simpleField)}: ${value}`}
+            onRemove={action(() => {
+              store.filter = setFieldValue(store.filter, simpleField, '');
+              onSearch();
+            })}
+          />
+        ))}
+      </div>
+    );
+  }
+);
+
+const Pill = (props: { label: string; onRemove: () => void }) => (
+  <div className={styles.pill}>
+    <T.Small>{props.label}</T.Small>
+    <button
+      type="button"
+      className={styles.pillRemove}
+      aria-label={`Remove filter: ${props.label}`}
+      onClick={props.onRemove}
+    >
+      ✕
+    </button>
+  </div>
+);
+
 const SimpleBuilder = observer((props: { store: MapListStore; onSearch: () => void }) => {
   const { store, onSearch } = props;
   const setField = action((simpleField: SimpleField, value: string) => {

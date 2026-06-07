@@ -110,6 +110,34 @@
     line-height: 1;
 }
 
+.pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--gridBaseline) * 0.5);
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--gridBaseline) * 0.5);
+    background: var(--colorGreyA15);
+    border: 1px solid var(--colorGreyA30);
+    border-radius: 999px;
+    padding: calc(var(--gridBaseline) * 0.5) var(--gridBaseline);
+}
+
+.pillRemove {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: none;
+    color: var(--colorGrey);
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 0;
+}
+
 .modeSwitch {
     align-self: flex-start;
     background: transparent;

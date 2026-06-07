@@ -1,6 +1,6 @@
 'use client';
 
-import { FilterBuilder } from 'app/filter_builder';
+import { ActiveFilterPills, FilterBuilder } from 'app/filter_builder';
 import { MapListPresenter, MapListStore } from 'app/map_list_presenter';
 import classNames from 'classnames';
 import { action } from 'mobx';
@@ -81,6 +81,7 @@ export const Search = observer((props: { store: MapListStore; presenter: MapList
         <Button onClick={onSearch}>{searchIcon} Search</Button>
         <BulkSelectActions />
       </div>
+      {!store.filtersExpanded && <ActiveFilterPills store={store} onSearch={onSearch} />}
       {store.filtersExpanded && <FilterBuilder store={store} onSearch={onSearch} />}
     </div>
   );
