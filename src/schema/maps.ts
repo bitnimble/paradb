@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { ApiError, ApiSuccess, PaginatedApiRequest, PaginatedApiResponse } from './api';
+import { FilterNode } from './map_filter';
+import { ApiError, ApiSuccess } from './api';
 
 /* Enums */
 export enum MapVisibility {
@@ -39,7 +40,9 @@ export const PDMap = z.object({
   id: z.string(),
   visibility: mapVisibilityEnum,
   validity: mapValidityEnum,
-  submissionDate: z.iso.datetime({ local: true }),
+  // `submission_date` is a `timestamptz`, which Postgres serializes to JSON with an offset (e.g.
+  // `+00:00`); `offset` accepts that, `local` keeps accepting offset-less values (e.g. fixtures).
+  submissionDate: z.iso.datetime({ offset: true, local: true }),
   title: z.string(),
   artist: z.string(),
   author: z.string().nullish(),
@@ -96,30 +99,8 @@ export type SearchMapsRequest = {
   limit: number;
   sort?: MapSortableAttributes;
   sortDirection?: 'asc' | 'desc';
+  filter?: FilterNode;
 };
-
-// Fields in this advanced search are AND'ed together
-export const AdvancedSearchMapRequest = z.intersection(
-  PaginatedApiRequest,
-  z.object({
-    title: z.string().nullish(),
-    artist: z.string().nullish(),
-    uploader: z.string().nullish(),
-    submissionDateStart: z.date().nullish(),
-    submissionDateEnd: z.date().nullish(),
-  })
-);
-
-export const AdvancedSearchMapResponse = z.intersection(
-  PaginatedApiResponse,
-  z.object({
-    success: z.literal(true),
-    maps: z.array(PDMap),
-  })
-);
-
-export type AdvancedSearchMapRequest = z.infer<typeof AdvancedSearchMapRequest>;
-export type AdvancedSearchMapsResponse = z.infer<typeof AdvancedSearchMapResponse>;
 
 /* POST submitMap */
 export const SubmitMapRequest = z.object({

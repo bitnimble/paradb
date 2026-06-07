@@ -3,14 +3,14 @@ CREATE TABLE maps (
   id varchar(16) primary key,
   visibility char not null,
   validity text not null,
-  submission_date timestamp not null,
+  submission_date timestamptz not null,
   title varchar(256) not null,
   artist varchar(256) not null,
   author varchar(256),
   uploader varchar(256) not null,
   download_count int not null default 0,
   description text,
-  tags text,
+  tags text[],
   complexity int not null,
   album_art text,
   fts tsvector generated always as (
@@ -30,6 +30,7 @@ CREATE TABLE difficulties (
 
 CREATE INDEX difficulties_map_id_idx ON difficulties USING btree (map_id);
 CREATE INDEX maps_fts_idx ON maps USING gin (fts);
+CREATE INDEX maps_tags_idx ON maps USING gin (tags);
 CREATE INDEX on maps USING btree (visibility);
 CREATE INDEX on maps USING btree (submission_date);
 

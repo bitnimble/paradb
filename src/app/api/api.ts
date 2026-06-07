@@ -1,5 +1,6 @@
 import * as qs from 'qs';
 import { ApiResponse } from 'schema/api';
+import { encodeFilter } from 'schema/map_filter';
 import {
   DeleteMapResponse,
   FindMapsResponse,
@@ -66,12 +67,10 @@ export class HttpApi implements Api {
     return FindMapsResponse.parse(resp);
   }
 
-  async searchMaps(req: {
-    query: string;
-    offset: number;
-    limit: number;
-  }): Promise<FindMapsResponse> {
-    const resp = await get(path(this.apiBase, 'maps'), qs.stringify(req));
+  async searchMaps(req: SearchMapsRequest): Promise<FindMapsResponse> {
+    const { filter, ...rest } = req;
+    const params = { ...rest, ...(filter ? { filter: encodeFilter(filter) } : {}) };
+    const resp = await get(path(this.apiBase, 'maps'), qs.stringify(params));
     return FindMapsResponse.parse(resp);
   }
 

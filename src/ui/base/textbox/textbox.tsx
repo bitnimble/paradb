@@ -14,9 +14,11 @@ export type TextboxProps = {
   placeholder?: string;
   borderColor?: TextboxBorderColor;
   borderWidth?: number;
-  inputType?: 'text' | 'password' | 'area';
+  inputType?: 'text' | 'password' | 'area' | 'date';
   error: string | undefined;
   value: string;
+  // Optional adornment rendered inside the box, right-aligned after the input.
+  trailing?: React.ReactNode;
   onChange(value: string): void;
   onSubmit?(): void;
 };
@@ -63,6 +65,7 @@ export const Textbox = (props: TextboxProps) => {
         style={{ borderWidth: `${props.borderWidth || 1}px` }}
       >
         {props.inputType === 'area' ? <textarea {...inputProps} /> : <input {...inputProps} />}
+        {props.trailing}
       </div>
 
       {props.error != null && props.error.trim() !== '' ? (

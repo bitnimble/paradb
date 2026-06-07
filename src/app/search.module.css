@@ -1,0 +1,30 @@
+.searchArea {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gridBaseline);
+}
+
+.searchRow {
+    display: flex;
+    gap: var(--gridBaseline);
+}
+
+.searchTextbox {
+    flex: 1;
+}
+
+.filterToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: calc(var(--gridBaseline) * 0.5);
+    margin-left: calc(var(--gridBaseline) * 0.5);
+    color: var(--colorGrey);
+    cursor: pointer;
+}
+
+.filterToggleActive {
+    color: var(--colorAccent);
+}

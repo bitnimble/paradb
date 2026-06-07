@@ -77,7 +77,6 @@
     "postcss-preset-env": "^9.3.0",
     "prettier": "^3.0.3",
     "smol-toml": "^1.6.1",
-    "supabase": "^2.67.3",
     "supertest": "^6.3.3",
     "ts-node": "^10.9.2"
   },

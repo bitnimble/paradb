@@ -31,7 +31,7 @@ The codebase uses Docker to run third-party services locally (Minio for a local 
 
 # React
 
-- Use `mobx-react-lite` instead of `mobx-react` for observer components
+- Prefer `mobx-react-lite` for observer components by default, only reaching for `mobx-react` if necessary
 - For client-side pages with forms, prefer the simple pattern: `useState` for the store, instantiate the presenter directly in the component, access store fields directly (e.g. `store.email`, `store.errors.get('field')`) rather than destructuring into intermediate variables or passing as props to a separate component
 - Avoid creating factory functions like `createXyzPage()` that return observer components. Instead, export `observer(() => { ... })` directly as the default export
 - Avoid separating page.tsx into multiple component files when the component is simple; inline the JSX directly in page.tsx

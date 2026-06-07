@@ -1,11 +1,15 @@
 import { Api } from 'app/api/api';
+import { isSimpleFilter } from 'app/filter_modes';
 import { checkExists } from 'base/preconditions';
-import { action, observable, runInAction } from 'mobx';
+import { action, computed, observable, runInAction } from 'mobx';
+import { FilterNode, normalizeFilter } from 'schema/map_filter';
 import { MapSortableAttributes, PDMap, mapSortableAttributes } from 'schema/maps';
 import { TableSortStore } from 'ui/base/table/table_presenter';
 import { getMapFileLink } from 'utils/maps';
 
 const SEARCH_LIMIT = 20;
+
+export type FilterMode = 'simple' | 'advanced';
 
 export class MapListStore {
   @observable accessor enableBulkSelect = false;
@@ -18,11 +22,29 @@ export class MapListStore {
   @observable accessor hasMore = true;
   @observable accessor loadingMore = false;
 
+  /* Filtering. Simple and advanced modes edit this one AST; they differ only in the UI. */
+  @observable accessor filtersExpanded = false;
+  @observable accessor filterMode: FilterMode = 'simple';
+  @observable accessor filter: FilterNode | undefined = undefined;
+
   constructor(
     query: string,
-    readonly tableSortStore: TableSortStore<PDMap, 7>
+    readonly tableSortStore: TableSortStore<PDMap, 7>,
+    initialFilter?: FilterNode
   ) {
     this.query = query;
+    if (initialFilter == null) {
+      return;
+    }
+    this.filter = initialFilter;
+    // Open simple mode if the rehydrated filter fits its shape; otherwise advanced.
+    this.filterMode = isSimpleFilter(initialFilter) ? 'simple' : 'advanced';
+    this.filtersExpanded = true;
+  }
+
+  /** The filter as sent to the backend, API and URL: trimmed, with incomplete leaves and empty groups dropped. */
+  @computed get activeFilter(): FilterNode | undefined {
+    return normalizeFilter(this.filter);
   }
 }
 
@@ -134,6 +156,7 @@ export class MapListPresenter {
       query: this.store.query,
       limit: SEARCH_LIMIT,
       offset: 0,
+      filter: this.store.activeFilter,
       ...(sort || {}),
     });
     if (resp.success) {
@@ -152,6 +175,7 @@ export class MapListPresenter {
       query: this.store.query,
       limit: SEARCH_LIMIT,
       offset: this.store.maps?.length || 0,
+      filter: this.store.activeFilter,
       ...(sort || {}),
     });
     runInAction(() => (this.store.loadingMore = false));

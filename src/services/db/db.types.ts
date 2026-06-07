@@ -111,7 +111,7 @@ export type Database = {
           fts: unknown
           id: string
           submission_date: string
-          tags: string | null
+          tags: string[] | null
           title: string
           uploader: string
           validity: string
@@ -128,7 +128,7 @@ export type Database = {
           fts?: unknown
           id: string
           submission_date: string
-          tags?: string | null
+          tags?: string[] | null
           title: string
           uploader: string
           validity: string
@@ -145,7 +145,7 @@ export type Database = {
           fts?: unknown
           id?: string
           submission_date?: string
-          tags?: string | null
+          tags?: string[] | null
           title?: string
           uploader?: string
           validity?: string

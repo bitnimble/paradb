@@ -3,11 +3,13 @@
   "redirects": [
     {
       "commands": [
+        "Bash(bun jest *)",
         "Bash(bun eslint *)",
         "Bash(bunx stylelint *)",
         "Bash(bunx tsc *)",
         "Bash(bun tsc *)",
         "Bash(bun prettier *)",
+        "Bash(bunx prettier *)",
         "Bash(tsc *)"
       ],
       "reason": "Use bun lint, bun typecheck, or bun format instead of invoking tools directly."
@@ -17,7 +19,14 @@
       "reason": "Use the GitHub API via Fetch() instead of invoking gh directly"
     },
     {
-      "commands": ["Bash(sed *)", "Bash(grep *)", "Bash(find *)", "Bash(rg *)", "Bash(awk *)"],
+      "commands": [
+        "Bash(cat *)",
+        "Bash(sed *)",
+        "Bash(grep *)",
+        "Bash(find *)",
+        "Bash(rg *)",
+        "Bash(awk *)"
+      ],
       "reason": "Use the Read(), Write(), Edit() and Find() tools instead of invoking sed, grep, find, rg or awk directly"
     },
     {

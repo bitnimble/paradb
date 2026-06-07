@@ -1,5 +1,6 @@
 import { MapSortableAttributes, MapVisibility } from 'schema/maps';
 import { getDbPool } from 'services/db/pool';
+import { compileFilter } from 'services/search/filter_compiler';
 import * as db from 'zapatos/db';
 import { maps } from 'zapatos/schema';
 import { MapDocument, SearchIndex, SearchOptions, SearchResult } from './types';
@@ -28,6 +29,7 @@ export class PostgresIndex implements SearchIndex {
     // TODO: ensure correctness of pagination by using "WHERE >" instead of offset + limit
     const offset = options?.offset ?? 0;
     const limit = options?.limit ?? 20;
+    const filter = options?.filter;
 
     // Build sort config from options
     let sortOrder:
@@ -50,9 +52,10 @@ export class PostgresIndex implements SearchIndex {
       return db
         .select(
           'maps',
-          {
-            visibility: MapVisibility.PUBLIC,
-          },
+          db.conditions.and(
+            { visibility: MapVisibility.PUBLIC },
+            ...(filter ? [compileFilter(filter)] : [])
+          ),
           {
             columns: ['id'],
             lateral: sortLateral,
@@ -93,7 +96,8 @@ export class PostgresIndex implements SearchIndex {
             'maps',
             db.conditions.and(
               { visibility: MapVisibility.PUBLIC },
-              db.sql`(${exactMatch} OR ${ftsMatch})`
+              db.sql`(${exactMatch} OR ${ftsMatch})`,
+              ...(filter ? [compileFilter(filter)] : [])
             ),
             {
               columns: ['id'],
