@@ -36,6 +36,7 @@ const OP_LABELS: Record<FilterOp, string> = {
   lte: '≤',
   before: 'before',
   after: 'after',
+  count: 'count',
 };
 
 const FIELD_LABELS: Record<FilterableField, string> = {
@@ -47,6 +48,7 @@ const FIELD_LABELS: Record<FilterableField, string> = {
   tags: 'Tags',
   downloadCount: 'Downloads',
   submissionDate: 'Upload date',
+  difficulties: 'Difficulties',
 };
 
 // `tags` stays in the filter schema but is hidden from the builder until the tag write-path and its
@@ -61,6 +63,17 @@ const simpleFieldLabel = (simpleField: SimpleField) =>
   FILTER_FIELDS[simpleField.field].kind === 'date'
     ? `Uploaded ${OP_LABELS[simpleField.op]}`
     : FIELD_LABELS[simpleField.field];
+
+const simpleInputType = (simpleField: SimpleField) => {
+  const kind = FILTER_FIELDS[simpleField.field].kind;
+  if (kind === 'date') {
+    return 'date';
+  }
+  if (kind === 'number' || kind === 'countable') {
+    return 'number';
+  }
+  return 'text';
+};
 
 export const FilterBuilder = observer((props: { store: MapListStore; onSearch: () => void }) => {
   const { store, onSearch } = props;
@@ -152,7 +165,7 @@ const SimpleBuilder = observer((props: { store: MapListStore; onSearch: () => vo
           key={simpleFieldKey(simpleField)}
           label={simpleFieldLabel(simpleField)}
           error={undefined}
-          inputType={FILTER_FIELDS[simpleField.field].kind === 'date' ? 'date' : 'text'}
+          inputType={simpleInputType(simpleField)}
           value={getFieldValue(store.filter, simpleField)}
           onChange={(v) => setField(simpleField, v)}
           onSubmit={onSearch}
@@ -290,7 +303,7 @@ const CmpEditor = (props: {
       type: 'cmp',
       field,
       op: OPS_BY_KIND[newKind][0],
-      value: newKind === 'number' ? 0 : '',
+      value: newKind === 'number' || newKind === 'countable' ? 0 : '',
     });
   };
 
@@ -334,7 +347,7 @@ const CmpEditor = (props: {
 const ValueWidget = (props: { node: CmpNode; onChange: (n: CmpNode) => void }) => {
   const { node, onChange } = props;
   const kind = FILTER_FIELDS[node.field].kind;
-  if (kind === 'number') {
+  if (kind === 'number' || kind === 'countable') {
     return (
       <input
         type="number"
