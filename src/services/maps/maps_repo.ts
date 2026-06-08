@@ -118,6 +118,7 @@ export class MapsRepo {
               'title',
               'artist',
               'author',
+              'authoring_tool',
               'uploader',
               'download_count',
               'description',
@@ -204,6 +205,7 @@ export class MapsRepo {
               'title',
               'artist',
               'author',
+              'authoring_tool',
               'uploader',
               'download_count',
               'description',
@@ -411,8 +413,16 @@ export class MapsRepo {
       return validatedMapResult;
     }
 
-    const { title, artist, author, description, complexity, difficulties, albumArtFiles } =
-      validatedMapResult.value;
+    const {
+      title,
+      artist,
+      author,
+      authoringTool,
+      description,
+      complexity,
+      difficulties,
+      albumArtFiles,
+    } = validatedMapResult.value;
 
     // We are updating a map; delete the old file off S3 first
     const uploadResult = await this.s3Handler.uploadAlbumArtFiles(id, albumArtFiles, true);
@@ -435,6 +445,7 @@ export class MapsRepo {
             title: title,
             artist: artist,
             author: author || null,
+            authoringTool: authoringTool || null,
             uploader,
             albumArt: albumArt || null,
             description: description || null,

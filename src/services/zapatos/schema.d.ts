@@ -341,6 +341,12 @@ declare module 'zapatos/schema' {
       */
       author: string | null;
       /**
+      * **maps.authoring_tool**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      authoring_tool: string | null;
+      /**
       * **maps.complexity**
       * - `int4` in database
       * - `NOT NULL`, no default
@@ -432,6 +438,12 @@ declare module 'zapatos/schema' {
       * - Nullable, no default
       */
       author: string | null;
+      /**
+      * **maps.authoring_tool**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      authoring_tool: string | null;
       /**
       * **maps.complexity**
       * - `int4` in database
@@ -525,6 +537,12 @@ declare module 'zapatos/schema' {
       */
       author?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
       /**
+      * **maps.authoring_tool**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      authoring_tool?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
+      /**
       * **maps.complexity**
       * - `int4` in database
       * - `NOT NULL`, no default
@@ -617,6 +635,12 @@ declare module 'zapatos/schema' {
       */
       author?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
       /**
+      * **maps.authoring_tool**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      authoring_tool?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment;
+      /**
       * **maps.complexity**
       * - `int4` in database
       * - `NOT NULL`, no default
@@ -702,6 +726,12 @@ declare module 'zapatos/schema' {
       * - Nullable, no default
       */
       author?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
+      /**
+      * **maps.authoring_tool**
+      * - `text` in database
+      * - Nullable, no default
+      */
+      authoring_tool?: string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | null | db.DefaultType | db.SQLFragment>;
       /**
       * **maps.complexity**
       * - `int4` in database

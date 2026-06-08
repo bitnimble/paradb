@@ -46,6 +46,7 @@ export const PDMap = z.object({
   title: z.string(),
   artist: z.string(),
   author: z.string().nullish(),
+  authoringTool: z.string().nullish(),
   uploader: z.string(),
   downloadCount: z.number(),
   albumArt: z.string().nullish(),

@@ -105,6 +105,7 @@ export type Database = {
           album_art: string | null
           artist: string
           author: string | null
+          authoring_tool: string | null
           complexity: number
           description: string | null
           download_count: number
@@ -122,6 +123,7 @@ export type Database = {
           album_art?: string | null
           artist: string
           author?: string | null
+          authoring_tool?: string | null
           complexity: number
           description?: string | null
           download_count?: number
@@ -139,6 +141,7 @@ export type Database = {
           album_art?: string | null
           artist?: string
           author?: string | null
+          authoring_tool?: string | null
           complexity?: number
           description?: string | null
           download_count?: number
