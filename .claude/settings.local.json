@@ -9,6 +9,17 @@
       "Bash(echo \"exit=$?\")",
       "Bash(echo \"outer exit=$?\")",
       "Bash(echo \"EXIT=$?\")",
+      "Bash(bun install)",
+      "Bash(mcp__plugin_playwright_playwright_browser_navigate)",
+      "Bash(mcp__plugin_playwright_playwright_browser_take_screenshot)",
+      "Bash(mcp__plugin_playwright_playwright_browser_click)",
+      "Bash(mcp__plugin_playwright_playwright_browser_evaluate)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git grep *)",
+      "Bash(git fetch *)",
+      "Bash(git stash *)",
+      "Bash(git rebase *)",
       "Bash(bun run build *)",
       "Bash(bun typecheck *)",
       "Bash(bun run typecheck *)",
@@ -27,6 +38,9 @@
       "Bash(git mv *)",
       "Bash(git rm *)",
       "Bash(git show *)"
+    ],
+    "deny": [
+      "Write(supabase/migrations/*)"
     ],
     "defaultMode": "acceptEdits"
   }

@@ -2,6 +2,9 @@ name: Schema
 
 on:
   pull_request:
+    paths:
+      - 'supabase/schemas/**'
+      - 'supabase/migrations/**'
   workflow_dispatch:
 
 jobs:
@@ -47,18 +50,6 @@ jobs:
 
       - name: Reset database
         run: supabase db reset
-
-      # `bun schema` (tools/update_schema.sh) sources .env.docker for the Zapatos connection vars.
-      # That file is gitignored, so recreate it here pointing at the local Supabase database.
-      - name: Configure schema generation env
-        run: |
-          cat > .env.docker <<'EOF'
-          PGHOST=127.0.0.1
-          PGPORT=54322
-          PGUSER=postgres
-          PGPASSWORD=postgres
-          PGDATABASE=postgres
-          EOF
 
       - name: Regenerate Zapatos types
         run: bun run schema
