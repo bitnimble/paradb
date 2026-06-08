@@ -1,4 +1,4 @@
-import { maps } from 'zapatos/schema';
+import { difficulties, maps } from 'zapatos/schema';
 import { z } from 'zod';
 
 /**
@@ -8,11 +8,13 @@ import { z } from 'zod';
  * which are forced server-side.
  */
 
-type FieldKind = 'string' | 'stringArray' | 'number' | 'date';
+type FieldKind = 'string' | 'stringArray' | 'number' | 'date' | 'countable';
 
 /**
- * Single source of truth for filterable fields. `column` references the real `maps` column so the
- * compiler can use it directly; the `maps.Column` constraint guarantees only real columns appear.
+ * Single source of truth for filterable fields. Column-backed fields reference the real `maps`
+ * column so the compiler can use it directly; the `maps.Column` constraint guarantees only real
+ * columns appear. `countable` fields instead reference a related table (`relation`) and the foreign
+ * key back to `maps`, so the compiler can emit a `count(*)` correlated subquery (see `compileCmp`).
  */
 export const FILTER_FIELDS = {
   title: { kind: 'string', column: 'title' },
@@ -23,7 +25,12 @@ export const FILTER_FIELDS = {
   tags: { kind: 'stringArray', column: 'tags' },
   downloadCount: { kind: 'number', column: 'download_count' },
   submissionDate: { kind: 'date', column: 'submission_date' },
-} as const satisfies Record<string, { kind: FieldKind; column: maps.Column }>;
+  difficulties: { kind: 'countable', relation: 'difficulties', foreignKey: 'map_id' },
+} as const satisfies Record<
+  string,
+  | { kind: 'string' | 'stringArray' | 'number' | 'date'; column: maps.Column }
+  | { kind: 'countable'; relation: difficulties.Table; foreignKey: difficulties.Column }
+>;
 
 export type FilterableField = keyof typeof FILTER_FIELDS;
 
@@ -32,6 +39,7 @@ export const OPS_BY_KIND = {
   stringArray: ['has'],
   number: ['eq', 'neq', 'gt', 'gte', 'lt', 'lte'],
   date: ['before', 'after', 'gte', 'lte'],
+  countable: ['count'],
 } as const satisfies Record<FieldKind, readonly string[]>;
 
 export type FilterOp = (typeof OPS_BY_KIND)[keyof typeof OPS_BY_KIND][number];
@@ -106,6 +114,7 @@ function validateCmp(node: CmpNode, ctx: z.RefinementCtx) {
   }
   switch (field.kind) {
     case 'number':
+    case 'countable':
       if (typeof node.value !== 'number') {
         ctx.addIssue({ code: 'custom', message: `Field "${node.field}" requires a numeric value` });
       }

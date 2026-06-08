@@ -10,6 +10,7 @@ import {
 const artist: SimpleField = { field: 'artist', op: 'contains' };
 const author: SimpleField = { field: 'author', op: 'contains' };
 const after: SimpleField = { field: 'submissionDate', op: 'after' };
+const difficulties: SimpleField = { field: 'difficulties', op: 'count' };
 
 describe('isSimpleFilter', () => {
   it('treats an empty filter as simple', () => {
@@ -113,6 +114,16 @@ describe('getFieldValue / setFieldValue', () => {
         { type: 'cmp', field: 'submissionDate', op: 'after', value: '2021-01-01' },
       ],
     });
+  });
+
+  it('coerces a numeric simple field value to a number in the AST', () => {
+    const filter = setFieldValue(undefined, difficulties, '4');
+    expect(filter).toEqual({
+      type: 'and',
+      children: [{ type: 'cmp', field: 'difficulties', op: 'count', value: 4 }],
+    });
+    // Reads back as a string for display in the widget.
+    expect(getFieldValue(filter, difficulties)).toBe('4');
   });
 
   it('clears a field when set to blank, and drops the filter when none remain', () => {

@@ -104,6 +104,21 @@ describe('compileFilter', () => {
     expect(values).toEqual(['Rock']);
   });
 
+  it('compiles a countable count as a correlated subquery against the related table', () => {
+    const { text, values } = compile({
+      type: 'cmp',
+      field: 'difficulties',
+      op: 'count',
+      value: 4,
+    });
+    expect(text).toContain('count(*)');
+    expect(text).toContain('"difficulties"');
+    // Correlated back to the outer maps row.
+    expect(text).toContain('"maps"."id"');
+    expect(text).toContain('=');
+    expect(values).toEqual([4]);
+  });
+
   it('compiles an AND group', () => {
     const { text, values } = compile({
       type: 'and',
