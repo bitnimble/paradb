@@ -145,7 +145,7 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
 
   const getRow = (map: PDMap): Row<8> => {
     const selected = presenter.isSelected(map.id);
-    const onSelect = action((e: React.MouseEvent<HTMLAnchorElement>) => {
+    const onSelect = action((e: React.MouseEvent) => {
       if (!store.enableBulkSelect) {
         return;
       }
@@ -179,7 +179,10 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
         ),
         React.memo(() =>
           store.enableBulkSelect ? (
-            <div className={classNames(styles.selectBox, { [styles.selectBoxChecked]: selected })}>
+            <div
+              className={classNames(styles.selectBox, { [styles.selectBoxChecked]: selected })}
+              onClick={onSelect}
+            >
               {selected && <Check />}
             </div>
           ) : null

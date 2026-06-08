@@ -59,17 +59,25 @@
     box-shadow: 0 0 0 1px var(--colorGreyA15);
 }
 
+/* Pin the selection column to a fixed width (scoped to bulk-select mode so it collapses
+   to nothing when off) and centre the checkbox in it, rather than letting the table's
+   slack flow into the column and leave empty space beside the checkbox. */
+.bulkSelectEnabled .mapListTable td:last-child,
+.bulkSelectEnabled .mapListTable th:last-child {
+    width: calc(var(--gridBaseline) * 8);
+    text-align: center;
+}
+
 .selectBox {
     display: inline-flex;
     justify-content: center;
     align-items: center;
     vertical-align: middle;
-    margin: 0 var(--gridBaseline);
     width: calc(var(--gridBaseline) * 3);
     height: calc(var(--gridBaseline) * 3);
     border: 1px solid var(--colorGreyA15);
     color: var(--colorAccent);
-    pointer-events: none;
+    cursor: pointer;
 }
 
 .selectBoxChecked {
