@@ -1,6 +1,9 @@
 .themeToggle {
     background: none;
     border: none;
+    /* Inherit the navbar's (always-white) text color so the icon matches it in both themes;
+       a bare <button> would otherwise fall back to the UA default (black). */
+    color: inherit;
     cursor: pointer;
     font-size: 20px;
     line-height: 24px;

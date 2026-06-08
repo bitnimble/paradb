@@ -4,6 +4,7 @@ import { useApi } from 'app/api/api_provider';
 import { MapListPresenter, MapListStore } from 'app/map_list_presenter';
 import { useSkeletonRef } from 'app/skeleton_provider';
 import classNames from 'classnames';
+import { Check } from 'lucide-react';
 import { action, computed, observable, reaction } from 'mobx';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { useSearchParams } from 'next/navigation';
@@ -60,6 +61,8 @@ const Home = observer(() => {
             sortLabel: 'submissionDate',
             style: { width: `${metrics.gridBaseline * 20}px` },
           },
+          // Trailing selection column; only shows a checkbox when bulk select is enabled.
+          { content: <div></div> },
         ],
         6,
         'desc'
@@ -140,7 +143,8 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
 
   const [tableStore] = useState(() => new TableStore(computed(() => store.maps)));
 
-  const getRow = (map: PDMap): Row<7> => {
+  const getRow = (map: PDMap): Row<8> => {
+    const selected = presenter.isSelected(map.id);
     const onSelect = action((e: React.MouseEvent<HTMLAnchorElement>) => {
       if (!store.enableBulkSelect) {
         return;
@@ -160,7 +164,7 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
       </RouteLink>
     );
     return {
-      className: classNames({ [styles.mapListRowSelected]: presenter.isSelected(map.id) }),
+      className: classNames({ [styles.mapListRowSelected]: selected }),
       Cells: [
         React.memo(() => <DifficultyColorPills difficulties={map.difficulties} />),
         React.memo(() => wrapWithMapRoute(<T.Small>{map.title}</T.Small>)),
@@ -172,6 +176,13 @@ const MapListTable = observer((props: { store: MapListStore; presenter: MapListP
         ),
         React.memo(() =>
           wrapWithMapRoute(<T.Small>{formatDate(map.submissionDate)}</T.Small>, styles.centeredCell)
+        ),
+        React.memo(() =>
+          store.enableBulkSelect ? (
+            <div className={classNames(styles.selectBox, { [styles.selectBoxChecked]: selected })}>
+              {selected && <Check />}
+            </div>
+          ) : null
         ),
       ],
     };

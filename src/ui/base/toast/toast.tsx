@@ -1,13 +1,8 @@
 'use client';
 
+import { Toast } from '@base-ui/react/toast';
 import classNames from 'classnames';
-import {
-  Button,
-  UNSTABLE_Toast as Toast,
-  UNSTABLE_ToastContent as ToastContent,
-  UNSTABLE_ToastQueue as ToastQueue,
-  UNSTABLE_ToastRegion as ToastRegion,
-} from 'react-aria-components';
+import { X } from 'lucide-react';
 import { T } from 'ui/base/text/text';
 import styles from './toast.module.css';
 
@@ -23,12 +18,7 @@ export const enum ToastIntent {
   ERROR = 'error',
 }
 
-export type ToastData = {
-  message: string;
-  intent?: ToastIntent;
-};
-
-const toastQueue = new ToastQueue<ToastData>({ maxVisibleToasts: 5 });
+const toastManager = Toast.createToastManager();
 
 /**
  * Shows a toast notification.
@@ -41,29 +31,36 @@ export function showToast(
   intent: ToastIntent = ToastIntent.DEFAULT,
   timeout: number = 5000
 ): void {
-  toastQueue.add({ message, intent }, { timeout });
+  toastManager.add({ title: message, type: intent, timeout });
+}
+
+function ToastList() {
+  const { toasts } = Toast.useToastManager();
+  return toasts.map((toast) => {
+    const intent = (toast.type as ToastIntent | undefined) ?? ToastIntent.DEFAULT;
+    return (
+      <Toast.Root
+        key={toast.id}
+        toast={toast}
+        className={classNames(styles.toast, intentStyles[intent])}
+      >
+        <Toast.Title className={styles.content}>
+          <T.Medium>{toast.title}</T.Medium>
+        </Toast.Title>
+        <Toast.Close className={styles.closeButton} aria-label="Close">
+          <X />
+        </Toast.Close>
+      </Toast.Root>
+    );
+  });
 }
 
 export function ToastProvider() {
   return (
-    <ToastRegion queue={toastQueue} className={styles.toastRegion}>
-      {({ toast }) => {
-        const intent = toast.content.intent ?? 'default';
-        return (
-          <Toast toast={toast} className={classNames(styles.toast, intentStyles[intent])}>
-            <ToastContent className={styles.content}>
-              <T.Medium>{toast.content.message}</T.Medium>
-            </ToastContent>
-            <Button
-              className={styles.closeButton}
-              onPress={() => toastQueue.close(toast.key)}
-              slot="close"
-            >
-              ✕
-            </Button>
-          </Toast>
-        );
-      }}
-    </ToastRegion>
+    <Toast.Provider toastManager={toastManager} limit={5}>
+      <Toast.Viewport className={styles.toastRegion}>
+        <ToastList />
+      </Toast.Viewport>
+    </Toast.Provider>
   );
 }

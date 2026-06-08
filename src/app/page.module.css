@@ -59,26 +59,20 @@
     box-shadow: 0 0 0 1px var(--colorGreyA15);
 }
 
-.bulkSelectEnabled .mapListRow::after {
-    content: '';
-    display: flex;
+.selectBox {
+    display: inline-flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    top: 50%;
-    right: var(--gridBaseline);
-    transform: translateY(-50%);
+    vertical-align: middle;
+    margin: 0 var(--gridBaseline);
     width: calc(var(--gridBaseline) * 3);
     height: calc(var(--gridBaseline) * 3);
     border: 1px solid var(--colorGreyA15);
+    color: var(--colorAccent);
     pointer-events: none;
 }
 
-.bulkSelectEnabled .mapListRow.mapListRowSelected::after {
-    content: '✔';
-    color: var(--colorAccent);
-    font-weight: bolder;
-    font-size: 20px;
+.selectBoxChecked {
     border: 2px solid var(--colorAccent);
 }
 

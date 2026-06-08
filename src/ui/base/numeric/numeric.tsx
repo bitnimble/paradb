@@ -1,9 +1,9 @@
 'use client';
 
+import { NumberField } from '@base-ui/react/number-field';
 import classNames from 'classnames';
-import { observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { FieldError, Input, Label, NumberField } from 'react-aria-components';
 import { T } from 'ui/base/text/text';
 import styles from './numeric.module.css';
 
@@ -26,33 +26,28 @@ export const Numeric = observer((props: NumericProps) => {
   const hasError = props.error != null && props.error.trim() !== '';
 
   return (
-    <NumberField
+    <NumberField.Root
       className={classNames(props.className, styles.container, {
         [styles.errorContainer]: props.error != null,
       })}
       value={props.value}
-      minValue={props.min}
-      maxValue={props.max}
-      isRequired={props.required}
-      isInvalid={hasError}
-      onChange={(value) => {
-        if (!isNaN(value)) {
+      min={props.min}
+      max={props.max}
+      required={props.required}
+      onValueChange={(value) => {
+        if (value != null && !isNaN(value)) {
           props.onChange(value);
         }
       }}
     >
       {props.label && (
-        <Label>
+        <label>
           <T.Small color="fgSecondary">{props.label}</T.Small>
           {props.required ? <T.Small color="red">&nbsp;*</T.Small> : undefined}
-        </Label>
+        </label>
       )}
-      <Input className={styles.numeric} onKeyDown={onKeyDown} />
-      {hasError ? (
-        <FieldError>
-          <T.Tiny color="red">{props.error}</T.Tiny>
-        </FieldError>
-      ) : undefined}
-    </NumberField>
+      <NumberField.Input className={styles.numeric} onKeyDown={onKeyDown} />
+      {hasError ? <T.Tiny color="red">{props.error}</T.Tiny> : undefined}
+    </NumberField.Root>
   );
 });

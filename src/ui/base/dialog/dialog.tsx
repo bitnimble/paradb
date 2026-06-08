@@ -1,36 +1,49 @@
 'use client';
 
+import { Dialog as BaseDialog } from '@base-ui/react/dialog';
+import { X } from 'lucide-react';
 import React from 'react';
-import {
-  Dialog as AriaDialog,
-  Button,
-  DialogTrigger,
-  Modal,
-  ModalOverlay,
-} from 'react-aria-components';
 import styles from './dialog.module.css';
+
+type TriggerProps = {
+  onClick?: () => void;
+  'aria-haspopup'?: 'dialog';
+  'aria-expanded'?: boolean;
+};
 
 type DialogProps = {
   Body: React.ReactNode;
-  children: React.ReactNode;
+  /** The trigger element. Its `onClick` is wired to open the dialog. */
+  children: React.ReactElement<TriggerProps>;
 };
 
 export const Dialog = (props: DialogProps) => {
   const { Body, children } = props;
+  const [open, setOpen] = React.useState(false);
+
+  const trigger = React.cloneElement<TriggerProps>(children, {
+    onClick: () => {
+      children.props.onClick?.();
+      setOpen(true);
+    },
+    'aria-haspopup': 'dialog',
+    'aria-expanded': open,
+  });
 
   return (
-    <DialogTrigger>
-      {children}
-      <ModalOverlay className={styles.dialogContainer} isDismissable>
-        <Modal>
-          <AriaDialog className={styles.dialog}>
-            <Button className={styles.close} aria-label="Close dialog" slot="close">
-              ✖
-            </Button>
+    <>
+      {trigger}
+      <BaseDialog.Root open={open} onOpenChange={setOpen}>
+        <BaseDialog.Portal>
+          <BaseDialog.Backdrop className={styles.dialogContainer} />
+          <BaseDialog.Popup className={styles.dialog}>
+            <BaseDialog.Close className={styles.close} aria-label="Close dialog">
+              <X />
+            </BaseDialog.Close>
             {Body}
-          </AriaDialog>
-        </Modal>
-      </ModalOverlay>
-    </DialogTrigger>
+          </BaseDialog.Popup>
+        </BaseDialog.Portal>
+      </BaseDialog.Root>
+    </>
   );
 };

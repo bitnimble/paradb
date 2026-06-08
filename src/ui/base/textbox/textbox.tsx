@@ -1,3 +1,7 @@
+'use client';
+
+import { Field } from '@base-ui/react/field';
+import { Input } from '@base-ui/react/input';
 import classNames from 'classnames';
 import React from 'react';
 import { T } from 'ui/base/text/text';
@@ -33,9 +37,8 @@ export const Textbox = (props: TextboxProps) => {
     props.onChange(target.value);
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) =>
     props.onSubmit != null && e.key === 'Enter' && props.onSubmit();
-  const inputProps = {
+  const sharedProps = {
     className: styles.textbox,
-    type: props.inputType || 'text',
     readOnly: props.readOnly,
     value: props.value,
     placeholder: props.placeholder,
@@ -45,16 +48,17 @@ export const Textbox = (props: TextboxProps) => {
     onKeyDown,
   };
   return (
-    <div
+    <Field.Root
       className={classNames(props.className, styles.container, {
         [styles.errorContainer]: props.error != null,
       })}
+      invalid={props.error != null}
     >
       {props.label && (
-        <span>
+        <Field.Label>
           <T.Small color="fgSecondary">{props.label}</T.Small>
           {props.required ? <T.Small color="red">&nbsp;*</T.Small> : undefined}
-        </span>
+        </Field.Label>
       )}
       <div
         className={classNames(
@@ -64,13 +68,17 @@ export const Textbox = (props: TextboxProps) => {
         )}
         style={{ borderWidth: `${props.borderWidth || 1}px` }}
       >
-        {props.inputType === 'area' ? <textarea {...inputProps} /> : <input {...inputProps} />}
+        {props.inputType === 'area' ? (
+          <textarea {...sharedProps} />
+        ) : (
+          <Input {...sharedProps} type={props.inputType || 'text'} />
+        )}
         {props.trailing}
       </div>
 
       {props.error != null && props.error.trim() !== '' ? (
         <T.Tiny color="red">{props.error}</T.Tiny>
       ) : undefined}
-    </div>
+    </Field.Root>
   );
 };

@@ -3,13 +3,12 @@
 import { ActiveFilterPills, FilterBuilder } from 'app/filter_builder';
 import { MapListPresenter, MapListStore } from 'app/map_list_presenter';
 import classNames from 'classnames';
+import { Download, Filter, Search as SearchIcon } from 'lucide-react';
 import { action } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { encodeFilter } from 'schema/map_filter';
 import { Button } from 'ui/base/button/button';
-import { filterIcon } from 'ui/base/icons/filter_icon';
-import { searchIcon } from 'ui/base/icons/search_icon';
 import { Textbox } from 'ui/base/textbox/textbox';
 import styles from './search.module.css';
 
@@ -49,14 +48,16 @@ export const Search = observer((props: { store: MapListStore; presenter: MapList
       })}
       onClick={action(() => (store.filtersExpanded = !store.filtersExpanded))}
     >
-      {filterIcon}
+      <Filter />
     </button>
   );
 
   const BulkSelectActions = observer(() => {
     return store.enableBulkSelect ? (
       <>
-        <Button onClick={presenter.onClickBulkDownload}>⭳ {store.selectedMaps.size}</Button>
+        <Button onClick={presenter.onClickBulkDownload}>
+          <Download /> {store.selectedMaps.size}
+        </Button>
         <Button onClick={presenter.onClickCancelBulkSelect}>Cancel</Button>
       </>
     ) : (
@@ -78,7 +79,9 @@ export const Search = observer((props: { store: MapListStore; presenter: MapList
           onSubmit={onSearch}
           trailing={filterToggle}
         />
-        <Button onClick={onSearch}>{searchIcon} Search</Button>
+        <Button onClick={onSearch}>
+          <SearchIcon /> Search
+        </Button>
         <BulkSelectActions />
       </div>
       {!store.filtersExpanded && <ActiveFilterPills store={store} onSearch={onSearch} />}
