@@ -158,6 +158,7 @@ export type Database = {
           _id: number
           email_status: string
           id: string
+          role: string
           supabase_id: string
           username: string
         }
@@ -165,6 +166,7 @@ export type Database = {
           _id?: number
           email_status: string
           id: string
+          role?: string
           supabase_id: string
           username: string
         }
@@ -172,6 +174,7 @@ export type Database = {
           _id?: number
           email_status?: string
           id?: string
+          role?: string
           supabase_id?: string
           username?: string
         }

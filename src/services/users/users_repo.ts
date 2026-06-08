@@ -17,6 +17,11 @@ export const enum EmailStatus {
   UNVERIFIED = 'U',
   VERIFIED = 'V',
 }
+// Site-level roles. 'user' is the default; 'owner' is a superadmin.
+export const enum UserRole {
+  USER = 'user',
+  OWNER = 'owner',
+}
 
 type GetUserOpts = GetUserByUsernameOpts | GetUserByIdOpts;
 type GetUserByUsernameOpts = { by: 'username'; username: string };
