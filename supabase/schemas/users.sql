@@ -4,7 +4,9 @@ CREATE TABLE users (
   username varchar(32) unique not null,
   -- Keep email_status around for the pre-Supabase users - we need to confirm their emails still
   email_status char not null,
-  supabase_id uuid unique not null
+  supabase_id uuid unique not null,
+  -- Site-level role: 'user' (default) or 'owner' (superadmin)
+  role text not null default 'user' check (role in ('user', 'owner'))
 );
 
 CREATE INDEX idx_users_supabase_id ON users (supabase_id);
