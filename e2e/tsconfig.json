@@ -1,0 +1,13 @@
+{
+  "//": "Standalone config for the Playwright E2E sources. Kept out of the app tsconfig (which only includes src/) so these test-only files never enter the Next/Vercel build, while still being type-checkable on their own and picked up by Playwright's loader.",
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": ["node"],
+    "noEmit": true,
+    "plugins": []
+  },
+  "include": ["**/*.ts", "../playwright.config.ts"]
+}

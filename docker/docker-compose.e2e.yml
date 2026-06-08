@@ -1,0 +1,21 @@
+# Minio (real S3) for the full-stack E2E suite. Self-contained and separate from the dev compose so
+# the E2E run never touches dev state. Brought up by tools/e2e.sh, which polls readiness host-side.
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: paradb_minio_e2e
+    command: server /data --console-address ":9001"
+    ports:
+      - 9000:9000
+    environment:
+      # Root credentials the app signs presigned URLs with (see .env.e2e S3_ACCESS_KEY_*).
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      # The browser uploads to presigned URLs cross-origin (localhost:3000 -> :9000); allow CORS.
+      - MINIO_API_CORS_ALLOW_ORIGIN=*
+    volumes:
+      - paradb_minio_e2e_data:/data
+    restart: unless-stopped
+
+volumes:
+  paradb_minio_e2e_data:
