@@ -42,7 +42,7 @@ export async function signUpAndConfirm(page: Page, user: TestUser) {
 
   // Confirmations are on, so the form routes to the verification notice rather than logging in.
   await page.waitForURL('**/signup/email-verification');
-  await expect(page.getByText('Email verification needed')).toBeVisible();
+  await expect(page.getByText('Email verification needed', { exact: true })).toBeVisible();
 
   const confirmLink = await getConfirmationLink(user.email);
   // Visiting the link verifies the OTP server-side, sets the session cookies, and redirects to the

@@ -61,7 +61,7 @@ test('full happy-path journey across two users', async ({ page }) => {
 
   await test.step('upload a map and land on its page', async () => {
     map1Id = await uploadMap(page, MAP_ONE);
-    await expect(page.getByText(MAP_ONE.artist)).toBeVisible();
+    await expect(page.getByText(MAP_ONE.artist, { exact: true })).toBeVisible();
   });
 
   await test.step('map page shows owner actions for the uploader', async () => {
@@ -93,7 +93,7 @@ test('full happy-path journey across two users', async ({ page }) => {
     await mapRow(page, map1Id).locator('a').first().click();
     await page.waitForURL(`**/map/${map1Id}`);
 
-    await expect(page.getByText(MAP_ONE.title)).toBeVisible();
+    await expect(page.getByText(MAP_ONE.title, { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Delete' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Reupload' })).toHaveCount(0);
   });

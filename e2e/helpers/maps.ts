@@ -18,7 +18,8 @@ export async function uploadMap(page: Page, fixture: MapFixture): Promise<string
     }
   );
   const id = new URL(page.url()).pathname.split('/').pop()!;
-  await expect(page.getByText(fixture.title)).toBeVisible();
+  // exact: true so we match the title heading, not Next's route announcer ("<title> - ParaDB").
+  await expect(page.getByText(fixture.title, { exact: true })).toBeVisible();
   return id;
 }
 
