@@ -6,7 +6,7 @@ CREATE TABLE users (
   email_status char not null,
   supabase_id uuid unique not null,
   -- Site-level role: 'user' (default) or 'owner' (superadmin)
-  role varchar(16) not null default 'user' check (role in ('user', 'owner'))
+  role text not null default 'user' check (role in ('user', 'owner'))
 );
 
 CREATE INDEX idx_users_supabase_id ON users (supabase_id);
