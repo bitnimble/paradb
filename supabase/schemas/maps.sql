@@ -7,6 +7,7 @@ CREATE TABLE maps (
   title varchar(256) not null,
   artist varchar(256) not null,
   author varchar(256),
+  authoring_tool text,
   uploader varchar(256) not null,
   download_count int not null default 0,
   description text,

@@ -7,7 +7,7 @@ import * as unzipper from 'unzipper';
 
 type RawMap = Pick<
   PDMap,
-  'title' | 'artist' | 'author' | 'description' | 'complexity' | 'difficulties'
+  'title' | 'artist' | 'author' | 'authoringTool' | 'description' | 'complexity' | 'difficulties'
 >;
 
 export const enum ValidateMapError {
@@ -57,7 +57,7 @@ function allExists<T>(a: (T | undefined)[]): a is T[] {
 }
 type RawMapMetadata = Pick<
   PDMap,
-  'title' | 'artist' | 'author' | 'albumArt' | 'description' | 'complexity'
+  'title' | 'artist' | 'author' | 'authoringTool' | 'albumArt' | 'description' | 'complexity'
 >;
 async function validateMapFiles(opts: {
   expectedMapName: string;
@@ -141,6 +141,7 @@ async function validateMapFiles(opts: {
       title: validDifficultyResults[0].value.title,
       artist: validDifficultyResults[0].value.artist,
       author: validDifficultyResults[0].value.author,
+      authoringTool: validDifficultyResults[0].value.authoringTool,
       description: validDifficultyResults[0].value.description,
       complexity: validDifficultyResults[0].value.complexity,
       difficulties: validDifficultyResults.map((d) => ({
@@ -189,9 +190,17 @@ function validateMapDifficulty(
       };
     }
   }
+  // The unofficial "ParEdit" editor writes its version to a top-level `editorData` object instead
+  // of the official `authoringTool` property; derive `authoringTool` from it when not set directly.
+  const editorData = map.editorData;
+  let authoringTool = metadata.authoringTool;
+  if (authoringTool == null && editorData?.editorVersion != null) {
+    authoringTool = `ParEdit ${editorData.editorVersion}`;
+  }
   const optionalFields = {
     description: metadata.description,
     author: metadata.creator,
+    authoringTool,
     albumArt: metadata.coverImagePath,
   };
   const difficultyMatch = filename.match(/.*_(.+?).rlrr/);
