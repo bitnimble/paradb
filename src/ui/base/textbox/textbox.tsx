@@ -36,6 +36,9 @@ export const Textbox = (props: TextboxProps) => {
   const inputProps = {
     className: styles.textbox,
     type: props.inputType || 'text',
+    // Associate the visible label with the control for assistive tech (the label is rendered as a
+    // sibling span, not a <label htmlFor>), which also gives tests a stable accessible-name handle.
+    'aria-label': props.label,
     readOnly: props.readOnly,
     value: props.value,
     placeholder: props.placeholder,
