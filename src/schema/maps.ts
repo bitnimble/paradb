@@ -78,6 +78,8 @@ export type DeleteMapResponse = z.infer<typeof DeleteMapResponse>;
 /* GET findMaps */
 export const FindMapsSuccess = ApiSuccess.extend({
   maps: z.array(PDMap),
+  // Total number of maps matching the query, ignoring pagination.
+  totalCount: z.number(),
 });
 export type FindMapsSuccess = z.infer<typeof FindMapsSuccess>;
 

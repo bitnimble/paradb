@@ -41,7 +41,7 @@ async function searchIds(filter: FilterNode, query = '') {
   if (!result.success) {
     throw new Error('searchMaps failed');
   }
-  return result.value.map((m) => m.id).sort();
+  return result.value.maps.map((m) => m.id).sort();
 }
 
 describe('maps repo search filters', () => {
@@ -190,6 +190,25 @@ describe('maps repo search filters', () => {
       'All Star'
     );
     expect(ids).toEqual(['200']);
+  });
+
+  it('reports the full match count regardless of the page limit', async () => {
+    for (const id of ['600', '601', '602']) {
+      await insertMap({ id, artist: 'CountTest' });
+    }
+    const { mapsRepo } = await getServerContext();
+    const result = await mapsRepo.searchMaps({
+      query: '',
+      offset: 0,
+      limit: 2,
+      filter: { type: 'cmp', field: 'artist', op: 'contains', value: 'CountTest' },
+    });
+    if (!result.success) {
+      throw new Error('searchMaps failed');
+    }
+    // The page is capped at the limit, but totalCount counts all matching maps.
+    expect(result.value.maps).toHaveLength(2);
+    expect(result.value.totalCount).toBe(3);
   });
 
   describe('LIKE-wildcard escaping', () => {

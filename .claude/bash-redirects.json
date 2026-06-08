@@ -10,7 +10,8 @@
         "Bash(bun tsc *)",
         "Bash(bun prettier *)",
         "Bash(bunx prettier *)",
-        "Bash(tsc *)"
+        "Bash(tsc *)",
+        "Bash(./node_modules/.bin/tsc *)"
       ],
       "reason": "Use bun lint, bun typecheck, or bun format instead of invoking tools directly."
     },

@@ -48,15 +48,15 @@ export class PostgresIndex implements SearchIndex {
     }
 
     let results;
+    let totalCount: number;
     const queryMostRecent = () => {
-      return db
-        .select(
-          'maps',
-          db.conditions.and(
-            { visibility: MapVisibility.PUBLIC },
-            ...(filter ? [compileFilter(filter)] : [])
-          ),
-          {
+      const conditions = db.conditions.and(
+        { visibility: MapVisibility.PUBLIC },
+        ...(filter ? [compileFilter(filter)] : [])
+      );
+      return Promise.all([
+        db
+          .select('maps', conditions, {
             columns: ['id'],
             lateral: sortLateral,
             order: sortOrder ?? {
@@ -65,20 +65,21 @@ export class PostgresIndex implements SearchIndex {
             },
             limit,
             offset,
-          }
-        )
-        .run(pool);
+          })
+          .run(pool),
+        db.count('maps', conditions).run(pool),
+      ]);
     };
 
     if (query.trim() === '') {
-      results = await queryMostRecent();
+      [results, totalCount] = await queryMostRecent();
     } else {
       const [{ tsquery }] = await db.sql<
         db.Parameter,
         [{ tsquery: string }]
       >`select websearch_to_tsquery('english', ${db.param(query)})::text as tsquery`.run(pool);
       if (tsquery.trim() === '') {
-        results = await queryMostRecent();
+        [results, totalCount] = await queryMostRecent();
       } else {
         const tsqueryPartial = db.sql<maps.SQL, string>`(${db.param(tsquery)} || ':*')::tsquery`;
 
@@ -91,15 +92,14 @@ export class PostgresIndex implements SearchIndex {
         const ftsMatch = db.sql<maps.SQL, boolean>`${'fts'} @@ ${tsqueryPartial}`;
         const rank = db.sql<maps.SQL, number>`ts_rank_cd(${'fts'}, ${tsqueryPartial})`;
 
-        results = await db
-          .select(
-            'maps',
-            db.conditions.and(
-              { visibility: MapVisibility.PUBLIC },
-              db.sql`(${exactMatch} OR ${ftsMatch})`,
-              ...(filter ? [compileFilter(filter)] : [])
-            ),
-            {
+        const conditions = db.conditions.and(
+          { visibility: MapVisibility.PUBLIC },
+          db.sql`(${exactMatch} OR ${ftsMatch})`,
+          ...(filter ? [compileFilter(filter)] : [])
+        );
+        [results, totalCount] = await Promise.all([
+          db
+            .select('maps', conditions, {
               columns: ['id'],
               lateral: sortLateral,
               order: sortOrder ?? [
@@ -112,14 +112,16 @@ export class PostgresIndex implements SearchIndex {
                 rank,
                 exactMatch,
               },
-            }
-          )
-          .run(pool);
+            })
+            .run(pool),
+          db.count('maps', conditions).run(pool),
+        ]);
       }
     }
 
     return {
       hits: results.map((r) => ({ id: r.id })),
+      totalCount,
     };
   }
 
