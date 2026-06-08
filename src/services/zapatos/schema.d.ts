@@ -797,8 +797,8 @@ declare module 'zapatos/schema' {
       id: string;
       /**
       * **users.role**
-      * - `varchar` in database
-      * - `NOT NULL`, default: `'user'::character varying`
+      * - `text` in database
+      * - `NOT NULL`, default: `'user'::text`
       */
       role: string;
       /**
@@ -835,8 +835,8 @@ declare module 'zapatos/schema' {
       id: string;
       /**
       * **users.role**
-      * - `varchar` in database
-      * - `NOT NULL`, default: `'user'::character varying`
+      * - `text` in database
+      * - `NOT NULL`, default: `'user'::text`
       */
       role: string;
       /**
@@ -873,8 +873,8 @@ declare module 'zapatos/schema' {
       id?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
       /**
       * **users.role**
-      * - `varchar` in database
-      * - `NOT NULL`, default: `'user'::character varying`
+      * - `text` in database
+      * - `NOT NULL`, default: `'user'::text`
       */
       role?: string | db.Parameter<string> | db.SQLFragment | db.ParentColumn | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment | db.ParentColumn>;
       /**
@@ -911,8 +911,8 @@ declare module 'zapatos/schema' {
       id: string | db.Parameter<string> | db.SQLFragment;
       /**
       * **users.role**
-      * - `varchar` in database
-      * - `NOT NULL`, default: `'user'::character varying`
+      * - `text` in database
+      * - `NOT NULL`, default: `'user'::text`
       */
       role?: string | db.Parameter<string> | db.DefaultType | db.SQLFragment;
       /**
@@ -949,8 +949,8 @@ declare module 'zapatos/schema' {
       id?: string | db.Parameter<string> | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.SQLFragment>;
       /**
       * **users.role**
-      * - `varchar` in database
-      * - `NOT NULL`, default: `'user'::character varying`
+      * - `text` in database
+      * - `NOT NULL`, default: `'user'::text`
       */
       role?: string | db.Parameter<string> | db.DefaultType | db.SQLFragment | db.SQLFragment<any, string | db.Parameter<string> | db.DefaultType | db.SQLFragment>;
       /**
