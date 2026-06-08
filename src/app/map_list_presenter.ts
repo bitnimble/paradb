@@ -19,6 +19,7 @@ export class MapListStore {
   @observable accessor selectedMaps = new Map<string, true>();
   @observable accessor lastSelectedMapIndex: number | undefined = undefined;
   @observable accessor maps: PDMap[] | undefined = undefined;
+  @observable accessor totalCount: number | undefined = undefined;
   @observable accessor hasMore = true;
   @observable accessor loadingMore = false;
 
@@ -151,7 +152,10 @@ export class MapListPresenter {
       }
     }
     const sort = this.getTableSortParams();
-    runInAction(() => (this.store.maps = undefined));
+    runInAction(() => {
+      this.store.maps = undefined;
+      this.store.totalCount = undefined;
+    });
     const resp = await this.api.searchMaps({
       query: this.store.query,
       limit: SEARCH_LIMIT,
@@ -162,6 +166,7 @@ export class MapListPresenter {
     if (resp.success) {
       runInAction(() => {
         this.store.maps = resp.maps;
+        this.store.totalCount = resp.totalCount;
         this.store.hasMore = resp.maps.length >= SEARCH_LIMIT;
       });
     }

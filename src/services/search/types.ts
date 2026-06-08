@@ -4,9 +4,10 @@ import { MapSortableAttributes, PDMap } from 'schema/maps';
 // Input type for indexing maps - accepts PDMap or partial with required id
 export type MapDocument = Partial<PDMap> & { id: string };
 
-// Search result - returns matching IDs
+// Search result - returns matching IDs along with the total count of matches ignoring pagination
 export type SearchResult = {
   hits: Array<{ id: string }>;
+  totalCount: number;
 };
 
 export type SortOption = {

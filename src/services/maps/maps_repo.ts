@@ -157,7 +157,7 @@ export class MapsRepo {
     offset: number;
     limit: number;
     filter?: FilterNode;
-  }): PromisedResult<PDMap[], DbError> {
+  }): PromisedResult<{ maps: PDMap[]; totalCount: number }, DbError> {
     const { user, query, offset, limit, sort, sortDirection, filter } = searchOptions;
     const response = await this.searchIndex.search(query, {
       offset,
@@ -176,7 +176,13 @@ export class MapsRepo {
     }
 
     const maps = new Map(mapsResult.value.map((m) => [m.id, m]));
-    return { success: true, value: searchResults.map((m) => maps.get(m.id)).filter(exists) };
+    return {
+      success: true,
+      value: {
+        maps: searchResults.map((m) => maps.get(m.id)).filter(exists),
+        totalCount: response.totalCount,
+      },
+    };
   }
 
   async getMap(mapId: string, userId?: string): PromisedResult<PDMap, GetMapError> {
