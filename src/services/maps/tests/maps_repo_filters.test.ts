@@ -41,7 +41,7 @@ async function searchIds(filter: FilterNode, query = '') {
   if (!result.success) {
     throw new Error('searchMaps failed');
   }
-  return result.value.map((m) => m.id).sort();
+  return result.value.maps.map((m) => m.id).sort();
 }
 
 describe('maps repo search filters', () => {
@@ -146,6 +146,36 @@ describe('maps repo search filters', () => {
     expect(ids).toEqual(['400']);
   });
 
+  it('filters by the number of difficulties', async () => {
+    // Seed maps '1' and '2' each have 4 difficulties and are public; '3' has 1 and is hidden.
+    const ids = await searchIds({ type: 'cmp', field: 'difficulties', op: 'count', value: 4 });
+    expect(ids).toEqual(['1', '2']);
+  });
+
+  it('counts difficulties per map without bleeding across maps', async () => {
+    const { pool } = await getServerContext();
+    await insertMap({ id: '600', artist: 'DiffCount' });
+    await pool.query(
+      `INSERT INTO difficulties (map_id, difficulty_name) VALUES ('600', 'Easy'), ('600', 'Hard')`
+    );
+    const matchesTwo = await searchIds({
+      type: 'and',
+      children: [
+        { type: 'cmp', field: 'artist', op: 'contains', value: 'DiffCount' },
+        { type: 'cmp', field: 'difficulties', op: 'count', value: 2 },
+      ],
+    });
+    expect(matchesTwo).toEqual(['600']);
+    const matchesThree = await searchIds({
+      type: 'and',
+      children: [
+        { type: 'cmp', field: 'artist', op: 'contains', value: 'DiffCount' },
+        { type: 'cmp', field: 'difficulties', op: 'count', value: 3 },
+      ],
+    });
+    expect(matchesThree).toEqual([]);
+  });
+
   it('matches array membership for tags', async () => {
     // Seed maps '1' and '2' both carry the "Rock" tag; '3' does too but is hidden.
     const ids = await searchIds({ type: 'cmp', field: 'tags', op: 'has', value: 'Rock' });
@@ -160,6 +190,25 @@ describe('maps repo search filters', () => {
       'All Star'
     );
     expect(ids).toEqual(['200']);
+  });
+
+  it('reports the full match count regardless of the page limit', async () => {
+    for (const id of ['600', '601', '602']) {
+      await insertMap({ id, artist: 'CountTest' });
+    }
+    const { mapsRepo } = await getServerContext();
+    const result = await mapsRepo.searchMaps({
+      query: '',
+      offset: 0,
+      limit: 2,
+      filter: { type: 'cmp', field: 'artist', op: 'contains', value: 'CountTest' },
+    });
+    if (!result.success) {
+      throw new Error('searchMaps failed');
+    }
+    // The page is capped at the limit, but totalCount counts all matching maps.
+    expect(result.value.maps).toHaveLength(2);
+    expect(result.value.totalCount).toBe(3);
   });
 
   describe('LIKE-wildcard escaping', () => {

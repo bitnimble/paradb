@@ -9,6 +9,7 @@ import { observer } from 'mobx-react-lite';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { encodeFilter } from 'schema/map_filter';
 import { Button } from 'ui/base/button/button';
+import { T } from 'ui/base/text/text';
 import { Textbox } from 'ui/base/textbox/textbox';
 import styles from './search.module.css';
 
@@ -86,6 +87,11 @@ export const Search = observer((props: { store: MapListStore; presenter: MapList
       </div>
       {!store.filtersExpanded && <ActiveFilterPills store={store} onSearch={onSearch} />}
       {store.filtersExpanded && <FilterBuilder store={store} onSearch={onSearch} />}
+      {store.totalCount != null && (
+        <T.Tiny color="grey" display="block">
+          {store.totalCount} {store.totalCount === 1 ? 'map' : 'maps'}
+        </T.Tiny>
+      )}
     </div>
   );
 });

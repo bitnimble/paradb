@@ -9,12 +9,14 @@
     "build": "sudo docker compose -f docker/docker-compose.yml --env-file .env build",
     "start": "sudo docker compose -f docker/docker-compose.yml --env-file .env up --build",
     "typecheck": "bun tsc",
+    "typecheck:e2e": "bun tsc -p e2e/tsconfig.json",
     "lint": "eslint .",
     "format": "prettier . --write",
     "schema": "tools/update_schema.sh",
     "test": "bun run test:unit",
     "test:unit": "bun jest --config jest.config.unit.ts",
-    "test:integration": "dotenv -e .env.test -- bash tools/test.sh"
+    "test:integration": "dotenv -e .env.test -- bash tools/test.sh",
+    "test:e2e": "dotenv -e .env.e2e -- bash tools/e2e.sh"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.958.0",
@@ -66,6 +68,7 @@
     "@babel/plugin-syntax-typescript": "^7.28.6",
     "@electric-sql/pglite": "^0.4.6",
     "@electric-sql/pglite-socket": "^0.1.6",
+    "@playwright/test": "^1.60.0",
     "@types/jest": "^29.5.5",
     "@types/pg": "^8.10.2",
     "@types/postcss-modules-values": "^4",

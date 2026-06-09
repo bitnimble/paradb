@@ -40,7 +40,7 @@ describe('maps repo', () => {
       limit: 5,
     });
     expect(result.success).toBe(true);
-    const ids = (result as Extract<typeof result, { success: true }>).value.map((m) => m.id);
+    const ids = (result as Extract<typeof result, { success: true }>).value.maps.map((m) => m.id);
     expect(ids.includes('3')).toBe(false);
   });
 

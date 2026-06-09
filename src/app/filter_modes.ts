@@ -1,4 +1,4 @@
-import { CmpNode, FilterNode, FilterOp, FilterableField } from 'schema/map_filter';
+import { CmpNode, FILTER_FIELDS, FilterNode, FilterOp, FilterableField } from 'schema/map_filter';
 
 /**
  * Simple and advanced filtering differ only in the UI: both edit the same {@link FilterNode}. Simple
@@ -12,6 +12,7 @@ export const SIMPLE_FIELDS: SimpleField[] = [
   { field: 'artist', op: 'contains' },
   { field: 'author', op: 'contains' },
   { field: 'description', op: 'contains' },
+  { field: 'difficulties', op: 'count' },
   { field: 'submissionDate', op: 'after' },
   { field: 'submissionDate', op: 'before' },
 ];
@@ -83,7 +84,16 @@ export function setFieldValue(
       children.splice(idx, 1);
     }
   } else {
-    const cmp: CmpNode = { type: 'cmp', field: simpleField.field, op: simpleField.op, value };
+    // Numeric kinds carry a `number` in the AST; the simple-mode widget hands us its raw string, so
+    // coerce here (the field's blank state was already handled above).
+    const kind = FILTER_FIELDS[simpleField.field].kind;
+    const coerced = kind === 'number' || kind === 'countable' ? Number(value) : value;
+    const cmp: CmpNode = {
+      type: 'cmp',
+      field: simpleField.field,
+      op: simpleField.op,
+      value: coerced,
+    };
     if (idx >= 0) {
       children[idx] = cmp;
     } else {

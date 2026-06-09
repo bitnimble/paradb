@@ -2,6 +2,10 @@
 data.ms
 .env
 .env.*
+# ...but the non-secret, committed local/test/e2e env files are tracked.
+!.env.localdev
+!.env.test
+!.env.e2e
 
 # dependencies
 /node_modules
@@ -40,3 +44,9 @@ next-env.d.ts
 
 # Local dev fake-backend state (file-backed PGlite + on-disk fake S3)
 .fake_dev/
+
+# Playwright E2E artifacts
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/

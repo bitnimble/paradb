@@ -52,8 +52,18 @@ function toUtcInstant(value: string | number): string | number {
 
 function compileCmp(node: Extract<FilterNode, { type: 'cmp' }>): db.SQLFragment<boolean> {
   const field = FILTER_FIELDS[node.field];
-  const column = field.column;
   const { op, value } = node;
+
+  // `countable` fields live in a related table, so compare against a correlated `count(*)` rather
+  // than a `maps` column. `parentTable` is forced to `maps` so `db.parent('id')` resolves to
+  // `maps.id` here in the WHERE clause (it would otherwise only be set inside a lateral).
+  if (field.kind === 'countable') {
+    const counted = db.count(field.relation, { [field.foreignKey]: db.parent('id') });
+    counted.parentTable = 'maps';
+    return db.sql<maps.SQL, boolean>`(${counted}) = ${db.param(value)}`;
+  }
+
+  const column = field.column;
 
   // `submission_date` is `timestamptz`. Bind date values as an absolute instant (anchoring a bare
   // `YYYY-MM-DD` to midnight UTC) so comparisons are independent of the server session's timezone.
@@ -89,5 +99,8 @@ function compileCmp(node: Extract<FilterNode, { type: 'cmp' }>): db.SQLFragment<
       )} ESCAPE '\\'`;
     case 'has':
       return db.sql<maps.SQL, boolean>`${param} = ANY(${column})`;
+    case 'count':
+      // Unreachable: `count` is only valid for `countable` fields, handled above.
+      throw new Error(`'count' operator is only valid for countable fields`);
   }
 }

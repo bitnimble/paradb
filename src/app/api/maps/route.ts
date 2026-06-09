@@ -59,5 +59,5 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       errorMessage: 'Could not retrieve map: ' + joinErrors(result),
     });
   }
-  return send({ success: true, maps: result.value });
+  return send({ success: true, maps: result.value.maps, totalCount: result.value.totalCount });
 }

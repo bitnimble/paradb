@@ -46,11 +46,11 @@ export class FakeApi implements Api {
 
   async findMaps(): Promise<FindMapsResponse> {
     await delay();
-    return { success: true, maps: fakeMaps };
+    return { success: true, maps: fakeMaps, totalCount: fakeMaps.length };
   }
   async searchMaps(_req: SearchMapsRequest): Promise<FindMapsResponse> {
     await delay();
-    return { success: true, maps: fakeMaps };
+    return { success: true, maps: fakeMaps, totalCount: fakeMaps.length };
   }
   async getMap(id: string): Promise<GetMapResponse> {
     await delay(1000);

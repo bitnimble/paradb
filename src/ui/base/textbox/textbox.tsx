@@ -18,7 +18,7 @@ export type TextboxProps = {
   placeholder?: string;
   borderColor?: TextboxBorderColor;
   borderWidth?: number;
-  inputType?: 'text' | 'password' | 'area' | 'date';
+  inputType?: 'text' | 'password' | 'area' | 'date' | 'number';
   error: string | undefined;
   value: string;
   // Optional adornment rendered inside the box, right-aligned after the input.
@@ -39,6 +39,9 @@ export const Textbox = (props: TextboxProps) => {
     props.onSubmit != null && e.key === 'Enter' && props.onSubmit();
   const sharedProps = {
     className: styles.textbox,
+    // Associate the visible label with the control for assistive tech (the label is rendered as a
+    // sibling span, not a <label htmlFor>), which also gives tests a stable accessible-name handle.
+    'aria-label': props.label,
     readOnly: props.readOnly,
     value: props.value,
     placeholder: props.placeholder,

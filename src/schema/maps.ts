@@ -46,6 +46,7 @@ export const PDMap = z.object({
   title: z.string(),
   artist: z.string(),
   author: z.string().nullish(),
+  authoringTool: z.string().nullish(),
   uploader: z.string(),
   downloadCount: z.number(),
   albumArt: z.string().nullish(),
@@ -77,6 +78,8 @@ export type DeleteMapResponse = z.infer<typeof DeleteMapResponse>;
 /* GET findMaps */
 export const FindMapsSuccess = ApiSuccess.extend({
   maps: z.array(PDMap),
+  // Total number of maps matching the query, ignoring pagination.
+  totalCount: z.number(),
 });
 export type FindMapsSuccess = z.infer<typeof FindMapsSuccess>;
 

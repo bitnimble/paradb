@@ -117,6 +117,36 @@ describe('map_filter schema', () => {
       expect(result.success).toBe(true);
     });
 
+    it('accepts a count comparison on a countable field', () => {
+      const result = FilterNode.safeParse({
+        type: 'cmp',
+        field: 'difficulties',
+        op: 'count',
+        value: 4,
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a non-numeric value for a countable field', () => {
+      const result = FilterNode.safeParse({
+        type: 'cmp',
+        field: 'difficulties',
+        op: 'count',
+        value: 'four',
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects the count op on a non-countable field', () => {
+      const result = FilterNode.safeParse({
+        type: 'cmp',
+        field: 'downloadCount',
+        op: 'count',
+        value: 4,
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects an unknown field', () => {
       const result = FilterNode.safeParse({
         type: 'cmp',
