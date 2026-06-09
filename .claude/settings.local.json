@@ -20,6 +20,7 @@
       "Bash(git fetch *)",
       "Bash(git stash *)",
       "Bash(git rebase *)",
+      "Bash(git status *)",
       "Bash(bun run build *)",
       "Bash(bun typecheck *)",
       "Bash(bun run typecheck *)",
