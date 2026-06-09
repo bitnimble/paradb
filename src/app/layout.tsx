@@ -1,6 +1,7 @@
 import { ApiProvider } from 'app/api/api_provider';
 import { MaintenanceBanner } from 'app/maintenance_banner';
 import { SkeletonProvider } from 'app/skeleton_provider';
+import { LucideProvider } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Flags } from 'services/flags/flag_definitions';
 import { getUserSession } from 'services/session/session';
@@ -29,18 +30,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>
-          <ApiProvider>
-            <SessionProvider session={session}>
-              <SkeletonProvider className={styles.skeleton}>
-                {showBanner ? <MaintenanceBanner message={bannerMessage} /> : null}
-                <NavBar />
-                <div className={styles.content}>{children}</div>
-                <ToastProvider />
-              </SkeletonProvider>
-            </SessionProvider>
-          </ApiProvider>
-        </ThemeProvider>
+        <LucideProvider size={16}>
+          <ThemeProvider>
+            <ApiProvider>
+              <SessionProvider session={session}>
+                <SkeletonProvider className={styles.skeleton}>
+                  {showBanner ? <MaintenanceBanner message={bannerMessage} /> : null}
+                  <NavBar />
+                  <div className={styles.content}>{children}</div>
+                  <ToastProvider />
+                </SkeletonProvider>
+              </SessionProvider>
+            </ApiProvider>
+          </ThemeProvider>
+        </LucideProvider>
       </body>
     </html>
   );

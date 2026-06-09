@@ -9,6 +9,7 @@ import {
   setFieldValue,
   toSimpleFilter,
 } from 'app/filter_modes';
+import { X } from 'lucide-react';
 import { action } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import {
@@ -148,7 +149,7 @@ const Pill = (props: { label: string; onRemove: () => void }) => (
       aria-label={`Remove filter: ${props.label}`}
       onClick={props.onRemove}
     >
-      ✕
+      <X />
     </button>
   </div>
 );
@@ -225,7 +226,7 @@ const GroupEditor = (props: {
             aria-label="Remove group"
             onClick={onRemove}
           >
-            ✕
+            <X />
           </button>
         )}
       </div>
@@ -338,7 +339,7 @@ const CmpEditor = (props: {
         aria-label="Remove condition"
         onClick={onRemove}
       >
-        ✕
+        <X />
       </button>
     </div>
   );

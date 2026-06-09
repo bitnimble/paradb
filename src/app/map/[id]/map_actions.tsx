@@ -1,6 +1,7 @@
 'use client';
 
 import { useApi } from 'app/api/api_provider';
+import { Heart } from 'lucide-react';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { PDMap } from 'schema/maps';
 import { Button } from 'ui/base/button/button';
@@ -24,11 +25,12 @@ export const MapActions = observer((props: { map: PDMap }) => {
     <div className={styles.actions}>
       {session && isFavorited != null && (
         <Button
+          aria-label="Favorite"
           onClick={presenter.onToggleFavorite}
           loading={store.updatingFavorite}
           style={isFavorited ? 'active' : 'regular'}
         >
-          {store.updatingFavorite ? '' : '❤'}
+          {store.updatingFavorite ? '' : <Heart fill={isFavorited ? 'currentColor' : 'none'} />}
         </Button>
       )}
       {downloadLink && <Button link={downloadLink}>Download</Button>}

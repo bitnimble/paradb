@@ -6,3 +6,7 @@
 .header .cell.sortable {
     cursor: pointer;
 }
+
+.sortArrow {
+    vertical-align: middle;
+}

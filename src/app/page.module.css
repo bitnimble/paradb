@@ -59,26 +59,28 @@
     box-shadow: 0 0 0 1px var(--colorGreyA15);
 }
 
-.bulkSelectEnabled .mapListRow::after {
-    content: '';
-    display: flex;
+/* Pin the selection column to a fixed width (scoped to bulk-select mode so it collapses
+   to nothing when off) and centre the checkbox in it, rather than letting the table's
+   slack flow into the column and leave empty space beside the checkbox. */
+.bulkSelectEnabled .mapListTable td:last-child,
+.bulkSelectEnabled .mapListTable th:last-child {
+    width: calc(var(--gridBaseline) * 8);
+    text-align: center;
+}
+
+.selectBox {
+    display: inline-flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    top: 50%;
-    right: var(--gridBaseline);
-    transform: translateY(-50%);
+    vertical-align: middle;
     width: calc(var(--gridBaseline) * 3);
     height: calc(var(--gridBaseline) * 3);
     border: 1px solid var(--colorGreyA15);
-    pointer-events: none;
+    color: var(--colorAccent);
+    cursor: pointer;
 }
 
-.bulkSelectEnabled .mapListRow.mapListRowSelected::after {
-    content: '✔';
-    color: var(--colorAccent);
-    font-weight: bolder;
-    font-size: 20px;
+.selectBoxChecked {
     border: 2px solid var(--colorAccent);
 }
 

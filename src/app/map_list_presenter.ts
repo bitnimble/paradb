@@ -30,7 +30,7 @@ export class MapListStore {
 
   constructor(
     query: string,
-    readonly tableSortStore: TableSortStore<PDMap, 7>,
+    readonly tableSortStore: TableSortStore<PDMap, 8>,
     initialFilter?: FilterNode
   ) {
     this.query = query;

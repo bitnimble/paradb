@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import React from 'react';
@@ -98,7 +99,13 @@ export const Table = observer(
                 onClick={c.sortLabel ? () => presenter.onColumnClick(x) : undefined}
                 style={toJS(c.style)}
               >
-                {c.content} {sortColumn === x && (sortDirection === 'asc' ? '🠕' : '🠗')}
+                {c.content}{' '}
+                {sortColumn === x &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUp className={styles.sortArrow} />
+                  ) : (
+                    <ArrowDown className={styles.sortArrow} />
+                  ))}
               </th>
             ))}
           </tr>
