@@ -1,5 +1,11 @@
 {
   "worktree": {
     "setup": "bun install"
+  },
+  "scripts": {
+    "dev": {
+      "type": "service",
+      "command": "bun run dev --port $PASEO_PORT"
+    }
   }
 }
