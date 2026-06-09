@@ -25,6 +25,7 @@ export const MapActions = observer((props: { map: PDMap }) => {
     <div className={styles.actions}>
       {session && isFavorited != null && (
         <Button
+          aria-label="Favorite"
           onClick={presenter.onToggleFavorite}
           loading={store.updatingFavorite}
           style={isFavorited ? 'active' : 'regular'}

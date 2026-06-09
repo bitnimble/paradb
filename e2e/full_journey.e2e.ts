@@ -21,7 +21,7 @@ import { assertZipMatchesFixture } from './helpers/zip';
 async function favoriteMap(page: Page) {
   // The favorite button only renders once the map's userProjection has loaded; wait for it so a
   // missing projection fails loudly here rather than as an opaque click timeout.
-  const favorite = page.getByRole('button', { name: '❤' });
+  const favorite = page.getByRole('button', { name: 'Favorite' });
   await expect(favorite).toBeVisible();
   await Promise.all([
     page.waitForResponse(
