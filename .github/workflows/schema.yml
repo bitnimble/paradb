@@ -7,10 +7,6 @@ on:
       - 'supabase/migrations/**'
   workflow_dispatch:
 
-permissions:
-  contents: read
-  statuses: write
-
 jobs:
   schema:
     runs-on: ubuntu-latest
@@ -18,14 +14,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
-      - name: Report pending status
-        if: github.event_name == 'pull_request'
-        uses: ./.github/actions/commit-status
-        with:
-          context: schema
-          state: pending
-          description: Checking schema and generated types
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -72,11 +60,3 @@ jobs:
             echo "::error::Generated DB types are out of date. Run 'bun schema' locally and commit the result."
             exit 1
           fi
-
-      - name: Report final status
-        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-        uses: ./.github/actions/commit-status
-        with:
-          context: schema
-          state: ${{ job.status == 'success' && 'success' || 'failure' }}
-          description: ${{ job.status == 'success' && 'Schema in sync' || 'Schema out of sync' }}
