@@ -1,6 +1,9 @@
 .container {
     display: flex;
     flex-direction: column;
+    /* Allow the box to shrink within flex/grid parents (search row, filter grid) instead of forcing
+       its intrinsic width and overflowing. */
+    min-width: 0;
 }
 
 .textboxBorder {
@@ -23,6 +26,8 @@
 
 .textbox {
     flex: 1;
+    /* Without this the native input's intrinsic width keeps it from shrinking, overflowing the box. */
+    min-width: 0;
     border: none;
     outline: none;
     padding: calc(var(--gridBaseline) * 0.5) var(--gridBaseline);

@@ -4,10 +4,10 @@ import { MapListStore } from 'app/map_list_presenter';
 import {
   SIMPLE_FIELDS,
   SimpleField,
-  getFieldValue,
+  compileSimpleFilter,
+  filterToSimpleValues,
   isSimpleFilter,
-  setFieldValue,
-  toSimpleFilter,
+  simpleFieldKey,
 } from 'app/filter_modes';
 import { X } from 'lucide-react';
 import { action } from 'mobx';
@@ -56,8 +56,6 @@ const FIELD_LABELS: Record<FilterableField, string> = {
 // dedicated UI land (next PR); today the column is never populated, so the field would match nothing.
 const ALL_FIELDS = filterableFields.filter((f) => f !== 'tags');
 
-const simpleFieldKey = (simpleField: SimpleField) => `${simpleField.field}:${simpleField.op}`;
-
 // Derive each simple field's label from the shared field/op labels so they can't drift; date slots
 // read as "Uploaded before/after" rather than the bare field label.
 const simpleFieldLabel = (simpleField: SimpleField) =>
@@ -70,11 +68,15 @@ const simpleInputType = (simpleField: SimpleField) => {
   if (kind === 'date') {
     return 'date';
   }
-  if (kind === 'number' || kind === 'countable') {
+  if (kind === 'number') {
     return 'number';
   }
+  // `countable` (Difficulties) stays a text input so comma-separated values like "1, 2" can be typed.
   return 'text';
 };
+
+const simpleFieldPlaceholder = (simpleField: SimpleField) =>
+  simpleField.field === 'difficulties' ? 'e.g. 1, 2' : undefined;
 
 export const FilterBuilder = observer((props: { store: MapListStore; onSearch: () => void }) => {
   const { store, onSearch } = props;
@@ -118,7 +120,7 @@ export const ActiveFilterPills = observer(
 
     const active = SIMPLE_FIELDS.map((simpleField) => ({
       simpleField,
-      value: getFieldValue(store.filter, simpleField),
+      value: store.simpleValues.get(simpleFieldKey(simpleField)) ?? '',
     })).filter(({ value }) => value.trim() !== '');
     if (active.length === 0) {
       return null;
@@ -130,7 +132,7 @@ export const ActiveFilterPills = observer(
             key={simpleFieldKey(simpleField)}
             label={`${simpleFieldLabel(simpleField)}: ${value}`}
             onRemove={action(() => {
-              store.filter = setFieldValue(store.filter, simpleField, '');
+              store.simpleValues.delete(simpleFieldKey(simpleField));
               onSearch();
             })}
           />
@@ -156,8 +158,10 @@ const Pill = (props: { label: string; onRemove: () => void }) => (
 
 const SimpleBuilder = observer((props: { store: MapListStore; onSearch: () => void }) => {
   const { store, onSearch } = props;
+  // Unidirectional: the textboxes own their raw strings in `simpleValues`; only user input writes
+  // them, and they're compiled to the AST only on search (see `MapListStore.activeFilter`).
   const setField = action((simpleField: SimpleField, value: string) => {
-    store.filter = setFieldValue(store.filter, simpleField, value);
+    store.simpleValues.set(simpleFieldKey(simpleField), value);
   });
   return (
     <div className={styles.simple}>
@@ -167,7 +171,8 @@ const SimpleBuilder = observer((props: { store: MapListStore; onSearch: () => vo
           label={simpleFieldLabel(simpleField)}
           error={undefined}
           inputType={simpleInputType(simpleField)}
-          value={getFieldValue(store.filter, simpleField)}
+          placeholder={simpleFieldPlaceholder(simpleField)}
+          value={store.simpleValues.get(simpleFieldKey(simpleField)) ?? ''}
           onChange={(v) => setField(simpleField, v)}
           onSubmit={onSearch}
         />
@@ -398,22 +403,23 @@ const ToggleButton = (props: {
 
 const ModeSwitch = observer((props: { store: MapListStore }) => {
   const { store } = props;
-  // Simple and advanced edit the same AST, so switching to advanced needs no conversion.
   const toAdvanced = action(() => {
+    // Hand the compiled simple filter to advanced mode so the AST it edits matches what was active.
+    store.filter = compileSimpleFilter(store.simpleValues);
     store.filterMode = 'advanced';
   });
   const toSimple = action(() => {
-    if (isSimpleFilter(store.filter)) {
-      store.filterMode = 'simple';
-      return;
+    if (!isSimpleFilter(store.filter)) {
+      const ok = window.confirm(
+        'Switching to simple filters will discard the parts of your filter that simple mode cannot represent. Continue?'
+      );
+      if (!ok) {
+        return;
+      }
     }
-    const ok = window.confirm(
-      'Switching to simple filters will discard the parts of your filter that simple mode cannot represent. Continue?'
-    );
-    if (ok) {
-      store.filter = toSimpleFilter(store.filter);
-      store.filterMode = 'simple';
-    }
+    store.simpleValues = filterToSimpleValues(store.filter);
+    store.filter = undefined;
+    store.filterMode = 'simple';
   });
   return (
     <button

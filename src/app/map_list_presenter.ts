@@ -1,5 +1,5 @@
 import { Api } from 'app/api/api';
-import { isSimpleFilter } from 'app/filter_modes';
+import { compileSimpleFilter, filterToSimpleValues, isSimpleFilter } from 'app/filter_modes';
 import { checkExists } from 'base/preconditions';
 import { action, computed, observable, runInAction } from 'mobx';
 import { FilterNode, normalizeFilter } from 'schema/map_filter';
@@ -23,9 +23,14 @@ export class MapListStore {
   @observable accessor hasMore = true;
   @observable accessor loadingMore = false;
 
-  /* Filtering. Simple and advanced modes edit this one AST; they differ only in the UI. */
+  /*
+   * Filtering. Simple mode owns a raw string per field in `simpleValues`, compiled to the AST only
+   * on search (see `activeFilter`). Advanced mode edits `filter` (the AST) directly. The two never
+   * share a live edit target.
+   */
   @observable accessor filtersExpanded = false;
   @observable accessor filterMode: FilterMode = 'simple';
+  @observable accessor simpleValues = new Map<string, string>();
   @observable accessor filter: FilterNode | undefined = undefined;
 
   constructor(
@@ -37,15 +42,22 @@ export class MapListStore {
     if (initialFilter == null) {
       return;
     }
-    this.filter = initialFilter;
-    // Open simple mode if the rehydrated filter fits its shape; otherwise advanced.
-    this.filterMode = isSimpleFilter(initialFilter) ? 'simple' : 'advanced';
     this.filtersExpanded = true;
+    // Open simple mode if the rehydrated filter fits its shape (seeding the raw fields); else advanced.
+    if (isSimpleFilter(initialFilter)) {
+      this.simpleValues = filterToSimpleValues(initialFilter);
+      this.filterMode = 'simple';
+    } else {
+      this.filter = initialFilter;
+      this.filterMode = 'advanced';
+    }
   }
 
-  /** The filter as sent to the backend, API and URL: trimmed, with incomplete leaves and empty groups dropped. */
+  /** The filter as sent to the backend, API and URL: simple mode compiles its raw fields; advanced trims its AST. */
   @computed get activeFilter(): FilterNode | undefined {
-    return normalizeFilter(this.filter);
+    return this.filterMode === 'simple'
+      ? compileSimpleFilter(this.simpleValues)
+      : normalizeFilter(this.filter);
   }
 }
 
