@@ -20,6 +20,11 @@ The codebase uses Docker to run third-party services locally (Minio for a local 
 
 - If you need to add dependencies, add them with `bun install XYZ` and ensure that the bun.lock file is updated and part of the commit or PR.
 
+# Comments
+
+- Only add a comment if it either (a) explains something complex that is hard to read from the code itself, or (b) explains _why_ something is being done when it isn't clear why it's necessary. Otherwise leave it out - don't restate what the code already says.
+- Don't commit comments that are only relevant to the session or task in which they were written (e.g. references to a code review, "fixes finding X", "RED test", etc.).
+
 # Typescript
 
 - Use `== null` (double equals null) instead of either `=== null` or `=== undefined` (triple equals null / undefined), and the same for `!=`. This is to make `null` and `undefined` mean the same thing everywhere in our codebase to avoid any potential serialisation/deserialisation confusion or issues.
