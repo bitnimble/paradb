@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { IdDomain, generateId } from '../../src/services/db/id_gen';
 
 // Direct Postgres access to the running Supabase DB (connection comes from .env.e2e, layered in by
 // tools/e2e.sh). Used to seed many maps quickly: uploading 20+ through the real submit flow would
@@ -26,14 +27,19 @@ export type SeededMap = { id: string; title: string };
 export async function seedPublicMaps(opts: {
   artist: string;
   count: number;
-  idPrefix: string;
 }): Promise<SeededMap[]> {
-  const { artist, count, idPrefix } = opts;
+  const { artist, count } = opts;
   const maps: SeededMap[] = [];
   for (let i = 0; i < count; i++) {
-    const n = String(i).padStart(3, '0');
-    const id = `${idPrefix}${n}`;
-    const title = `Infinite Scroll Map ${n}`;
+    const title = `Infinite Scroll Map ${String(i).padStart(3, '0')}`;
+    const id = await generateId(
+      IdDomain.MAPS,
+      async (candidate) =>
+        ((await getPool().query('SELECT 1 FROM maps WHERE id = $1', [candidate])).rowCount ?? 0) > 0
+    );
+    if (id == null) {
+      throw new Error('Could not generate a unique map id for seeding');
+    }
     await getPool().query(
       `INSERT INTO maps
          (id, visibility, validity, submission_date, title, artist, uploader, download_count, complexity)

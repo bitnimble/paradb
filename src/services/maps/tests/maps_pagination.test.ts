@@ -1,6 +1,7 @@
 import { reportUploadComplete } from 'app/api/maps/submit/complete/actions';
 import { _unwrap } from 'base/result';
 import { MapVisibility } from 'schema/maps';
+import { IdDomain, generateId } from 'services/db/id_gen';
 import { MemoryFakeS3Handler } from 'services/maps/s3_handler_fake_memory';
 import { getServerContext } from 'services/server_context';
 import { _setCurrentUserForTesting } from 'services/session/supabase_fake';
@@ -79,37 +80,45 @@ describe('maps repo pagination', () => {
     expect(descending).toEqual([...expectedTitles].reverse());
   }, 120000);
 
-  // Uses direct inserts (mirroring maps_repo_filters.test.ts) to control the id and submission_date
-  // exactly, which the upload flow can't (it generates ids and stamps now()).
+  // Direct-inserts public maps with a shared submission_date (which the upload flow can't set),
+  // using real generated ids.
   it('orders maps with tied sort keys deterministically by id', async () => {
     const { pool, mapsRepo } = await getServerContext();
     await pool.query('TRUNCATE maps, difficulties, favorites CASCADE');
 
-    // Every map shares one submission_date, so the default `submission_date DESC` order cannot
-    // distinguish them; only a tiebreaker can. Insert in a shuffled order so any stable total
-    // order has to come from the tiebreaker, not from insertion/scan order.
+    // Every map shares one submission_date, so the default `submission_date DESC` order can't
+    // distinguish them; only a tiebreaker can. The ids are random, so insertion/scan order won't
+    // accidentally match id order - a stable total order has to come from the tiebreaker.
     const TIED_DATE = '2022-01-01T00:00:00.000Z';
-    const suffixes = ['07', '02', '09', '04', '00', '06', '01', '08', '03', '05'];
-    for (const s of suffixes) {
+    const COUNT = 10;
+    const ids: string[] = [];
+    for (let i = 0; i < COUNT; i++) {
+      const id = await generateId(
+        IdDomain.MAPS,
+        async (candidate) =>
+          ((await pool.query('SELECT 1 FROM maps WHERE id = $1', [candidate])).rowCount ?? 0) > 0
+      );
+      if (id == null) {
+        throw new Error('Could not generate a unique map id');
+      }
+      ids.push(id);
       await pool.query(
         `INSERT INTO maps
            (id, visibility, validity, submission_date, title, artist, uploader, download_count, complexity)
          VALUES ($1, $2, 'valid', $3, $4, 'Artist', 'tester', 0, 1)`,
-        [`m${s}`, MapVisibility.PUBLIC, TIED_DATE, `Title ${s}`]
+        [id, MapVisibility.PUBLIC, TIED_DATE, `Title ${i}`]
       );
     }
 
     const paged: string[] = [];
-    for (let offset = 0; offset < suffixes.length; offset += 4) {
+    for (let offset = 0; offset < COUNT; offset += 4) {
       const { maps } = await _unwrap(mapsRepo.searchMaps({ query: '', offset, limit: 4 }));
       paged.push(...maps.map((m) => m.id));
     }
 
-    const expected = suffixes.map((s) => `m${s}`).sort();
     // Every id is seen exactly once...
-    expect(new Set(paged).size).toBe(suffixes.length);
-    // ...and the order across tied rows is the deterministic, id-ordered sequence the `id`
-    // tiebreaker produces.
-    expect(paged).toEqual(expected);
+    expect(new Set(paged).size).toBe(COUNT);
+    // ...and tied rows come back in the deterministic, id-ordered sequence the tiebreaker produces.
+    expect(paged).toEqual([...ids].sort());
   });
 });

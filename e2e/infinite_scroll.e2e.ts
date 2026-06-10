@@ -13,7 +13,7 @@ async function seedRun(): Promise<string> {
   const unique = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
   const artist = `infscroll${unique}`;
   seededArtists.push(artist);
-  await seedPublicMaps({ artist, count: TOTAL, idPrefix: `e2einf${unique}_` });
+  await seedPublicMaps({ artist, count: TOTAL });
   return artist;
 }
 
