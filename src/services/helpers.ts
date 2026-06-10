@@ -84,8 +84,9 @@ export function badRequest(message: string) {
   });
 }
 
-const DEFAULT_LIMIT = 20;
-// Upper bound so a single request can't ask for the whole table.
+// Floor so a client can't page the list one map at a time; ceiling so one request can't ask for
+// the whole table. The floor doubles as the default when `limit` is absent or unparseable.
+const MIN_LIMIT = 20;
 const MAX_LIMIT = 100;
 
 export function getOffsetLimit(req: NextRequest) {
@@ -95,7 +96,7 @@ export function getOffsetLimit(req: NextRequest) {
   return {
     offset: Number.isFinite(parsedOffset) ? Math.max(0, Math.floor(parsedOffset)) : 0,
     limit: Number.isFinite(parsedLimit)
-      ? Math.min(MAX_LIMIT, Math.max(1, Math.floor(parsedLimit)))
-      : DEFAULT_LIMIT,
+      ? Math.min(MAX_LIMIT, Math.max(MIN_LIMIT, Math.floor(parsedLimit)))
+      : MIN_LIMIT,
   };
 }

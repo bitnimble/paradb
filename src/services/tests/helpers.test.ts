@@ -12,13 +12,15 @@ describe('getOffsetLimit', () => {
   });
 
   it('parses valid offset and limit', () => {
-    expect(getOffsetLimit(req('?offset=40&limit=10'))).toEqual({ offset: 40, limit: 10 });
+    expect(getOffsetLimit(req('?offset=40&limit=50'))).toEqual({ offset: 40, limit: 50 });
   });
 
-  // Invalid values are clamped rather than passed into the SQL LIMIT/OFFSET: a negative limit or
-  // offset would make Postgres throw, and an unbounded limit would let one request pull the table.
-  it('clamps a negative limit up to at least 1', () => {
-    expect(getOffsetLimit(req('?limit=-5')).limit).toBeGreaterThanOrEqual(1);
+  // Invalid/out-of-range values are clamped rather than passed into the SQL LIMIT/OFFSET: a negative
+  // limit or offset would make Postgres throw, a tiny limit would let a client page one map at a
+  // time, and an unbounded limit would let one request pull the whole table.
+  it('clamps a small or negative limit up to the minimum page size', () => {
+    expect(getOffsetLimit(req('?limit=-5')).limit).toBe(20);
+    expect(getOffsetLimit(req('?limit=1')).limit).toBe(20);
   });
 
   it('clamps a negative offset up to 0', () => {

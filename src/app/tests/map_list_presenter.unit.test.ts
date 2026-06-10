@@ -11,7 +11,7 @@ const makeMap = (id: string) => ({ id }) as unknown as PDMap;
 
 function createMapListStore() {
   // sortColumn is cleared on search, and these tests never sort, so the columns are unused.
-  const sortStore = new TableSortStore<PDMap, 7>([] as unknown as Columns<PDMap, 7>, 0, 'desc');
+  const sortStore = new TableSortStore<PDMap, 8>([] as unknown as Columns<PDMap, 8>, 0, 'desc');
   return new MapListStore('', sortStore);
 }
 
