@@ -26,7 +26,10 @@ export class PostgresIndex implements SearchIndex {
   async search(query: string, options?: SearchOptions): Promise<SearchResult> {
     const pool = await getDbPool();
 
-    // TODO: ensure correctness of pagination by using "WHERE >" instead of offset + limit
+    // Every ORDER BY below ends with `id` so tied sort keys (equal ranks, dates, etc.) get a stable
+    // total order, and offset pagination can't drop or duplicate rows across page boundaries.
+    // TODO: switch to keyset ("WHERE > last") pagination so a concurrent insert can't shift the
+    // offset window either.
     const offset = options?.offset ?? 0;
     const limit = options?.limit ?? 20;
     const filter = options?.filter;
@@ -59,10 +62,10 @@ export class PostgresIndex implements SearchIndex {
           .select('maps', conditions, {
             columns: ['id'],
             lateral: sortLateral,
-            order: sortOrder ?? {
-              by: 'submission_date',
-              direction: 'DESC',
-            },
+            order: [
+              sortOrder ?? { by: 'submission_date', direction: 'DESC' },
+              { by: 'id', direction: 'ASC' },
+            ],
             limit,
             offset,
           })
@@ -74,14 +77,25 @@ export class PostgresIndex implements SearchIndex {
     if (query.trim() === '') {
       [results, totalCount] = await queryMostRecent();
     } else {
+      // A hyphen between two alphanumeric characters (e.g. "spider-man") is part of a word, not a
+      // search operator, so collapse it to a space: the parts are then ANDed and a search matches
+      // "Spider-Man" and "Spider Man" alike. A whitespace-padded " - " is left intact as a
+      // websearch negation operator.
+      const normalizedQuery = query.replace(/(?<=[\p{L}\p{N}])-(?=[\p{L}\p{N}])/gu, ' ');
       const [{ tsquery }] = await db.sql<
         db.Parameter,
         [{ tsquery: string }]
-      >`select websearch_to_tsquery('english', ${db.param(query)})::text as tsquery`.run(pool);
+      >`select websearch_to_tsquery('english', ${db.param(normalizedQuery)})::text as tsquery`.run(
+        pool
+      );
       if (tsquery.trim() === '') {
         [results, totalCount] = await queryMostRecent();
       } else {
-        const tsqueryPartial = db.sql<maps.SQL, string>`(${db.param(tsquery)} || ':*')::tsquery`;
+        // Make the trailing lexeme a prefix match (search-as-you-type) - but only when the tsquery
+        // ends in a plain lexeme. A websearch result ending in ')' (a phrase or negation group)
+        // would become invalid tsquery syntax with a bare ':*' appended.
+        const prefixTsquery = tsquery.endsWith("'") ? `${tsquery}:*` : tsquery;
+        const tsqueryPartial = db.sql<maps.SQL, string>`${db.param(prefixTsquery)}::tsquery`;
 
         const lowerQuery = query.toLowerCase();
         const exactMatch = db.sql<maps.SQL, boolean>`(
@@ -92,9 +106,14 @@ export class PostgresIndex implements SearchIndex {
         const ftsMatch = db.sql<maps.SQL, boolean>`${'fts'} @@ ${tsqueryPartial}`;
         const rank = db.sql<maps.SQL, number>`ts_rank_cd(${'fts'}, ${tsqueryPartial})`;
 
+        // Filter on `ftsMatch` alone so the query can use the `fts` GIN index. `exactMatch` only
+        // boosts exact title/artist/author hits to the top of the FTS results in the ordering
+        // below, where it is evaluated over the matched rows rather than forcing a full scan. (A
+        // whitespace-padded "Artist - Title" name is a websearch negation and so isn't matched by
+        // FTS; we intentionally don't special-case it.)
         const conditions = db.conditions.and(
           { visibility: MapVisibility.PUBLIC },
-          db.sql`(${exactMatch} OR ${ftsMatch})`,
+          ftsMatch,
           ...(filter ? [compileFilter(filter)] : [])
         );
         [results, totalCount] = await Promise.all([
@@ -102,16 +121,15 @@ export class PostgresIndex implements SearchIndex {
             .select('maps', conditions, {
               columns: ['id'],
               lateral: sortLateral,
-              order: sortOrder ?? [
-                { by: exactMatch, direction: 'DESC' },
-                { by: rank, direction: 'DESC' },
-              ],
+              order: sortOrder
+                ? [sortOrder, { by: 'id', direction: 'ASC' }]
+                : [
+                    { by: exactMatch, direction: 'DESC' },
+                    { by: rank, direction: 'DESC' },
+                    { by: 'id', direction: 'ASC' },
+                  ],
               limit,
               offset,
-              extras: {
-                rank,
-                exactMatch,
-              },
             })
             .run(pool),
           db.count('maps', conditions).run(pool),

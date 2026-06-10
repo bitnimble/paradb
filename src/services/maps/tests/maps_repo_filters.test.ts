@@ -211,6 +211,32 @@ describe('maps repo search filters', () => {
     expect(result.value.totalCount).toBe(3);
   });
 
+  it('treats an intra-word hyphen as a space so "spider-man" matches "Spider Man"', async () => {
+    // A hyphen between word characters isn't a search operator; searchMaps collapses it to a space
+    // before websearch_to_tsquery. Without that, "spider-man" compiles to a phrase with a
+    // 'spider-man' lexeme the spaced title doesn't have, and the map would be missed.
+    await insertMap({ id: '800', title: 'Spider Man', artist: 'Webhead' });
+    await insertMap({ id: '801', title: 'Spider-Man', artist: 'Webhead' });
+    const { mapsRepo } = await getServerContext();
+    const result = await mapsRepo.searchMaps({ query: 'spider-man', offset: 0, limit: 50 });
+    if (!result.success) {
+      throw new Error('searchMaps failed');
+    }
+    expect(result.value.maps.map((m) => m.id).sort()).toEqual(['800', '801']);
+  });
+
+  it('keeps a whitespace-padded dash as a websearch negation', async () => {
+    // " - rose" excludes maps mentioning "rose"; only the dash *inside* a word is normalised away.
+    await insertMap({ id: '810', title: 'Kiss From a Rose', artist: 'Seal' });
+    await insertMap({ id: '811', title: 'Kiss the Sky', artist: 'Seal' });
+    const { mapsRepo } = await getServerContext();
+    const result = await mapsRepo.searchMaps({ query: 'kiss - rose', offset: 0, limit: 50 });
+    if (!result.success) {
+      throw new Error('searchMaps failed');
+    }
+    expect(result.value.maps.map((m) => m.id)).toEqual(['811']);
+  });
+
   describe('LIKE-wildcard escaping', () => {
     it('treats % in a contains value literally', async () => {
       await insertMap({ id: '300', description: '100% complete' });

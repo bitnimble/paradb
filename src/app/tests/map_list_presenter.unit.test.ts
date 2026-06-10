@@ -24,7 +24,7 @@ class FakeSearchApi {
     const maps = Array.from({ length: Math.min(req.limit, available) }, (_, i) =>
       makeMap(`m${req.offset + i}`)
     );
-    return Promise.resolve({ success: true, maps });
+    return Promise.resolve({ success: true, maps, totalCount: this.total });
   }
 }
 
@@ -33,16 +33,15 @@ class FakeDeferredSearchApi {
   readonly calls: Array<{ req: SearchMapsRequest; resolve: (maps: PDMap[]) => void }> = [];
   searchMaps(req: SearchMapsRequest): Promise<FindMapsResponse> {
     return new Promise((resolve) => {
-      this.calls.push({ req, resolve: (maps) => resolve({ success: true, maps }) });
+      this.calls.push({
+        req,
+        resolve: (maps) => resolve({ success: true, maps, totalCount: maps.length }),
+      });
     });
   }
 }
 
 describe('MapListPresenter pagination', () => {
-  // RED: review finding #4. `hasMore` is `length >= SEARCH_LIMIT`, so when the total is exactly a
-  // multiple of the page size the last page still looks "full" and hasMore stays true, costing one
-  // wasted fetch that returns nothing. The fix (request limit + 1, render limit, hasMore = got the
-  // extra row) makes hasMore false here.
   it('does not report hasMore when the result count exactly fills one page', async () => {
     const store = createMapListStore();
     const presenter = new MapListPresenter(
@@ -57,10 +56,6 @@ describe('MapListPresenter pagination', () => {
     expect(store.hasMore).toBe(false);
   });
 
-  // RED: review finding #3. onLoadMore appends its result to store.maps with no check that the
-  // query/sort/filter is still the one it was issued for. If a new search lands while a load-more
-  // is in flight, the stale page gets appended to the fresh results. The fix (a request/generation
-  // guard) drops the stale page.
   it('discards an in-flight load-more when a new search replaces the results', async () => {
     const store = createMapListStore();
     const api = new FakeDeferredSearchApi();

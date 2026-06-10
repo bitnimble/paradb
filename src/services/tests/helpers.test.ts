@@ -15,9 +15,8 @@ describe('getOffsetLimit', () => {
     expect(getOffsetLimit(req('?offset=40&limit=10'))).toEqual({ offset: 40, limit: 10 });
   });
 
-  // RED: review finding #2. getOffsetLimit does no clamping, so these invalid values flow straight
-  // into the SQL LIMIT/OFFSET. A negative limit or offset makes Postgres throw, and an unbounded
-  // limit lets a single request pull the entire table.
+  // Invalid values are clamped rather than passed into the SQL LIMIT/OFFSET: a negative limit or
+  // offset would make Postgres throw, and an unbounded limit would let one request pull the table.
   it('clamps a negative limit up to at least 1', () => {
     expect(getOffsetLimit(req('?limit=-5')).limit).toBeGreaterThanOrEqual(1);
   });

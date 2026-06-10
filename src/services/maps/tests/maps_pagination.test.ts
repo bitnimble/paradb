@@ -37,9 +37,10 @@ async function uploadGeneratedMap(index: number): Promise<string> {
 
 async function page(offset: number, sortDirection: 'asc' | 'desc') {
   const { mapsRepo } = await getServerContext();
-  return _unwrap(
+  const result = await _unwrap(
     mapsRepo.searchMaps({ query: '', offset, limit: PAGE, sort: 'title', sortDirection })
   );
+  return result.maps;
 }
 
 describe('maps repo pagination', () => {
@@ -78,11 +79,8 @@ describe('maps repo pagination', () => {
     expect(descending).toEqual([...expectedTitles].reverse());
   }, 120000);
 
-  // RED: documents the known pagination bug from the search review. searchMaps' ORDER BY has no
-  // unique tiebreaker, so rows with equal sort keys come back in an arbitrary (scan-dependent)
-  // order. This test fails until searchMaps appends `id` to every ORDER BY (or moves to keyset
-  // pagination). Uses direct inserts (mirroring maps_repo_filters.test.ts) to control the id and
-  // submission_date exactly, which the upload flow can't (it generates ids and stamps now()).
+  // Uses direct inserts (mirroring maps_repo_filters.test.ts) to control the id and submission_date
+  // exactly, which the upload flow can't (it generates ids and stamps now()).
   it('orders maps with tied sort keys deterministically by id', async () => {
     const { pool, mapsRepo } = await getServerContext();
     await pool.query('TRUNCATE maps, difficulties, favorites CASCADE');
@@ -103,15 +101,15 @@ describe('maps repo pagination', () => {
 
     const paged: string[] = [];
     for (let offset = 0; offset < suffixes.length; offset += 4) {
-      const maps = await _unwrap(mapsRepo.searchMaps({ query: '', offset, limit: 4 }));
+      const { maps } = await _unwrap(mapsRepo.searchMaps({ query: '', offset, limit: 4 }));
       paged.push(...maps.map((m) => m.id));
     }
 
     const expected = suffixes.map((s) => `m${s}`).sort();
-    // Static offset paging is self-consistent, so every id is still seen exactly once...
+    // Every id is seen exactly once...
     expect(new Set(paged).size).toBe(suffixes.length);
-    // ...but the order across tied rows must be the deterministic, id-ordered sequence a unique
-    // tiebreaker produces. Currently it isn't, so this fails.
+    // ...and the order across tied rows is the deterministic, id-ordered sequence the `id`
+    // tiebreaker produces.
     expect(paged).toEqual(expected);
   });
 });

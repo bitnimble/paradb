@@ -84,7 +84,18 @@ export function badRequest(message: string) {
   });
 }
 
+const DEFAULT_LIMIT = 20;
+// Upper bound so a single request can't ask for the whole table.
+const MAX_LIMIT = 100;
+
 export function getOffsetLimit(req: NextRequest) {
   const { offset, limit } = getQueryParams(req);
-  return { offset: Number(offset) || 0, limit: Number(limit) || 20 };
+  const parsedOffset = Number(offset);
+  const parsedLimit = Number(limit);
+  return {
+    offset: Number.isFinite(parsedOffset) ? Math.max(0, Math.floor(parsedOffset)) : 0,
+    limit: Number.isFinite(parsedLimit)
+      ? Math.min(MAX_LIMIT, Math.max(1, Math.floor(parsedLimit)))
+      : DEFAULT_LIMIT,
+  };
 }
