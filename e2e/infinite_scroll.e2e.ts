@@ -64,21 +64,21 @@ async function moveMouseToTableCentre(page: Page): Promise<void> {
   await page.mouse.move(cx, cy);
 }
 
-// Scrolls the wheel over the table until the "Load more" button goes disabled - i.e. the
-// infinite-scroll hook reached the bottom and kicked off the next-page load (the button is disabled
-// while store.loadingMore is true). The wheel scrolls the layout skeleton container (the list's
-// scroll parent), so this stops as soon as loading starts rather than guessing a scroll distance.
-async function wheelUntilButtonDisabled(page: Page, loadMore: Locator): Promise<void> {
-  const disabled = expect(loadMore).toBeDisabled({ timeout: 15_000 });
-  let loading = false;
-  void disabled.then(() => (loading = true)).catch(() => undefined);
-
+// Scrolls the wheel over the table until the next page has loaded (the row count grows past the
+// first page) - i.e. the infinite-scroll hook reached the bottom and appended the next page. The
+// wheel scrolls the layout skeleton container (the list's scroll parent). We key off the row count
+// rather than the button's loading/disabled state, which is too transient to observe reliably when
+// the fetch is fast.
+async function wheelUntilNextPageLoads(page: Page, rows: Locator): Promise<void> {
   await moveMouseToTableCentre(page);
-  for (let i = 0; i < 40 && !loading; i++) {
+  for (let i = 0; i < 40; i++) {
     await page.mouse.wheel(0, 400);
-    await page.waitForTimeout(150); // let the hook's 150ms scroll debounce run
+    if ((await rows.count()) > PAGE_SIZE) {
+      return;
+    }
+    await page.waitForTimeout(150); // let the hook's 150ms scroll debounce + the fetch run
   }
-  await disabled;
+  throw new Error('scrolling to the bottom did not load the next page');
 }
 
 test.describe('home page infinite scroll', () => {
@@ -105,7 +105,7 @@ test.describe('home page infinite scroll', () => {
 
   test('appends the next page when the mouse wheel reaches the bottom', async ({ page }) => {
     const { rows, loadMore } = await openFirstPage(page);
-    await wheelUntilButtonDisabled(page, loadMore);
+    await wheelUntilNextPageLoads(page, rows);
     await expectAllLoaded(rows, loadMore);
   });
 });
