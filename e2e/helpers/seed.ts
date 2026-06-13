@@ -1,63 +1,62 @@
-import { Pool } from 'pg';
-import { IdDomain, generateId } from '../../src/services/db/id_gen';
+import { Page } from '@playwright/test';
+import { buildMapZip } from '../../src/services/maps/tests/map_generator';
 
-// Direct Postgres access to the running Supabase DB (connection comes from .env.e2e, layered in by
-// tools/e2e.sh). Used to seed many maps quickly: uploading 20+ through the real submit flow would
-// be far too slow just to populate a list for the pagination test.
-let pool: Pool | undefined;
-function getPool(): Pool {
-  if (pool == null) {
-    pool = new Pool({
-      host: process.env.PGHOST,
-      port: Number(process.env.PGPORT),
-      user: process.env.PGUSER,
-      database: process.env.PGDATABASE,
-      password: process.env.PGPASSWORD,
-    });
-  }
-  return pool;
-}
+// Seeds maps through the real submit flow over HTTP (presigned PUT to S3 + server-side validation +
+// publish), rather than writing rows directly: it's slower than a raw insert but goes through the
+// exact code path production does, so it can't drift from the schema the way hand-written SQL can.
+// Uses `page.request` so it shares the (authenticated) browser context's cookies; the caller must
+// have logged the page in first.
 
 export type SeededMap = { id: string; title: string };
 
 /**
- * Inserts `count` public, valid maps that all share one (caller-supplied, run-unique) artist, so a
- * search for that artist isolates exactly this run's maps from anything else in the persisted DB.
+ * Uploads `count` valid maps, all under one (caller-supplied, run-unique) artist so a search for it
+ * isolates exactly this run's maps. Returns the published map ids.
  */
-export async function seedPublicMaps(opts: {
-  artist: string;
-  count: number;
-}): Promise<SeededMap[]> {
+export async function seedPublicMaps(
+  page: Page,
+  opts: { artist: string; count: number }
+): Promise<SeededMap[]> {
   const { artist, count } = opts;
   const maps: SeededMap[] = [];
   for (let i = 0; i < count; i++) {
-    const title = `Infinite Scroll Map ${String(i).padStart(3, '0')}`;
-    const id = await generateId(
-      IdDomain.MAPS,
-      async (candidate) =>
-        ((await getPool().query('SELECT 1 FROM maps WHERE id = $1', [candidate])).rowCount ?? 0) > 0
-    );
-    if (id == null) {
-      throw new Error('Could not generate a unique map id for seeding');
+    const n = String(i).padStart(3, '0');
+    const title = `Infinite Scroll Map ${n}`;
+    const zip = buildMapZip({ folder: `IScroll${n}`, title, artist });
+
+    // 1. Reserve a map id + presigned S3 upload URL.
+    const submit = await page.request.post('/api/maps/submit', { data: { title: `${title}.zip` } });
+    const submitBody = await submit.json();
+    if (!submitBody.success) {
+      throw new Error(`submit failed for "${title}": ${submitBody.errorMessage}`);
     }
-    await getPool().query(
-      `INSERT INTO maps
-         (id, visibility, validity, submission_date, title, artist, uploader, download_count, complexity)
-       VALUES ($1, 'public', 'valid', $2, $3, $4, 'e2e', 0, 1)`,
-      [id, new Date(Date.now() + i * 1000).toISOString(), title, artist]
-    );
+    const { id, url } = submitBody as { id: string; url: string };
+
+    // 2. Upload the archive to the presigned URL (real S3 / Minio).
+    const put = await page.request.put(url, {
+      data: zip,
+      headers: { 'Content-Type': 'application/zip' },
+    });
+    if (!put.ok()) {
+      throw new Error(`S3 upload failed for "${title}": ${put.status()}`);
+    }
+
+    // 3. Validate + publish.
+    const complete = await page.request.post('/api/maps/submit/complete', {
+      data: { id, isReupload: false },
+    });
+    const completeBody = await complete.json();
+    if (!completeBody.success) {
+      throw new Error(`complete failed for "${title}": ${completeBody.errorMessage}`);
+    }
     maps.push({ id, title });
   }
   return maps;
 }
 
-export async function deleteSeededMaps(artist: string): Promise<void> {
-  await getPool().query('DELETE FROM maps WHERE artist = $1', [artist]);
-}
-
-export async function closeSeedPool(): Promise<void> {
-  if (pool != null) {
-    await pool.end();
-    pool = undefined;
+/** Deletes the seeded maps via the real delete endpoint (cascades difficulties/favorites + S3). */
+export async function deleteSeededMaps(page: Page, ids: string[]): Promise<void> {
+  for (const id of ids) {
+    await page.request.post(`/api/maps/${id}/delete`);
   }
 }

@@ -1,4 +1,4 @@
-import { reportUploadComplete } from 'app/api/maps/submit/complete/actions';
+import { completeMapUpload } from 'app/api/maps/submit/complete/complete_upload';
 import { _unwrap } from 'base/result';
 import { MapVisibility } from 'schema/maps';
 import { IdDomain, generateId } from 'services/db/id_gen';
@@ -29,7 +29,7 @@ async function uploadGeneratedMap(index: number): Promise<string> {
   });
   (s3Handler as MemoryFakeS3Handler)._putMapFileForTesting(id, zip);
   _setCurrentUserForTesting({ id: UPLOADER.id, email: UPLOADER.email });
-  const result = await reportUploadComplete(id, false);
+  const result = await completeMapUpload(id, false);
   if (!result.success) {
     throw new Error(`Failed to publish generated map ${n}: ${result.errorMessage}`);
   }

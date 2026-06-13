@@ -126,3 +126,21 @@ export const SubmitMapResponse = z.discriminatedUnion('success', [
   SubmitMapError,
 ]);
 export type SubmitMapResponse = z.infer<typeof SubmitMapResponse>;
+
+/* POST submitMap/complete */
+export const CompleteUploadRequest = z.object({
+  id: z.string(),
+  isReupload: z.boolean(),
+});
+export type CompleteUploadRequest = z.infer<typeof CompleteUploadRequest>;
+
+export const CompleteUploadSuccess = ApiSuccess.extend({
+  map: PDMap,
+});
+export type CompleteUploadSuccess = z.infer<typeof CompleteUploadSuccess>;
+
+export const CompleteUploadResponse = z.discriminatedUnion('success', [
+  CompleteUploadSuccess,
+  ApiError,
+]);
+export type CompleteUploadResponse = z.infer<typeof CompleteUploadResponse>;

@@ -1,21 +1,15 @@
 import { expect, Locator, Page, test } from '@playwright/test';
-import { closeSeedPool, deleteSeededMaps, seedPublicMaps } from './helpers/seed';
+import { makeUser, signUpAndConfirm } from './helpers/auth';
+import { deleteSeededMaps, seedPublicMaps } from './helpers/seed';
 
 // SEARCH_LIMIT in src/app/map_list_presenter.ts.
 const PAGE_SIZE = 20;
 const TOTAL = 25;
 
-const seededArtists: string[] = [];
-
-// Seeds TOTAL maps under a process-unique artist so re-runs against the persisted Supabase DB
-// never see each other's maps, and each test's set is isolated from the other's.
-async function seedRun(): Promise<string> {
-  const unique = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
-  const artist = `infscroll${unique}`;
-  seededArtists.push(artist);
-  await seedPublicMaps({ artist, count: TOTAL });
-  return artist;
-}
+// Process-unique artist so re-runs against the persisted Supabase DB never collide; one seeded set
+// is shared by both tests.
+const unique = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
+const artist = `infscroll${unique}`;
 
 // One row per map (each row links to /map/{id}); excludes the header and loading skeleton.
 const mapRows = (page: Page) => page.locator('tr', { has: page.locator('a[href^="/map/"]') });
@@ -32,7 +26,6 @@ const nextPageResponse = (page: Page) =>
 // Opens the list scoped (by the run-unique artist) to exactly this run's maps and asserts the
 // first page rendered with "Load more" on offer.
 async function openFirstPage(page: Page): Promise<{ rows: Locator; loadMore: Locator }> {
-  const artist = await seedRun();
   const rows = mapRows(page);
   await page.goto(`/?q=${artist}`);
   await page.waitForResponse(
@@ -89,11 +82,19 @@ async function wheelUntilButtonDisabled(page: Page, loadMore: Locator): Promise<
 }
 
 test.describe('home page infinite scroll', () => {
+  // A dedicated, authenticated page seeds the maps once over the real API; both tests share them.
+  let seedPage: Page;
+  let seededIds: string[];
+
+  test.beforeAll(async ({ browser }) => {
+    seedPage = await browser.newPage();
+    await signUpAndConfirm(seedPage, makeUser('isscroll'));
+    seededIds = (await seedPublicMaps(seedPage, { artist, count: TOTAL })).map((m) => m.id);
+  });
+
   test.afterAll(async () => {
-    for (const artist of seededArtists) {
-      await deleteSeededMaps(artist);
-    }
-    await closeSeedPool();
+    await deleteSeededMaps(seedPage, seededIds);
+    await seedPage.close();
   });
 
   test('appends the next page when "Load more" is clicked', async ({ page }) => {

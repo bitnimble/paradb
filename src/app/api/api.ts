@@ -2,6 +2,8 @@ import * as qs from 'qs';
 import { ApiResponse } from 'schema/api';
 import { encodeFilter } from 'schema/map_filter';
 import {
+  CompleteUploadRequest,
+  CompleteUploadResponse,
   DeleteMapResponse,
   FindMapsResponse,
   GetMapResponse,
@@ -34,6 +36,7 @@ export interface Api {
   getMap(id: string): Promise<GetMapResponse>;
   deleteMap(id: string): Promise<DeleteMapResponse>;
   submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse>;
+  completeMapUpload(req: CompleteUploadRequest): Promise<CompleteUploadResponse>;
 }
 
 export class HttpApi implements Api {
@@ -87,6 +90,11 @@ export class HttpApi implements Api {
   async submitMap(req: SubmitMapRequest): Promise<SubmitMapResponse> {
     const resp = await post(path(this.apiBase, 'maps', 'submit'), req);
     return SubmitMapResponse.parse(resp);
+  }
+
+  async completeMapUpload(req: CompleteUploadRequest): Promise<CompleteUploadResponse> {
+    const resp = await post(path(this.apiBase, 'maps', 'submit', 'complete'), req);
+    return CompleteUploadResponse.parse(resp);
   }
 }
 

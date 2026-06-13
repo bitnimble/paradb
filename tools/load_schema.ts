@@ -1,50 +1,38 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import pg from 'pg';
-import { parse as parseToml } from 'smol-toml';
 
 // Shared between the integration test global setup and the local dev bootstrap (tools/dev.sh):
-// resolves the ordered schema files from `[db.migrations] schema_paths` in supabase/config.toml,
-// the same list Supabase itself applies, then loads them into the target Postgres. PGlite can't
-// run the auth-coupled / extension files Supabase real-deploys, so those are dropped.
+// applies the real `supabase/migrations` in order to the target Postgres, so the test/dev DB matches
+// exactly what Supabase deploys to production (rather than a hand-maintained declarative copy that
+// can drift).
+//
+// PGlite isn't Supabase, so two migration concerns are handled here: the GRANTs target Supabase
+// roles that don't exist (created in the prelude), and a couple of `create extension` statements
+// reference extensions PGlite doesn't ship (stripped). The auth-coupled functions still load because
+// the migration sets `check_function_bodies = off`, and RLS is a no-op under PGlite's superuser
+// connection.
 
 const SUPABASE_DIR = path.resolve(process.cwd(), 'supabase');
-// functions.sql references the `auth` schema / `auth.uid()` / `crypt`; misc.sql creates extensions
-// (hypopg, index_advisor) PGlite doesn't ship. The fake Supabase client reimplements what we need.
-const SKIPPED_FILES = ['functions.sql', 'misc.sql'];
+const MIGRATIONS_DIR = path.join(SUPABASE_DIR, 'migrations');
 
-async function resolveSchemaFiles(): Promise<string[]> {
-  const config = parseToml(await fs.readFile(path.join(SUPABASE_DIR, 'config.toml'), 'utf8')) as {
-    db?: { migrations?: { schema_paths?: string[] } };
-  };
-  const patterns = config.db?.migrations?.schema_paths;
-  if (!patterns?.length) {
-    throw new Error('No [db.migrations] schema_paths found in supabase/config.toml');
-  }
+// Create the roles the migration GRANTs target. Idempotent so a `skipIfLoaded` re-run (dev) against
+// an already-bootstrapped DB doesn't error on existing roles.
+const MIGRATION_PRELUDE = `
+DO $$ BEGIN CREATE ROLE anon; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE ROLE authenticated; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE ROLE service_role; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+`;
 
-  const ordered: string[] = [];
-  const seen = new Set<string>();
-  const add = (relPath: string) => {
-    if (!seen.has(relPath)) {
-      seen.add(relPath);
-      ordered.push(relPath);
-    }
-  };
-  for (const raw of patterns) {
-    const pattern = raw.replace(/^\.\//, '');
-    if (!pattern.includes('*')) {
-      add(pattern);
-      continue;
-    }
-    // Expand a glob (e.g. "schemas/*.sql") to its sorted matches, matching Supabase's
-    // dedupe-by-first-occurrence behaviour so already-listed files keep their explicit position.
-    const dir = path.dirname(pattern);
-    const matches = (await fs.readdir(path.join(SUPABASE_DIR, dir)))
-      .filter((f) => f.endsWith('.sql'))
-      .sort();
-    for (const f of matches) add(path.join(dir, f));
-  }
-  return ordered.filter((f) => !SKIPPED_FILES.includes(path.basename(f)));
+// PGlite doesn't ship hypopg / index_advisor (advisory-only, unused at runtime), and `create
+// extension` would error, so drop those statements.
+function stripUnsupportedStatements(sql: string): string {
+  return sql.replace(/create extension[^;]*;/gi, '');
+}
+
+async function resolveMigrationFiles(): Promise<string[]> {
+  // Supabase applies migrations in lexicographic (timestamp-prefixed) filename order.
+  return (await fs.readdir(MIGRATIONS_DIR)).filter((f) => f.endsWith('.sql')).sort();
 }
 
 // PGlite's TCP socket can be accepting connections before the Postgres protocol is fully ready,
@@ -76,8 +64,11 @@ export async function loadSchema(
   if (opts.skipIfLoaded && (await isSchemaLoaded(pool))) {
     return { loaded: false };
   }
-  for (const file of await resolveSchemaFiles()) {
-    const sql = await fs.readFile(path.join(SUPABASE_DIR, file), 'utf8');
+  await pool.query(MIGRATION_PRELUDE);
+  for (const file of await resolveMigrationFiles()) {
+    const sql = stripUnsupportedStatements(
+      await fs.readFile(path.join(MIGRATIONS_DIR, file), 'utf8')
+    );
     await pool.query(sql);
   }
   if (opts.includeSeed) {
