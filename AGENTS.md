@@ -20,6 +20,11 @@ The codebase uses Docker to run third-party services locally (Minio for a local 
 
 - If you need to add dependencies, add them with `bun install XYZ` and ensure that the bun.lock file is updated and part of the commit or PR.
 
+# Comments
+
+- Only add a comment if it either (a) explains something complex that is hard to read from the code itself, or (b) explains _why_ something is being done when it isn't clear why it's necessary. Otherwise leave it out - don't restate what the code already says.
+- Don't commit comments that are only relevant to the session or task in which they were written (e.g. references to a code review, "fixes finding X", "RED test", etc.).
+
 # Typescript
 
 - Use `== null` (double equals null) instead of either `=== null` or `=== undefined` (triple equals null / undefined), and the same for `!=`. This is to make `null` and `undefined` mean the same thing everywhere in our codebase to avoid any potential serialisation/deserialisation confusion or issues.
@@ -65,7 +70,7 @@ The codebase uses Docker to run third-party services locally (Minio for a local 
 - `bun format` will format the codebase with Prettier
 - `bun typecheck` will typecheck the codebase, and `bun lint` will lint it
 - `bun run test:unit` runs the pure unit tests (`*.unit.test.ts`)
-- `bun run test:integration` runs the integration suite. It needs no live services: the database is an ephemeral in-memory PGlite (started by `tools/test.sh`, with the schema loaded from `supabase/config.toml`'s `schema_paths`), and Supabase, S3, and Axiom are faked (see `.env.test`). Do not run `bun test` (Bun's built-in runner); it's intercepted with a pointer to these scripts.
+- `bun run test:integration` runs the integration suite. It needs no live services: the database is an ephemeral in-memory PGlite (started by `tools/test.sh`, with the real `supabase/migrations` applied by `tools/load_schema.ts` so it matches production), and Supabase, S3, and Axiom are faked (see `.env.test`). Do not run `bun test` (Bun's built-in runner); it's intercepted with a pointer to these scripts.
 
 # How you should work
 

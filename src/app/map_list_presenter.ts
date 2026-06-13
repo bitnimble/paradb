@@ -68,6 +68,10 @@ async function delay(ms: number = 5) {
 }
 
 export class MapListPresenter {
+  // Bumped on every new search so an in-flight load-more (or a superseded search) can tell its
+  // results are stale and drop them instead of clobbering the current list.
+  private searchSeq = 0;
+
   constructor(
     private readonly api: Api,
     private readonly store: MapListStore
@@ -154,6 +158,7 @@ export class MapListPresenter {
   }
 
   @action.bound async onSearch(trigger: 'sort' | 'search') {
+    const seq = ++this.searchSeq;
     if (trigger === 'search') {
       // Upon clearing search to go back to the original view, reset sort back to submission date
       if (this.store.query === '') {
@@ -167,6 +172,7 @@ export class MapListPresenter {
     runInAction(() => {
       this.store.maps = undefined;
       this.store.totalCount = undefined;
+      this.store.loadingMore = false;
     });
     const resp = await this.api.searchMaps({
       query: this.store.query,
@@ -175,17 +181,22 @@ export class MapListPresenter {
       filter: this.store.activeFilter,
       ...(sort || {}),
     });
+    // A newer search started while this one was in flight; let it own the results.
+    if (seq !== this.searchSeq) {
+      return;
+    }
     if (resp.success) {
       runInAction(() => {
         this.store.maps = resp.maps;
         this.store.totalCount = resp.totalCount;
-        this.store.hasMore = resp.maps.length >= SEARCH_LIMIT;
+        this.store.hasMore = resp.maps.length < resp.totalCount;
       });
     }
     this.store.lastSelectedMapIndex = undefined;
   }
 
   @action.bound async onLoadMore() {
+    const seq = this.searchSeq;
     const sort = this.getTableSortParams();
     this.store.loadingMore = true;
     const resp = await this.api.searchMaps({
@@ -196,16 +207,15 @@ export class MapListPresenter {
       ...(sort || {}),
     });
     runInAction(() => (this.store.loadingMore = false));
+    // A search replaced the result set while this page was loading; drop the stale page.
+    if (seq !== this.searchSeq) {
+      return;
+    }
     if (resp.success) {
       runInAction(() => {
-        if (this.store.maps) {
-          this.store.maps.push(...resp.maps);
-        } else {
-          this.store.maps = resp.maps;
-        }
-        if (resp.maps.length < SEARCH_LIMIT) {
-          this.store.hasMore = false;
-        }
+        this.store.maps = [...(this.store.maps ?? []), ...resp.maps];
+        this.store.totalCount = resp.totalCount;
+        this.store.hasMore = this.store.maps.length < resp.totalCount;
       });
     }
   }

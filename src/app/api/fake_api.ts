@@ -1,5 +1,7 @@
 import { ApiResponse } from 'schema/api';
 import {
+  CompleteUploadRequest,
+  CompleteUploadResponse,
   DeleteMapResponse,
   FindMapsResponse,
   GetMapResponse,
@@ -74,6 +76,11 @@ export class FakeApi implements Api {
   async submitMap(_req: SubmitMapRequest): Promise<SubmitMapResponse> {
     await delay();
     return { success: true, id: allStar.id, url: '' };
+  }
+
+  async completeMapUpload(_req: CompleteUploadRequest): Promise<CompleteUploadResponse> {
+    await delay();
+    return { success: true, map: allStar };
   }
 }
 

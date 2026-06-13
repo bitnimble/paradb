@@ -1,5 +1,4 @@
 import { Api } from 'app/api/api';
-import { reportUploadComplete } from 'app/api/maps/submit/complete/actions';
 import { action, computed, observable, runInAction } from 'mobx';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { getLog } from 'services/logging/client_logger';
@@ -84,7 +83,10 @@ export class ThrottledMapUploader {
         if (xhr.status !== 200) {
           throw new Error(`(${xhr.status}): ${xhr.responseText}`);
         }
-        const processMapResp = await reportUploadComplete(submitMapResp.id, !!reuploadMapId);
+        const processMapResp = await this.api.completeMapUpload({
+          id: submitMapResp.id,
+          isReupload: !!reuploadMapId,
+        });
         runInAction(() => {
           if (!processMapResp.success) {
             upload.state = 'error';

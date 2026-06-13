@@ -23,6 +23,7 @@
       "Bash(bun run build *)",
       "Bash(bun typecheck *)",
       "Bash(bun run typecheck *)",
+      "Bash(bun run typecheck:e2e *)",
       "Bash(bun lint *)",
       "Bash(bun run lint *)",
       "Bash(bun format *)",

@@ -26,7 +26,9 @@
         "Bash(grep *)",
         "Bash(find *)",
         "Bash(rg *)",
-        "Bash(awk *)"
+        "Bash(awk *)",
+        "Bash(head *)",
+        "Bash(tail *)"
       ],
       "reason": "Use the Read(), Write(), Edit() and Find() tools instead of invoking sed, grep, find, rg or awk directly"
     },

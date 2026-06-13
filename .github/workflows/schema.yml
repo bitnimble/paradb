@@ -1,10 +1,10 @@
 name: Schema
 
+# Runs on every PR (not just schema-touching ones) so the check always reports a status - branch
+# protection / auto-merge waits on it, and a path-filtered workflow that never starts blocks the
+# merge forever. The expensive Supabase steps are gated below so an unrelated PR passes instantly.
 on:
   pull_request:
-    paths:
-      - 'supabase/schemas/**'
-      - 'supabase/migrations/**'
   workflow_dispatch:
 
 jobs:
@@ -15,10 +15,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Detect schema changes
+        id: changes
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            schema:
+              - 'supabase/schemas/**'
+              - 'supabase/migrations/**'
+
+      # Run the actual check when the schema/migrations changed, or always on a manual dispatch.
+      - name: Decide whether to run the schema check
+        id: decide
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ] || [ "${{ steps.changes.outputs.schema }}" = "true" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No schema or migration changes; passing without running the schema check."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Bun
+        if: steps.decide.outputs.run == 'true'
         uses: oven-sh/setup-bun@v2
 
       - name: Cache bun install cache
+        if: steps.decide.outputs.run == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
@@ -26,20 +49,24 @@ jobs:
           restore-keys: bun-${{ runner.os }}-
 
       - name: Install dependencies
+        if: steps.decide.outputs.run == 'true'
         run: bun install --frozen-lockfile
 
       - name: Install Supabase CLI
+        if: steps.decide.outputs.run == 'true'
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
       - name: Start Supabase database
+        if: steps.decide.outputs.run == 'true'
         run: supabase db start
 
       # `supabase db diff` always prints progress lines and exits 0, so we can't gate on output being
       # empty. When the declarative schemas (supabase/schemas) and migrations match it prints
       # "No schema changes found"; otherwise it prints the reconciling migration.
       - name: Check declarative schema matches migrations
+        if: steps.decide.outputs.run == 'true'
         run: |
           diff_output=$(supabase db diff 2>&1)
           echo "$diff_output"
@@ -49,12 +76,15 @@ jobs:
           fi
 
       - name: Reset database
+        if: steps.decide.outputs.run == 'true'
         run: supabase db reset
 
       - name: Regenerate Zapatos types
+        if: steps.decide.outputs.run == 'true'
         run: bun run schema
 
       - name: Check generated types are up to date
+        if: steps.decide.outputs.run == 'true'
         run: |
           if ! git diff --exit-code -- src/services/zapatos/schema.d.ts src/services/db/db.types.ts; then
             echo "::error::Generated DB types are out of date. Run 'bun schema' locally and commit the result."

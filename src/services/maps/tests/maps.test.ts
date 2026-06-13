@@ -1,4 +1,4 @@
-import { reportUploadComplete } from 'app/api/maps/submit/complete/actions';
+import { completeMapUpload } from 'app/api/maps/submit/complete/complete_upload';
 import { _unwrap } from 'base/result';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -30,7 +30,7 @@ describe('maps handler', () => {
       (await _unwrap(mapsRepo.createNewMap({ title: 'placeholder', uploader: uploaderId }))).id;
     (s3Handler as MemoryFakeS3Handler)._putMapFileForTesting(id, buffer);
     _setCurrentUserForTesting({ id: uploaderId, email: UPLOADER.email });
-    const result = await reportUploadComplete(id, opts.isReupload ?? false);
+    const result = await completeMapUpload(id, opts.isReupload ?? false);
     return { result, id };
   };
 
