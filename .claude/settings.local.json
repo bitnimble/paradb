@@ -39,9 +39,7 @@
       "Bash(git rm *)",
       "Bash(git show *)"
     ],
-    "deny": [
-      "Write(supabase/migrations/*)"
-    ],
+    "deny": ["Write(supabase/migrations/*)"],
     "defaultMode": "acceptEdits"
   }
 }

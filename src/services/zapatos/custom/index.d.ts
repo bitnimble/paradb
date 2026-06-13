@@ -8,4 +8,4 @@ Released under the MIT licence: see LICENCE file
 */
 
 // this empty declaration appears to fix relative imports in other custom type files
-declare module 'zapatos/custom' { }
+declare module 'zapatos/custom' {}
