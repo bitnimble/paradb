@@ -30,18 +30,17 @@ export async function completeMapUpload(id: string, isReupload: boolean) {
   }
 
   const dbMapResult = await mapsRepo.getMap(id);
-  const previousValidity = dbMapResult.success ? dbMapResult.value.validity : undefined;
 
   async function cleanupFailedUpload() {
-    // If this is a freshly created Map, delete the Map record
-    if (previousValidity === MapValidity.PENDING_UPLOAD) {
+    // A fresh upload has no prior published state, so delete the placeholder record; a failed
+    // reupload keeps the existing map and reverts it to valid. (getMap can't tell them apart - it
+    // only returns public maps, and a fresh upload is still hidden here - so key off `isReupload`.)
+    if (!isReupload) {
       // Mark as invalid first in case any other parts of deletion fail
       await mapsRepo.setValidity(id, MapValidity.INVALID);
       await mapsRepo.deleteMap({ id });
     } else {
-      // Delete temp files
       await s3Handler.deleteFiles(id, true);
-      // This is a reupload, so reset validity back to valid
       await mapsRepo.setValidity(id, MapValidity.VALID);
     }
   }
@@ -55,11 +54,9 @@ export async function completeMapUpload(id: string, isReupload: boolean) {
     });
   }
 
-  // Technically this isn't required, but better safe than sorry - just enforce it for now for
-  // consistency
   if (dbMapResult.success && dbMapResult.value.uploader !== session.id) {
     await cleanupFailedUpload();
-    if (previousValidity === MapValidity.PENDING_UPLOAD) {
+    if (!isReupload) {
       return actionError({
         errorBody: {},
         message: 'You must begin and complete the upload while logged into the same user session.',
