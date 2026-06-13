@@ -49,7 +49,7 @@ const FIELD_LABELS: Record<FilterableField, string> = {
   tags: 'Tags',
   downloadCount: 'Downloads',
   submissionDate: 'Upload date',
-  difficulties: 'Difficulties',
+  difficulties: 'No. of difficulties',
 };
 
 // `tags` stays in the filter schema but is hidden from the builder until the tag write-path and its
