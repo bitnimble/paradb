@@ -22,6 +22,13 @@ const SORTABLE_LATERAL: Partial<Record<MapSortableAttributes, db.SQLFragment<num
 
 type SortDirection = 'ASC' | 'DESC';
 
+// Minimum cover-density rank for an FTS hit to count as a match. Words ANDed by websearch can each
+// appear anywhere in `fts` regardless of distance, so a huge description full of common words
+// otherwise matches almost any query. ts_rank_cd is ~weight/cover-length, so scattered hits score
+// orders of magnitude below a real title/artist/author or clustered-description match; this cutoff
+// drops the former without touching the latter.
+const MIN_RANK = 0.0001;
+
 export class PostgresIndex implements SearchIndex {
   async search(query: string, options?: SearchOptions): Promise<SearchResult> {
     const pool = await getDbPool();
@@ -105,15 +112,18 @@ export class PostgresIndex implements SearchIndex {
         )`;
         const ftsMatch = db.sql<maps.SQL, boolean>`${'fts'} @@ ${tsqueryPartial}`;
         const rank = db.sql<maps.SQL, number>`ts_rank_cd(${'fts'}, ${tsqueryPartial})`;
+        const rankThreshold = db.sql<maps.SQL, boolean>`${rank} >= ${db.param(MIN_RANK)}`;
 
-        // Filter on `ftsMatch` alone so the query can use the `fts` GIN index. `exactMatch` only
-        // boosts exact title/artist/author hits to the top of the FTS results in the ordering
-        // below, where it is evaluated over the matched rows rather than forcing a full scan. (A
-        // whitespace-padded "Artist - Title" name is a websearch negation and so isn't matched by
-        // FTS; we intentionally don't special-case it.)
+        // Filter on `ftsMatch` so the query can use the `fts` GIN index; `rankThreshold` then drops
+        // scattered low-density matches over the index hits. `exactMatch` only boosts exact
+        // title/artist/author hits to the top of the FTS results in the ordering below, where it is
+        // evaluated over the matched rows rather than forcing a full scan. (A whitespace-padded
+        // "Artist - Title" name is a websearch negation and so isn't matched by FTS; we
+        // intentionally don't special-case it.)
         const conditions = db.conditions.and(
           { visibility: MapVisibility.PUBLIC },
           ftsMatch,
+          rankThreshold,
           ...(filter ? [compileFilter(filter)] : [])
         );
         [results, totalCount] = await Promise.all([
