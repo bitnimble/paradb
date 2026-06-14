@@ -21,14 +21,12 @@
     },
     {
       "commands": [
-        "Bash(cat *)",
         "Bash(sed *)",
-        "Bash(grep *)",
         "Bash(find *)",
-        "Bash(rg *)",
         "Bash(awk *)",
-        "Bash(head *)",
-        "Bash(tail *)"
+        "Bash(cat *)",
+        "Bash(grep *)",
+        "Bash(rg *)"
       ],
       "reason": "Use the Read(), Write(), Edit() and Find() tools instead of invoking sed, grep, find, rg or awk directly"
     },
@@ -37,7 +35,7 @@
       "reason": "Do not start the dev server as the user probably has their own dev server running, and it will fail to bind to the same port."
     },
     {
-      "commands": ["Bash(npm *)", "Bash(npx *)", "Bash(node *)"],
+      "commands": ["Bash(npm *)", "Bash(npx *)", "Bash(node *)", "Bash(yarn *)", "Bash(ts-node *)"],
       "reason": "Use bun instead of node, npm, npx"
     }
   ]
