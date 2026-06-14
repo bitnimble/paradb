@@ -14,7 +14,13 @@ import * as db from 'zapatos/db';
 
 const FAKE_SESSION_COOKIE = 'fake-supabase-session';
 
-type FakeSession = { id: string; username: string; email: string; supabaseId: string };
+type FakeSession = {
+  id: string;
+  username: string;
+  email: string;
+  supabaseId: string;
+  avatarCacheToken?: string;
+};
 
 // In-process tests (no HTTP cookie scope) opt into an authenticated session by calling
 // `_setCurrentUserForTesting`. Without it, `getUser()` returns no-user so missing auth surfaces
@@ -127,14 +133,53 @@ export function fakeSupabaseClient(): SupabaseClient<Database> {
             user: {
               id: session.supabaseId,
               email: session.email,
-              user_metadata: { id: session.id, username: session.username },
+              user_metadata: {
+                id: session.id,
+                username: session.username,
+                avatarCacheToken: session.avatarCacheToken,
+              },
             },
           },
           error: null,
         };
       },
 
-      async updateUser() {
+      // Merge the updated metadata back into the session cookie so subsequent getUser() calls (and
+      // therefore the session) reflect it, mirroring real Supabase's persisted user_metadata. Outside
+      // a request scope (in-process tests) there's no cookie to update, so this is a no-op there.
+      async updateUser(attributes: { data?: Record<string, unknown> }) {
+        try {
+          const cookie = (await cookies()).get(FAKE_SESSION_COOKIE);
+          if (cookie) {
+            const existing = decode(cookie.value);
+            // Only merge known metadata fields. Real Supabase's updateUser({ data }) writes to
+            // user_metadata and can't touch identity fields (id/email/supabaseId), so whitelisting
+            // here keeps the fake from diverging.
+            const updated: FakeSession = {
+              ...existing,
+              avatarCacheToken:
+                (attributes.data?.avatarCacheToken as string | undefined) ??
+                existing.avatarCacheToken,
+            };
+            await setSessionCookie(updated);
+            return {
+              data: {
+                user: {
+                  id: updated.supabaseId,
+                  email: updated.email,
+                  user_metadata: {
+                    id: updated.id,
+                    username: updated.username,
+                    avatarCacheToken: updated.avatarCacheToken,
+                  },
+                },
+              },
+              error: null,
+            };
+          }
+        } catch {
+          /* no request scope */
+        }
         return { data: { user: null }, error: null };
       },
 

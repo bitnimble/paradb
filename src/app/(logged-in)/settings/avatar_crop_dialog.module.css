@@ -1,0 +1,59 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: var(--colorDialogOverlay);
+}
+
+.dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--gridBaseline) * 2);
+
+    width: calc(var(--gridBaseline) * 50);
+    max-width: 90vw;
+
+    background-color: var(--colorBackground);
+    padding: calc(var(--gridBaseline) * 3);
+    border: 1px dotted var(--colorForeground);
+}
+
+.cropArea {
+    position: relative;
+    width: 100%;
+    height: calc(var(--gridBaseline) * 40);
+    background-color: var(--colorDarkGrey);
+}
+
+.zoom {
+    display: flex;
+    align-items: center;
+    gap: var(--gridBaseline);
+}
+
+.zoom input {
+    flex: 1;
+}
+
+.scaling {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--gridBaseline) * 2);
+}
+
+.scalingOption {
+    display: flex;
+    align-items: center;
+    gap: calc(0.5 * var(--gridBaseline));
+    cursor: pointer;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--gridBaseline);
+}

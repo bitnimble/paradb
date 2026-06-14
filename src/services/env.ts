@@ -16,6 +16,10 @@ export type EnvVars = {
   s3AccessKeyId: string;
   s3AccessKeySecret: string;
   s3MapsBucket: string;
+  /** Bucket for non-map assets (e.g. profile pictures), separate from the maps bucket. */
+  s3AssetsBucket: string;
+  /** Public read base for the assets bucket (e.g. Cloudflare-fronted). */
+  publicAssetsBaseUrl: string;
   /** 'real' talks to S3; 'fake' returns hardcoded data (for tests, no bucket required). */
   s3Implementation: string;
   /** 'real' talks to Supabase; 'fake' uses an in-repo fake (for tests, no Supabase required). */
@@ -76,6 +80,8 @@ function createEnvVars(): EnvVars {
     s3AccessKeyId: () => requireString('S3_ACCESS_KEY_ID'),
     s3AccessKeySecret: () => requireString('S3_ACCESS_KEY_SECRET'),
     s3MapsBucket: () => requireString('S3_MAPS_BUCKET'),
+    s3AssetsBucket: () => requireString('S3_ASSETS_BUCKET'),
+    publicAssetsBaseUrl: () => requireString('PUBLIC_ASSETS_BASE_URL'),
     s3Implementation: () => process.env.S3_IMPLEMENTATION || 'real',
     supabaseImplementation: () => process.env.SUPABASE_IMPLEMENTATION || 'real',
     axiomImplementation: () => process.env.AXIOM_IMPLEMENTATION || 'real',

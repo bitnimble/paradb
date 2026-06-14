@@ -2,7 +2,8 @@ import { completeMapUpload } from 'app/api/maps/submit/complete/complete_upload'
 import { _unwrap } from 'base/result';
 import { MapVisibility } from 'schema/maps';
 import { IdDomain, generateId } from 'services/db/id_gen';
-import { MemoryFakeS3Handler } from 'services/maps/s3_handler_fake_memory';
+import { mapKey } from 'services/s3/maps_s3_handler';
+import { getSharedMemoryBucket } from 'services/s3/memory_bucket';
 import { getServerContext } from 'services/server_context';
 import { _setCurrentUserForTesting } from 'services/session/supabase_fake';
 import { buildMapZip } from './map_generator';
@@ -17,7 +18,7 @@ const PAGE = 20;
 // validates and publishes it (same path as maps.test.ts). Returns the published map id.
 async function uploadGeneratedMap(index: number): Promise<string> {
   const n = String(index).padStart(3, '0');
-  const { mapsRepo, s3Handler } = await getServerContext();
+  const { mapsRepo } = await getServerContext();
   const id = (await _unwrap(mapsRepo.createNewMap({ title: 'placeholder', uploader: UPLOADER.id })))
     .id;
   // Zero-padded title/artist so lexical ordering matches numeric ordering, giving a unique total
@@ -27,7 +28,7 @@ async function uploadGeneratedMap(index: number): Promise<string> {
     title: `Pagination Map ${n}`,
     artist: `Artist ${n}`,
   });
-  (s3Handler as MemoryFakeS3Handler)._putMapFileForTesting(id, zip);
+  await getSharedMemoryBucket().put(mapKey(id, true), zip, 'application/zip');
   _setCurrentUserForTesting({ id: UPLOADER.id, email: UPLOADER.email });
   const result = await completeMapUpload(id, false);
   if (!result.success) {

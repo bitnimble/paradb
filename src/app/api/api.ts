@@ -17,6 +17,7 @@ import {
   LoginRequest,
   LoginResponse,
   SetFavoriteMapsRequest,
+  SetProfilePictureResponse,
   SignupRequest,
   SignupResponse,
 } from 'schema/users';
@@ -28,6 +29,7 @@ export interface Api {
 
   /* User */
   changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse>;
+  setProfilePicture(png: Blob): Promise<SetProfilePictureResponse>;
   setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse>;
 
   /* Maps */
@@ -58,6 +60,15 @@ export class HttpApi implements Api {
       ChangePasswordRequest.parse(req)
     );
     return ChangePasswordResponse.parse(resp);
+  }
+
+  async setProfilePicture(png: Blob): Promise<SetProfilePictureResponse> {
+    const resp = await fetch(path(this.apiBase, 'users', 'avatar'), {
+      method: 'POST',
+      headers: { ['Content-Type']: 'application/octet-stream' },
+      body: png,
+    });
+    return SetProfilePictureResponse.parse(await resp.json());
   }
 
   async setFavorites(req: SetFavoriteMapsRequest): Promise<ApiResponse> {

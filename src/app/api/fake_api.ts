@@ -18,6 +18,7 @@ import {
   LoginRequest,
   LoginResponse,
   SetFavoriteMapsRequest,
+  SetProfilePictureResponse,
   SignupRequest,
   SignupResponse,
 } from 'schema/users';
@@ -34,6 +35,9 @@ async function delay(ms: number = DELAY) {
 export class FakeApi implements Api {
   async changePassword(_req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
     return { success: true };
+  }
+  async setProfilePicture(_png: Blob): Promise<SetProfilePictureResponse> {
+    return { success: true, avatarUrl: 'https://fake-assets.local/avatars/fake.png?v=fake' };
   }
   async login(_req: LoginRequest): Promise<LoginResponse> {
     return { success: true, accessToken: '123', refreshToken: '456' };

@@ -7,6 +7,7 @@ export const UserSession = z.object({
   id: z.string(),
   username: z.string(),
   email: z.string(),
+  avatarUrl: z.string().optional(),
 });
 export type UserSession = z.infer<typeof UserSession>;
 
@@ -77,6 +78,18 @@ export const ChangePasswordResponse = z.discriminatedUnion('success', [
   ChangePasswordError,
 ]);
 export type ChangePasswordResponse = z.infer<typeof ChangePasswordResponse>;
+
+/** Profile picture. The image is sent as a raw binary body; the current user is taken from the session. */
+export const SetProfilePictureSuccess = ApiSuccess.extend({
+  avatarUrl: z.string(),
+});
+export type SetProfilePictureSuccess = z.infer<typeof SetProfilePictureSuccess>;
+
+export const SetProfilePictureResponse = z.discriminatedUnion('success', [
+  SetProfilePictureSuccess,
+  ApiError,
+]);
+export type SetProfilePictureResponse = z.infer<typeof SetProfilePictureResponse>;
 
 /** User-specific map data. User ID is implicit and pulled from the session cookie for all of these requests. */
 export const GetFavoriteMapsSuccess = ApiSuccess.extend({

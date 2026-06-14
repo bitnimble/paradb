@@ -21,7 +21,8 @@ import { SearchIndex } from 'services/search/types';
 import { getServerContext } from 'services/server_context';
 import snakeCaseKeys from 'snakecase-keys';
 import * as db from 'zapatos/db';
-import { S3Error, S3Handler } from './s3_handler_types';
+import { S3Handler } from 'services/s3/maps_s3_handler';
+import { S3Error } from 'services/s3/s3_bucket';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
 

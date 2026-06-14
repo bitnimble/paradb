@@ -43,8 +43,8 @@ if [ -n "$NEXT_PORT" ]; then
   base_url="http://$url_host:$NEXT_PORT"
   export NEXT_PUBLIC_BASE_URL="$base_url"
   export NEXT_PUBLIC_SUPABASE_URL="$base_url"
-  export S3_ENDPOINT="$base_url/api/_dev/s3"
-  export PUBLIC_S3_BASE_URL="$base_url/api/_dev/s3"
+  export S3_ENDPOINT="$base_url/api/dev/s3"
+  export PUBLIC_S3_BASE_URL="$base_url/api/dev/s3"
   PG_REQUESTED_PORT=0
 fi
 
