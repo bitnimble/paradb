@@ -5,3 +5,21 @@
     flex-direction: column;
     gap: calc(var(--gridBaseline) * 2);
 }
+
+.avatarSection {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--gridBaseline) * 2);
+}
+
+.avatar,
+.avatarPlaceholder {
+    width: calc(var(--gridBaseline) * 10);
+    height: calc(var(--gridBaseline) * 10);
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatarPlaceholder {
+    background-color: var(--colorGreyA15);
+}

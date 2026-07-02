@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { MemoryFakeS3Handler } from 'services/maps/s3_handler_fake_memory';
 import { getServerContext } from 'services/server_context';
+import { getSharedMemoryBucket } from 'services/s3/memory_bucket';
 import { _setCurrentUserForTesting } from 'services/session/supabase_fake';
 
 async function initTestData() {
@@ -21,10 +21,8 @@ beforeEach(async () => {
     throw new Error('Almost dropped DB on prod env');
   }
   _setCurrentUserForTesting(null);
-  const { s3Handler } = getServerContext();
-  if (s3Handler instanceof MemoryFakeS3Handler) {
-    s3Handler._resetForTesting();
-  }
+  // Tests run with S3_IMPLEMENTATION=fake, where every bucket shares this one in-memory store.
+  getSharedMemoryBucket()._reset();
   await initTestData();
 });
 afterAll(async () => {

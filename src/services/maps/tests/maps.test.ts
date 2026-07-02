@@ -4,7 +4,8 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { SubmitMapRequest, SubmitMapResponse } from 'schema/maps';
 import { testAuthenticate, testPost, testUser2 } from 'services/jest_helpers';
-import { MemoryFakeS3Handler } from 'services/maps/s3_handler_fake_memory';
+import { mapKey } from 'services/s3/maps_s3_handler';
+import { getSharedMemoryBucket } from 'services/s3/memory_bucket';
 import { getServerContext } from 'services/server_context';
 import { _setCurrentUserForTesting } from 'services/session/supabase_fake';
 import { createUser } from 'services/users/users_repo';
@@ -23,12 +24,14 @@ describe('maps handler', () => {
     opts: { id?: string; isReupload?: boolean; uploaderId?: string } = {}
   ) => {
     const uploaderId = opts.uploaderId ?? UPLOADER.id;
-    const { mapsRepo, s3Handler } = await getServerContext();
+    const { mapsRepo } = await getServerContext();
     const buffer = await fs.readFile(path.resolve(__dirname, 'files', zipName));
     const id =
       opts.id ??
       (await _unwrap(mapsRepo.createNewMap({ title: 'placeholder', uploader: uploaderId }))).id;
-    (s3Handler as MemoryFakeS3Handler)._putMapFileForTesting(id, buffer);
+    // Seed the uploaded zip into the shared fake bucket at the temp map key (stands in for the
+    // client's PUT to the presigned URL).
+    await getSharedMemoryBucket().put(mapKey(id, true), buffer, 'application/zip');
     _setCurrentUserForTesting({ id: uploaderId, email: UPLOADER.email });
     const result = await completeMapUpload(id, opts.isReupload ?? false);
     return { result, id };

@@ -61,7 +61,11 @@ function UserActions() {
         ) : (
           <>
             <RouteLink href={routeFor([RoutePath.MAP, RoutePath.SUBMIT])}>Submit map</RouteLink>
-            {` | Logged in as ${session.username} (${session.email}) | `}
+            {' | '}
+            {session.avatarUrl != null ? (
+              <img src={session.avatarUrl} alt="" className={styles.avatar} />
+            ) : null}
+            {`Logged in as ${session.username} (${session.email}) | `}
             <RouteLink href={routeFor([RoutePath.SETTINGS])}>Settings</RouteLink>
             {' | '}
             <RouteLink href={routeFor([RoutePath.LOGOUT])} force={true}>

@@ -3,6 +3,7 @@ import 'server-only';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { UserSession } from 'schema/users';
+import { buildAvatarUrl } from 'services/users/avatar';
 import { getServerContext } from 'services/server_context';
 import { UserRole, getUser } from 'services/users/users_repo';
 import { RoutePath, routeFor } from 'utils/routes';
@@ -18,6 +19,10 @@ export const getUserSession = cache(async (): Promise<UserSession | undefined> =
     id: metadata.id,
     email: user.data.user.email,
     username: metadata.username,
+    avatarUrl:
+      metadata.avatarCacheToken != null
+        ? buildAvatarUrl(metadata.id, metadata.avatarCacheToken)
+        : undefined,
   };
 });
 
