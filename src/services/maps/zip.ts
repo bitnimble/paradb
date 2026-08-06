@@ -3,15 +3,10 @@ import { FileEntry, Reader, configure } from '@zip.js/zip.js';
 // There are no web workers on the server, and inflating a map's metadata doesn't need them anyway.
 configure({ useWebWorkers: false });
 
-/**
- * A zip.js `Reader` over data whose ranges are expensive to fetch (a remote object, a file on
- * disk). Subclasses only have to fetch a byte range; the tail is cached, so the scan for the
- * end-of-central-directory record and the read of the central directory it points at - laid out
- * immediately before it - cost one fetch rather than two.
- */
+/** A zip.js `Reader` over data whose ranges are expensive to fetch: a remote object, a file on disk. */
 export abstract class RangeReader extends Reader<string> {
-  // Only the tail is worth keeping: zip.js scans a fixed-size window for the end-of-central-
-  // directory record, whereas an entry's data can be arbitrarily large.
+  // The central directory sits immediately before the end-of-central-directory record, so caching
+  // the tail covers both in one fetch. Only the tail: an entry's data can be arbitrarily large.
   private tail?: { index: number; bytes: Uint8Array };
 
   constructor(name: string, size: number) {

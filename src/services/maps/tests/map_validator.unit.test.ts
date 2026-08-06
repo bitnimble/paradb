@@ -5,6 +5,27 @@ import { validateMap } from 'services/maps/map_validator';
 import { readEntry } from 'services/maps/zip';
 import { buildMapZip } from './map_generator';
 
+class FailingReader extends Reader<Uint8Array> {
+  private reads = 0;
+  private readonly delegate: Uint8ArrayReader;
+
+  constructor(
+    data: Uint8Array,
+    private readonly failAfterReads: number
+  ) {
+    super(data);
+    this.delegate = new Uint8ArrayReader(data);
+    this.size = data.byteLength;
+  }
+
+  async readUint8Array(index: number, length: number): Promise<Uint8Array> {
+    if (this.reads++ >= this.failAfterReads) {
+      throw new Error('storage unavailable');
+    }
+    return this.delegate.readUint8Array(index, length);
+  }
+}
+
 class CountingReader extends Reader<Uint8Array> {
   bytesRead = 0;
   private readonly delegate: Uint8ArrayReader;
@@ -67,9 +88,8 @@ describe('validateMap', () => {
       expect([bytes[0], bytes[1]]).toEqual([0xff, 0xd8]);
     });
 
-    // The point of reading through a Reader: an archive is validated off its central directory and
-    // rlrr files, so blob storage never has to hand over the audio. What's read is bounded by the
-    // metadata plus zip.js' fixed-size scan for the central directory, not by the archive size.
+    // Validated off the central directory and rlrr files alone, so storage never hands over the
+    // audio. Bounded by zip.js' fixed-size central directory scan, not by the archive.
     it('reads a bounded amount regardless of how large the archive is', async () => {
       const build = (padBytes: number) =>
         buildMapZip({ folder: 'Test', title: 'Test', artist: 'Artist', padBytes });
@@ -85,7 +105,8 @@ describe('validateMap', () => {
       );
 
       expect(readCounts[0]).toEqual(readCounts[1]);
-      expect(readCounts[0]).toBeLessThan(1024 * 1024);
+      // The scan window is ~64KB; anything beyond that means entry contents are being read.
+      expect(readCounts[0]).toBeLessThan(128 * 1024);
     });
   });
 
@@ -128,6 +149,22 @@ describe('validateMap', () => {
 
     it('a missing album art file', async () => {
       await expectError('Test_missing_album_art.zip', 'missing_album_art');
+    });
+
+    // Storage can fail partway through, once the archive is being read entry by entry. That has to
+    // come back as an error Result: a throw escaping here strands the upload mid-validation,
+    // because it's only rolled back on an error Result.
+    it('storage failing partway through reading the archive', async () => {
+      const buffer = readFixture('Test_valid.zip');
+      // The central directory is read first; the failure lands on an entry's contents.
+      const reader = new FailingReader(buffer, 2);
+
+      const result = await validateMap({ id: 'test', reader });
+
+      expect(result.success).toBe(false);
+      expect((result as Extract<typeof result, { success: false }>).errors[0].type).toEqual(
+        'no_data'
+      );
     });
   });
 });

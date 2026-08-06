@@ -1,5 +1,5 @@
 import { FileEntry, Reader, ZipReader } from '@zip.js/zip.js';
-import { PromisedResult, Result, ResultError } from 'base/result';
+import { PromisedResult, Result, ResultError, wrapError } from 'base/result';
 import { PDMap } from 'schema/maps';
 // @ts-expect-error - encoding does not provide types
 import * as encoding from 'encoding';
@@ -31,28 +31,29 @@ export async function validateMap(opts: {
   RawMap & { albumArtFiles: FileEntry[] },
   ValidateMapError | ValidateMapDifficultyError
 > {
-  let files: FileEntry[];
+  // Reading an entry decompresses and CRC-checks it, and on a remote archive fetches more of it, so
+  // anything in here can throw. A throw escaping to the caller would strand the map mid-validation:
+  // its upload only gets rolled back on an error Result.
   try {
     const entries = await new ZipReader(opts.reader).getEntries();
-    files = entries.filter((e): e is FileEntry => !e.directory);
-  } catch {
-    // Failed to open zip -- corrupted, or incorrect format
-    return { success: false, errors: [{ type: ValidateMapError.NO_DATA }] };
+    const files = entries.filter((e): e is FileEntry => !e.directory);
+    if (files.length === 0) {
+      return { success: false, errors: [{ type: ValidateMapError.NO_DATA }] };
+    }
+    // A submitted map must have exactly one directory in it, and all of the files must be directly
+    // under that directory.
+    let mapName = files[0].filename.match(/(.+?)\//)?.[1];
+    if (mapName?.startsWith('/')) {
+      mapName = mapName.substring(1);
+    }
+    if (mapName == null || !files.every((f) => zipDirname(f.filename) === mapName)) {
+      return { success: false, errors: [{ type: ValidateMapError.INCORRECT_FOLDER_STRUCTURE }] };
+    }
+    return await validateMapFiles({ expectedMapName: mapName, mapFiles: files });
+  } catch (e) {
+    // Corrupted, not a zip at all, or unreadable from storage.
+    return { success: false, errors: [wrapError(e, ValidateMapError.NO_DATA)] };
   }
-  if (files.length === 0) {
-    return { success: false, errors: [{ type: ValidateMapError.NO_DATA }] };
-  }
-  // A submitted map must have exactly one directory in it, and all of the files must be directly
-  // under that directory.
-  let mapName = files[0].filename.match(/(.+?)\//)?.[1];
-  if (mapName?.startsWith('/')) {
-    mapName = mapName.substring(1);
-  }
-  if (mapName == null || !files.every((f) => zipDirname(f.filename) === mapName)) {
-    return { success: false, errors: [{ type: ValidateMapError.INCORRECT_FOLDER_STRUCTURE }] };
-  }
-  const validatedResult = validateMapFiles({ expectedMapName: mapName, mapFiles: files });
-  return validatedResult;
 }
 
 function allExists<T>(a: (T | undefined)[]): a is T[] {

@@ -3,6 +3,7 @@ import {
   DeleteObjectCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
+  GetObjectCommandOutput,
   HeadObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
@@ -45,13 +46,20 @@ function getS3Client() {
 }
 
 /** HTTP byte ranges are inclusive on both ends; S3 clamps a range that runs past the object. */
-export function rangeHeader(index: number, length: number): string {
+function rangeHeader(index: number, length: number): string {
   return `bytes=${index}-${index + length - 1}`;
 }
 
+/** Just the part of `S3Client` a ranged read needs, so tests can stand one in. */
+export type RangeGetter = {
+  send(command: GetObjectCommand): Promise<GetObjectCommandOutput>;
+};
+
 /** Serves a zip's reads as ranged S3 GETs, so only the bytes zip.js asks for are transferred. */
-class S3RangeReader extends RangeReader {
+export class S3RangeReader extends RangeReader {
   constructor(
+    private readonly client: RangeGetter,
+    private readonly bucket: string,
     private readonly key: string,
     size: number
   ) {
@@ -59,10 +67,9 @@ class S3RangeReader extends RangeReader {
   }
 
   protected async fetchRange(index: number, length: number): Promise<Uint8Array> {
-    const s3 = getS3Client();
-    const resp = await s3.client.send(
+    const resp = await this.client.send(
       new GetObjectCommand({
-        Bucket: s3.bucket,
+        Bucket: this.bucket,
         Key: this.key,
         Range: rangeHeader(index, length),
       })
@@ -183,16 +190,30 @@ export class RealS3Handler implements S3Handler {
     albumArtFiles: FileEntry[],
     temp: boolean
   ): Promise<Result<string | undefined, S3Error>> {
-    // Write album art files to S3
     // TODO: display all of the album arts in the FE, e.g. in a carousel, or when selecting a difficulty
-    await Promise.all(
-      albumArtFiles.map(async (a) => {
-        const albumArt = checkExists(a, 'albumArt');
-        const buffer = await readEntry(albumArt);
-        const filename = zipBasename(albumArt.filename);
-        return s3Put(`${albumArtPrefix(id, temp)}${filename}`, buffer, guessContentType(filename));
-      })
-    );
+    let writes: Result<undefined, S3Error>[];
+    try {
+      writes = await Promise.all(
+        albumArtFiles.map(async (a) => {
+          const albumArt = checkExists(a, 'albumArt');
+          const buffer = await readEntry(albumArt);
+          const filename = zipBasename(albumArt.filename);
+          return s3Put(
+            `${albumArtPrefix(id, temp)}${filename}`,
+            buffer,
+            guessContentType(filename)
+          );
+        })
+      );
+    } catch (e) {
+      // Decompressing an entry can throw, and the caller only rolls the upload back on an error
+      // Result.
+      return { success: false, errors: [wrapError(e, S3Error.S3_WRITE_ERROR, { id })] };
+    }
+    const failed = writes.find((w) => !w.success);
+    if (failed != null && !failed.success) {
+      return failed;
+    }
 
     return {
       success: true,
@@ -219,7 +240,10 @@ export class RealS3Handler implements S3Handler {
       }
       return {
         success: true,
-        value: { reader: new S3RangeReader(key, head.ContentLength), size: head.ContentLength },
+        value: {
+          reader: new S3RangeReader(s3.client, s3.bucket, key, head.ContentLength),
+          size: head.ContentLength,
+        },
       };
     } catch (e) {
       return { success: false, errors: [wrapError(e, S3Error.S3_GET_ERROR, { key })] };

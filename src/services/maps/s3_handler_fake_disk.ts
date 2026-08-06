@@ -110,10 +110,15 @@ export class FileFakeS3Handler implements S3Handler {
     for (const a of albumArtFiles) {
       const albumArt = checkExists(a, 'albumArt');
       const filename = zipBasename(albumArt.filename);
-      const writeResult = await writeFile(
-        `${albumArtPrefix(id, temp)}${filename}`,
-        await readEntry(albumArt)
-      );
+      let entry: Buffer;
+      try {
+        entry = await readEntry(albumArt);
+      } catch (e) {
+        // Decompressing an entry can throw, and the caller only rolls the upload back on an error
+        // Result.
+        return { success: false, errors: [wrapError(e, S3Error.S3_WRITE_ERROR, { id })] };
+      }
+      const writeResult = await writeFile(`${albumArtPrefix(id, temp)}${filename}`, entry);
       if (!writeResult.success) return writeResult;
     }
     return {
