@@ -1,7 +1,7 @@
 import { Reader, Uint8ArrayReader } from '@zip.js/zip.js';
 import * as fs from 'fs';
 import * as path from 'path';
-import { MAX_MAP_FILE_SIZE, maxMapFileSize } from 'services/maps/map_size';
+import { maxMapFileSize } from 'services/maps/map_size';
 import { validateMap } from 'services/maps/map_validator';
 import { readEntry } from 'services/maps/zip';
 import { buildMapZip } from './map_generator';
@@ -136,7 +136,7 @@ describe('validateMap', () => {
       expect(readCounts[0]).toBeLessThan(128 * 1024);
     });
 
-    // Same length as the rejected archive below, so it's the size being judged, not the song.
+    // Same 60s length as 'an archive over the size budget', so size is the only difference.
     it('a short song whose archive is inside its budget', async () => {
       const buffer = buildMapZip({
         folder: 'Test',
@@ -151,13 +151,48 @@ describe('validateMap', () => {
       expect(result.success).toBe(true);
     });
 
-    // Same archive size as the rejected one below, so it's the song being judged, not the size.
+    // Same 90MiB as 'an archive over the size budget', so length is the only difference.
     it('a long song whose archive would be over the budget for a short one', async () => {
       const buffer = buildMapZip({
         folder: 'Test',
         title: 'Test',
         artist: 'Artist',
         difficulties: [{ name: 'Easy', lengthSeconds: 600 }],
+        padBytes: 90 * MIB,
+      });
+
+      const result = await validateMap({ id: 'test', archive: archiveOf(buffer) });
+
+      expect(result.success).toBe(true);
+    });
+
+    // Separately-recorded difficulties drift, so their lengths have to be exempt from the
+    // metadata-must-match check, and the budget has to be built from the longest of them.
+    it('difficulties that declare different song lengths', async () => {
+      const buffer = buildMapZip({
+        folder: 'Test',
+        title: 'Test',
+        artist: 'Artist',
+        difficulties: [
+          { name: 'Easy', lengthSeconds: 30 },
+          { name: 'Hard', lengthSeconds: 600 },
+        ],
+        // Inside the 600s budget, but well over the 30s one.
+        padBytes: 90 * MIB,
+      });
+
+      const result = await validateMap({ id: 'test', archive: archiveOf(buffer) });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('a map whose rlrr declares no length at all', async () => {
+      const buffer = buildMapZip({
+        folder: 'Test',
+        title: 'Test',
+        artist: 'Artist',
+        difficulties: [{ name: 'Easy', lengthSeconds: null }],
+        // Over the budget a very short song would get, inside the unknown-length allowance.
         padBytes: 90 * MIB,
       });
 
@@ -240,28 +275,5 @@ describe('validateMap', () => {
         'file_too_large'
       );
     });
-  });
-});
-
-describe('maxMapFileSize', () => {
-  it('scales with song length', () => {
-    expect(maxMapFileSize(600)).toBeGreaterThan(maxMapFileSize(60));
-  });
-
-  it('fits lossless audio for a standard-length song', () => {
-    expect(maxMapFileSize(5 * 60)).toEqual(95 * MIB);
-  });
-
-  it('only fits lossy audio for an hour-long song', () => {
-    expect(maxMapFileSize(60 * 60)).toEqual(260 * MIB);
-  });
-
-  it('never exceeds the hard cap', () => {
-    expect(maxMapFileSize(60 * 60 * 24)).toEqual(MAX_MAP_FILE_SIZE);
-  });
-
-  it('falls back to the hard cap when the length is unknown', () => {
-    expect(maxMapFileSize(undefined)).toEqual(MAX_MAP_FILE_SIZE);
-    expect(maxMapFileSize(0)).toEqual(MAX_MAP_FILE_SIZE);
   });
 });

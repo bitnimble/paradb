@@ -54,13 +54,13 @@ export const SubmitMap = observer((props: { id?: string }) => {
   };
 
   const DropInput = observer(() => {
-    const { selected } = store;
+    const { selectedFiles } = store;
 
     return (
       <button
         className={classNames(
           styles.fileContainer,
-          (selected.length || isDraggingOver) && styles.hasMapData
+          (selectedFiles.length || isDraggingOver) && styles.hasMapData
         )}
       >
         <input
@@ -75,8 +75,8 @@ export const SubmitMap = observer((props: { id?: string }) => {
         />
         <div className={styles.filenames}>
           <T.Small>
-            {selected.length
-              ? selected.map((u, i) => (
+            {selectedFiles.length
+              ? selectedFiles.map((u, i) => (
                   <p key={i}>
                     {u.file.name}
                     {u.state === 'error' && (
@@ -133,9 +133,9 @@ export const SubmitMap = observer((props: { id?: string }) => {
       <T.Medium>
         The maximum file size scales with the length of your song, up to{' '}
         {formatFileSize(MAX_MAP_FILE_SIZE)}: a 5 minute song gets{' '}
-        {formatFileSize(maxMapFileSize(5 * 60))}, which fits lossless audio. The allowance per
-        minute of audio shrinks as songs get longer, so anything much over 8 minutes will need lossy
-        audio (Opus, AAC or MP3).
+        {formatFileSize(maxMapFileSize(5 * 60))}, which fits lossless audio, and a 30 minute one
+        gets {formatFileSize(maxMapFileSize(30 * 60))}. Longer songs get proportionally less per
+        minute, so they will need lossy audio (Opus, AAC or MP3).
       </T.Medium>
       {showProgressScreen ? (
         <div className={classNames(styles.fileContainer, styles.hasMapData, styles.isSubmitting)}>
@@ -152,8 +152,9 @@ export const SubmitMap = observer((props: { id?: string }) => {
         <DropInput />
       )}
       <Button
-        disabled={showProgressScreen}
-        loading={uploader.isUploading}
+        // Submitting mid-check would upload a file the check was about to reject.
+        disabled={showProgressScreen || store.checksInFlight > 0}
+        loading={uploader.isUploading || store.checksInFlight > 0}
         onClick={presenter.onSubmit}
       >
         Submit

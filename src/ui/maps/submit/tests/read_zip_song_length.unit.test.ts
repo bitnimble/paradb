@@ -1,15 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { buildMapZip } from 'services/maps/tests/map_generator';
+import { FILES_DIR, buildMapZip } from 'services/maps/tests/map_generator';
 import { readZipSongLength } from 'ui/maps/submit/read_zip_song_length';
 
-const FIXTURES_DIR = path.resolve(__dirname, '../../../../services/maps/tests/files');
-
 describe('readZipSongLength', () => {
+  // The committed fixture's rlrr is DEFLATE-compressed, unlike the generated ones.
   it('reads the length from a real, deflated archive', async () => {
-    const zip = new Blob([fs.readFileSync(path.join(FIXTURES_DIR, 'Test_valid.zip'))]);
+    const zip = new Blob([fs.readFileSync(path.join(FILES_DIR, 'Test_valid.zip'))]);
 
-    expect(await readZipSongLength(zip)).toBeGreaterThan(0);
+    expect(await readZipSongLength(zip)).toEqual(11.1814);
   });
 
   it('takes the longest length across difficulties, as the server does', async () => {

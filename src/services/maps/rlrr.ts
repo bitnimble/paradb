@@ -1,4 +1,3 @@
-/** Shared by the server's validation and the client's pre-upload check, so keep it free of both. */
 export function parseRlrr(bytes: Uint8Array): unknown {
   // Paradiddle writes some rlrr files as UTF-16LE with a byte order mark. Both decoders strip the
   // mark themselves; leaving one in front would fail the parse.

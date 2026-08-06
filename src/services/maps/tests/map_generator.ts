@@ -9,14 +9,15 @@ import * as path from 'path';
  * `files/` (`silence.ogg`, `album.jpg`), same as the Python script.
  */
 
-const FILES_DIR = path.resolve(__dirname, 'files');
+export const FILES_DIR = path.resolve(__dirname, 'files');
 const albumArt = fs.readFileSync(path.join(FILES_DIR, 'album.jpg'));
 const silence = fs.readFileSync(path.join(FILES_DIR, 'silence.ogg'));
 
 export type MapZipSpec = {
   /** Top-level folder name. Must match the .rlrr filename prefix, which the validator enforces. */
   folder: string;
-  difficulties?: { name: string; lengthSeconds?: number }[];
+  /** `lengthSeconds: null` writes no length at all, as an rlrr predating the field would. */
+  difficulties?: { name: string; lengthSeconds?: number | null }[];
   title: string;
   artist: string;
   creator?: string;
@@ -38,7 +39,7 @@ export function buildMapZip(spec: MapZipSpec): Buffer {
       coverImagePath: 'album.jpg',
       artist: spec.artist,
       creator: spec.creator ?? '',
-      length: difficulty.lengthSeconds ?? 11.1814,
+      ...(difficulty.lengthSeconds === null ? {} : { length: difficulty.lengthSeconds ?? 11.1814 }),
       complexity: spec.complexity ?? 1,
     },
     audioFileData: { songTracks: ['song.ogg'], drumTracks: ['drums.ogg'], calibrationOffset: 0.0 },
@@ -47,7 +48,7 @@ export function buildMapZip(spec: MapZipSpec): Buffer {
     bpmEvents: [{ bpm: 120.0, time: 0.0 }],
   });
 
-  // The .rlrr's must come first: the validator derives the map name from the first file entry.
+  // The .rlrrs must come first: the validator derives the map name from the first file entry.
   const entries: ZipEntry[] = [
     ...difficulties.map((d) => ({
       name: `${spec.folder}/${spec.folder}_${d.name}.rlrr`,

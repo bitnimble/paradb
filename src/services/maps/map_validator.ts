@@ -1,8 +1,8 @@
 import { FileEntry, ZipReader } from '@zip.js/zip.js';
 import { PromisedResult, Result, ResultError, wrapError } from 'base/result';
 import { PDMap } from 'schema/maps';
-import { formatFileSize, maxMapFileSize } from 'services/maps/map_size';
-import { parseRlrr } from 'services/maps/rlrr';
+import { longestSongLength, maxMapFileSize, overBudgetMessage } from 'services/maps/map_size';
+import { parseRlrr, rlrrSongLength } from 'services/maps/rlrr';
 import { MapArchive } from 'services/maps/s3_handler_types';
 import { readEntry, zipBasename, zipDirname } from 'services/maps/zip';
 
@@ -138,17 +138,16 @@ async function validateMapFiles(opts: {
     return { success: false, errors: [{ type: ValidateMapError.DESCRIPTION_TOO_LONG }] };
   }
 
-  const songLengths = validDifficultyResults
-    .map((d) => d.value.length)
-    .filter((l): l is number => l != null);
-  const sizeLimit = maxMapFileSize(songLengths.length === 0 ? undefined : Math.max(...songLengths));
+  const sizeLimit = maxMapFileSize(
+    longestSongLength(validDifficultyResults.map((d) => d.value.length))
+  );
   if (opts.archiveSize > sizeLimit) {
     return {
       success: false,
       errors: [
         {
           type: ValidateMapError.FILE_TOO_LARGE,
-          userMessage: `File is ${formatFileSize(opts.archiveSize)}, over the ${formatFileSize(sizeLimit)} limit for a song of this length`,
+          userMessage: overBudgetMessage(opts.archiveSize, sizeLimit),
         },
       ],
     };
@@ -278,7 +277,7 @@ function validateMapDifficulty(
       ...requiredFields,
       ...optionalFields,
       difficultyName: difficultyMatch[1],
-      length: typeof metadata.length === 'number' ? metadata.length : undefined,
+      length: rlrrSongLength(map),
     },
   };
 }
