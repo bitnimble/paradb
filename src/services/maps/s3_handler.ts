@@ -45,11 +45,6 @@ function getS3Client() {
   return s3;
 }
 
-/** HTTP byte ranges are inclusive on both ends; S3 clamps a range that runs past the object. */
-function rangeHeader(index: number, length: number): string {
-  return `bytes=${index}-${index + length - 1}`;
-}
-
 /** Just the part of `S3Client` a ranged read needs, so tests can stand one in. */
 export type RangeGetter = {
   send(command: GetObjectCommand): Promise<GetObjectCommandOutput>;
@@ -71,13 +66,18 @@ export class S3RangeReader extends RangeReader {
       new GetObjectCommand({
         Bucket: this.bucket,
         Key: this.key,
-        Range: rangeHeader(index, length),
+        Range: this.rangeHeader(index, length),
       })
     );
     if (!resp.Body) {
       throw new Error(`Missing S3 body for ${this.key}`);
     }
     return resp.Body.transformToByteArray();
+  }
+
+  /** HTTP byte ranges are inclusive on both ends; S3 clamps a range that runs past the object. */
+  private rangeHeader(index: number, length: number): string {
+    return `bytes=${index}-${index + length - 1}`;
   }
 }
 
