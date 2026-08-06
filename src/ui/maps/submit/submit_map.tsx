@@ -131,11 +131,8 @@ export const SubmitMap = observer((props: { id?: string }) => {
 │  ├─ ...`}
       </T.Medium>
       <T.Medium>
-        The maximum file size scales with the length of your song, up to{' '}
-        {formatMaxFileSize(MAX_MAP_FILE_SIZE)}: a 5 minute song gets{' '}
-        {formatMaxFileSize(maxMapFileSize(5 * 60))}, which fits lossless audio, and a 30 minute one
-        gets {formatMaxFileSize(maxMapFileSize(30 * 60))}. Longer songs get proportionally less per
-        minute, so they will need lossy audio (Opus, AAC or MP3).
+        Max file size scales with song length, up to a cap of {formatMaxFileSize(MAX_MAP_FILE_SIZE)}.
+        A 5 minute song gets ~{formatMaxFileSize(maxMapFileSize(5 * 60))}, and a 1 hour song gets ~{formatMaxFileSize(maxMapFileSize(30 * 60))}.
       </T.Medium>
       {showProgressScreen ? (
         <div className={classNames(styles.fileContainer, styles.hasMapData, styles.isSubmitting)}>
