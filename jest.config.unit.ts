@@ -11,6 +11,11 @@ const config: Config = {
   testMatch: ['**/*.unit.test.[jt]s?(x)'],
   setupFilesAfterEnv: ['<rootDir>/src/services/jest_setup.unit.ts'],
   modulePaths: ['<rootDir>/src'],
+  moduleNameMapper: {
+    // Jest's resolver doesn't read the "exports" map, and zip.js' subpaths are ESM-only. The CJS
+    // bundle is the same native-codec build, just not tree-shaken.
+    '^@zip\\.js/zip\\.js/lib/zip-core-native\\.js$': '@zip.js/zip.js/index-native.cjs',
+  },
   transform: {
     '^.+\\.(t|j)sx?$': [
       '@swc/jest',

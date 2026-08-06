@@ -1,7 +1,8 @@
-import { FileEntry, Reader, ZipReader } from '@zip.js/zip.js';
+import { FileEntry, ZipReader } from '@zip.js/zip.js';
 import { PromisedResult, Result, ResultError, wrapError } from 'base/result';
 import { PDMap } from 'schema/maps';
 import { formatFileSize, maxMapFileSize } from 'services/maps/map_size';
+import { parseRlrr } from 'services/maps/rlrr';
 import { MapArchive } from 'services/maps/s3_handler_types';
 import { readEntry, zipBasename, zipDirname } from 'services/maps/zip';
 
@@ -193,7 +194,7 @@ function validateMapDifficulty(
 > {
   let map: any;
   try {
-    map = parseJson(rlrr);
+    map = parseRlrr(rlrr);
   } catch {
     return { success: false, errors: [{ type: ValidateMapDifficultyError.INVALID_FORMAT }] };
   }
@@ -280,11 +281,4 @@ function validateMapDifficulty(
       length: typeof metadata.length === 'number' ? metadata.length : undefined,
     },
   };
-}
-
-function parseJson(bytes: Uint8Array) {
-  // Paradiddle writes some rlrr files as UTF-16LE with a byte order mark. Both decoders strip the
-  // mark themselves; leaving one in front would fail the parse.
-  const isUtf16le = bytes[0] === 0xff && bytes[1] === 0xfe;
-  return JSON.parse(new TextDecoder(isUtf16le ? 'utf-16le' : 'utf-8').decode(bytes));
 }

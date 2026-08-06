@@ -54,13 +54,13 @@ export const SubmitMap = observer((props: { id?: string }) => {
   };
 
   const DropInput = observer(() => {
-    const { filenames } = store;
+    const { selected } = store;
 
     return (
       <button
         className={classNames(
           styles.fileContainer,
-          (filenames.length || isDraggingOver) && styles.hasMapData
+          (selected.length || isDraggingOver) && styles.hasMapData
         )}
       >
         <input
@@ -75,8 +75,15 @@ export const SubmitMap = observer((props: { id?: string }) => {
         />
         <div className={styles.filenames}>
           <T.Small>
-            {filenames.length
-              ? filenames.map((f, i) => <p key={i}>{f}</p>)
+            {selected.length
+              ? selected.map((u, i) => (
+                  <p key={i}>
+                    {u.file.name}
+                    {u.state === 'error' && (
+                      <span className={styles.fileError}>: {u.errorMessage}</span>
+                    )}
+                  </p>
+                ))
               : 'Click or drag to upload your zipped map.'}
           </T.Small>
         </div>

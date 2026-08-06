@@ -2,7 +2,7 @@ import { Api } from 'app/api/api';
 import { action, computed, observable, runInAction } from 'mobx';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { getLog } from 'services/logging/client_logger';
-import { MAX_MAP_FILE_SIZE, formatFileSize } from 'services/maps/map_size';
+import { MAX_MAP_FILE_SIZE, formatFileSize, maxMapFileSize } from 'services/maps/map_size';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
 
@@ -163,8 +163,8 @@ export class SubmitMapStore extends FormStore<SubmitMapField> {
   id?: string = undefined;
   @observable accessor files = new Map<string, UploadState>();
 
-  @computed get filenames() {
-    return [...this.files.values()].map((f) => f.file.name).sort((a, b) => a.localeCompare(b));
+  @computed get selected() {
+    return [...this.files.values()].sort((a, b) => a.file.name.localeCompare(b.file.name));
   }
 
   constructor(id?: string) {
@@ -208,7 +208,34 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
       // Deduplicate by both filename and byte size
       const key = `${file.name}-${file.size}`;
       this.store.files.set(key, f);
+      if (f.state === 'pending') {
+        void this.checkSizeAgainstSongLength(key, file);
+      }
     }
+  }
+
+  private async checkSizeAgainstSongLength(key: string, file: File) {
+    // Loaded on demand so the zip reader isn't in the page's initial payload.
+    const { readZipSongLength } = await import('ui/maps/submit/read_zip_song_length');
+    const limit = maxMapFileSize(await readZipSongLength(file));
+    if (file.size <= limit) {
+      return;
+    }
+    this.setUploadError(
+      key,
+      `File is ${formatFileSize(file.size)}, over the ${formatFileSize(limit)} limit for a song of this length`
+    );
+  }
+
+  @action.bound private setUploadError(key: string, errorMessage: string) {
+    // Read back out of the store: `files` is deep observable, so the entry it holds is a different
+    // object to the one that went in, and only writes to that one are seen by the view.
+    const upload = this.store.files.get(key);
+    // Reading the archive is slow enough that the upload may have started, or been cleared, since.
+    if (upload?.state !== 'pending') {
+      return;
+    }
+    Object.assign(upload, { state: 'error', errorMessage });
   }
 
   readonly onSubmit = async () => {
