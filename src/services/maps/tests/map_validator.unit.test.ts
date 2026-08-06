@@ -1,11 +1,35 @@
+import { Reader, Uint8ArrayReader } from '@zip.js/zip.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { validateMap } from 'services/maps/map_validator';
 import { readEntry } from 'services/maps/zip';
+import { buildMapZip } from './map_generator';
+
+class CountingReader extends Reader<Uint8Array> {
+  bytesRead = 0;
+  private readonly delegate: Uint8ArrayReader;
+
+  constructor(data: Uint8Array) {
+    super(data);
+    this.delegate = new Uint8ArrayReader(data);
+    this.size = data.byteLength;
+  }
+
+  async readUint8Array(index: number, length: number): Promise<Uint8Array> {
+    this.bytesRead += length;
+    return this.delegate.readUint8Array(index, length);
+  }
+}
 
 const readFixture = (name: string) => fs.readFileSync(path.resolve(__dirname, 'files', name));
 
-const validate = (name: string) => validateMap({ id: 'test', buffer: readFixture(name) });
+const validate = (name: string) => {
+  const buffer = readFixture(name);
+  return validateMap({
+    id: 'test',
+    archive: { reader: new Uint8ArrayReader(buffer), size: buffer.byteLength },
+  });
+};
 
 const expectError = async (name: string, type: string) => {
   const result = await validate(name);
@@ -42,6 +66,30 @@ describe('validateMap', () => {
       const bytes = await readEntry(albumArtFiles[0]);
       // JPEG start-of-image marker: the entry decompressed to the real album art.
       expect([bytes[0], bytes[1]]).toEqual([0xff, 0xd8]);
+    });
+
+    // The point of reading through a Reader: an archive is validated off its central directory and
+    // rlrr files, so blob storage never has to hand over the audio. What's read is bounded by the
+    // metadata plus zip.js' fixed-size scan for the central directory, not by the archive size.
+    it('reads a bounded amount regardless of how large the archive is', async () => {
+      const build = (padBytes: number) =>
+        buildMapZip({ folder: 'Test', title: 'Test', artist: 'Artist', padBytes });
+
+      const readCounts = await Promise.all(
+        [8 * 1024 * 1024, 32 * 1024 * 1024].map(async (padBytes) => {
+          const buffer = build(padBytes);
+          const reader = new CountingReader(buffer);
+          const result = await validateMap({
+            id: 'test',
+            archive: { reader, size: buffer.byteLength },
+          });
+          expect(result.success).toBe(true);
+          return reader.bytesRead;
+        })
+      );
+
+      expect(readCounts[0]).toEqual(readCounts[1]);
+      expect(readCounts[0]).toBeLessThan(1024 * 1024);
     });
   });
 

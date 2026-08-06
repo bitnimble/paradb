@@ -1,8 +1,9 @@
-import { FileEntry, Uint8ArrayReader, ZipReader } from '@zip.js/zip.js';
+import { FileEntry, ZipReader } from '@zip.js/zip.js';
 import { PromisedResult, Result, ResultError } from 'base/result';
 import { PDMap } from 'schema/maps';
 // @ts-expect-error - encoding does not provide types
 import * as encoding from 'encoding';
+import { MapArchive } from 'services/maps/s3_handler_types';
 import { readEntry, zipBasename, zipDirname } from 'services/maps/zip';
 
 type RawMap = Pick<
@@ -26,14 +27,14 @@ export const enum ValidateMapDifficultyError {
 
 export async function validateMap(opts: {
   id: string;
-  buffer: Buffer;
+  archive: MapArchive;
 }): PromisedResult<
   RawMap & { albumArtFiles: FileEntry[] },
   ValidateMapError | ValidateMapDifficultyError
 > {
   let files: FileEntry[];
   try {
-    const entries = await new ZipReader(new Uint8ArrayReader(opts.buffer)).getEntries();
+    const entries = await new ZipReader(opts.archive.reader).getEntries();
     files = entries.filter((e): e is FileEntry => !e.directory);
   } catch {
     // Failed to open zip -- corrupted, or incorrect format

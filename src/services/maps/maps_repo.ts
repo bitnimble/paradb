@@ -21,7 +21,7 @@ import { SearchIndex } from 'services/search/types';
 import { getServerContext } from 'services/server_context';
 import snakeCaseKeys from 'snakecase-keys';
 import * as db from 'zapatos/db';
-import { S3Error, S3Handler } from './s3_handler_types';
+import { MapArchive, S3Error, S3Handler } from './s3_handler_types';
 
 const exists = <T>(t: T | undefined): t is NonNullable<T> => !!t;
 
@@ -45,8 +45,7 @@ export const enum DeleteMapError {
 type ProcessMapOpts = {
   id: string;
   uploader: string;
-  // zip file of the map
-  mapFile: Buffer;
+  archive: MapArchive;
 };
 export const enum CreateMapError {
   TOO_MANY_ID_GEN_ATTEMPTS = 'too_many_id_gen_attempts',
@@ -408,13 +407,13 @@ export class MapsRepo {
     | ValidateMapDifficultyError
     | SearchIndexError
   > {
-    const { id, mapFile: buffer, uploader } = opts;
+    const { id, archive, uploader } = opts;
     const existingMap = await this.getMap(id);
     const isExistingMap =
       existingMap.success && existingMap.value.validity === MapValidity.REUPLOADED;
 
     await this.setValidity(id, MapValidity.VALIDATING);
-    const validatedMapResult = await validateMap({ id, buffer });
+    const validatedMapResult = await validateMap({ id, archive });
     if (!validatedMapResult.success) {
       return validatedMapResult;
     }

@@ -3,17 +3,18 @@ import {
   DeleteObjectCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { FileEntry } from '@zip.js/zip.js';
+import { FileEntry, Reader } from '@zip.js/zip.js';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
 import { getEnvVars } from 'services/env';
 import { readEntry, zipBasename } from 'services/maps/zip';
-import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
+import { MapArchive, MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 let s3: { client: S3Client; bucket: string } | undefined;
 
@@ -41,6 +42,40 @@ function getS3Client() {
   }
 
   return s3;
+}
+
+/** HTTP byte ranges are inclusive on both ends; S3 clamps a range that runs past the object. */
+export function rangeHeader(index: number, length: number): string {
+  return `bytes=${index}-${index + length - 1}`;
+}
+
+/** Serves a zip's reads as ranged S3 GETs, so only the bytes zip.js asks for are transferred. */
+class S3RangeReader extends Reader<string> {
+  constructor(
+    private readonly key: string,
+    size: number
+  ) {
+    super(key);
+    this.size = size;
+  }
+
+  async readUint8Array(index: number, length: number): Promise<Uint8Array> {
+    if (length === 0) {
+      return new Uint8Array(0);
+    }
+    const s3 = getS3Client();
+    const resp = await s3.client.send(
+      new GetObjectCommand({
+        Bucket: s3.bucket,
+        Key: this.key,
+        Range: rangeHeader(index, length),
+      })
+    );
+    if (!resp.Body) {
+      throw new Error(`Missing S3 body for ${this.key}`);
+    }
+    return resp.Body.transformToByteArray();
+  }
 }
 
 async function s3Get(key: string): PromisedResult<Buffer, S3Error> {
@@ -202,8 +237,30 @@ export class RealS3Handler implements S3Handler {
     };
   }
 
-  async getMapFile(id: string, temp: boolean): PromisedResult<Buffer, S3Error> {
-    return s3Get(mapKey(id, temp));
+  async openMapFile(id: string, temp: boolean): PromisedResult<MapArchive, S3Error> {
+    const key = mapKey(id, temp);
+    try {
+      const s3 = getS3Client();
+      const head = await s3.client.send(new HeadObjectCommand({ Bucket: s3.bucket, Key: key }));
+      if (head.ContentLength == null) {
+        return {
+          success: false,
+          errors: [
+            {
+              type: S3Error.S3_GET_ERROR,
+              internalMessage: 'Missing S3 content length',
+              details: { key },
+            },
+          ],
+        };
+      }
+      return {
+        success: true,
+        value: { reader: new S3RangeReader(key, head.ContentLength), size: head.ContentLength },
+      };
+    } catch (e) {
+      return { success: false, errors: [wrapError(e, S3Error.S3_GET_ERROR, { key })] };
+    }
   }
 
   async mintUploadUrl(id: string): Promise<MintUploadUrlResult> {

@@ -1,11 +1,11 @@
-import { FileEntry } from '@zip.js/zip.js';
+import { FileEntry, Reader } from '@zip.js/zip.js';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { getEnvVars } from 'services/env';
 import { readEntry, zipBasename } from 'services/maps/zip';
-import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
+import { MapArchive, MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 // Disk-backed fake S3 handler for `bun dev` (selected via S3_IMPLEMENTATION=dev). Mirrors the
 // key layout of the real S3 handler so the same temp -> permanent promotion flow works without
@@ -71,6 +71,28 @@ export const devS3 = {
   write: writeFile,
 };
 
+/** Disk counterpart to the real handler's ranged S3 GETs: reads only the requested bytes. */
+class FileRangeReader extends Reader<string> {
+  constructor(
+    private readonly filePath: string,
+    size: number
+  ) {
+    super(filePath);
+    this.size = size;
+  }
+
+  async readUint8Array(index: number, length: number): Promise<Uint8Array> {
+    const handle = await fs.open(this.filePath);
+    try {
+      const buffer = Buffer.alloc(Math.max(Math.min(length, this.size - index), 0));
+      await handle.read(buffer, 0, buffer.length, index);
+      return buffer;
+    } finally {
+      await handle.close();
+    }
+  }
+}
+
 export class FileFakeS3Handler implements S3Handler {
   async uploadAlbumArtFiles(
     id: string,
@@ -92,8 +114,15 @@ export class FileFakeS3Handler implements S3Handler {
     };
   }
 
-  async getMapFile(id: string, temp: boolean): PromisedResult<Buffer, S3Error> {
-    return readFile(mapKey(id, temp));
+  async openMapFile(id: string, temp: boolean): PromisedResult<MapArchive, S3Error> {
+    const key = mapKey(id, temp);
+    try {
+      const filePath = devS3Path(key);
+      const { size } = await fs.stat(filePath);
+      return { success: true, value: { reader: new FileRangeReader(filePath, size), size } };
+    } catch (e) {
+      return { success: false, errors: [wrapError(e, S3Error.S3_GET_ERROR, { key })] };
+    }
   }
 
   async mintUploadUrl(id: string): Promise<MintUploadUrlResult> {

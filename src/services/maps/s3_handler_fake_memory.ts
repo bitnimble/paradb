@@ -1,7 +1,7 @@
-import { FileEntry } from '@zip.js/zip.js';
+import { FileEntry, Uint8ArrayReader } from '@zip.js/zip.js';
 import { PromisedResult, Result } from 'base/result';
 import { zipBasename } from 'services/maps/zip';
-import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
+import { MapArchive, MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 /**
  * In-memory S3 handler used in tests (selected via `S3_IMPLEMENTATION=fake`) so they don't require a
@@ -42,7 +42,7 @@ export class MemoryFakeS3Handler implements S3Handler {
     };
   }
 
-  async getMapFile(id: string, temp: boolean): PromisedResult<Buffer, S3Error> {
+  async openMapFile(id: string, temp: boolean): PromisedResult<MapArchive, S3Error> {
     const buffer = this.mapFileStore(temp).get(id);
     if (buffer == null) {
       return {
@@ -55,7 +55,10 @@ export class MemoryFakeS3Handler implements S3Handler {
         ],
       };
     }
-    return { success: true, value: buffer };
+    return {
+      success: true,
+      value: { reader: new Uint8ArrayReader(buffer), size: buffer.byteLength },
+    };
   }
 
   async mintUploadUrl(id: string): Promise<MintUploadUrlResult> {

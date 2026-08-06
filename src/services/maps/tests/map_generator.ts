@@ -22,6 +22,8 @@ export type MapZipSpec = {
   creator?: string;
   description?: string;
   complexity?: number;
+  /** Filler, added as an extra file, to stand in for a large archive's audio. */
+  padBytes?: number;
 };
 
 export function buildMapZip(spec: MapZipSpec): Buffer {
@@ -44,7 +46,7 @@ export function buildMapZip(spec: MapZipSpec): Buffer {
   };
 
   // The .rlrr must come first: the validator derives the map name from the first file entry.
-  return buildZip([
+  const entries: ZipEntry[] = [
     {
       name: `${spec.folder}/${spec.folder}_${difficulty}.rlrr`,
       data: Buffer.from(JSON.stringify(rlrr, null, 2)),
@@ -52,7 +54,11 @@ export function buildMapZip(spec: MapZipSpec): Buffer {
     { name: `${spec.folder}/album.jpg`, data: albumArt },
     { name: `${spec.folder}/song.ogg`, data: silence },
     { name: `${spec.folder}/drums.ogg`, data: silence },
-  ]);
+  ];
+  if (spec.padBytes) {
+    entries.push({ name: `${spec.folder}/pad.bin`, data: Buffer.alloc(spec.padBytes) });
+  }
+  return buildZip(entries);
 }
 
 type ZipEntry = { name: string; data: Buffer };
