@@ -14,7 +14,7 @@ const ALLOWANCE_PER_MINUTE = 3 * MIB;
 const UNKNOWN_LENGTH_ALLOWANCE = 100 * MIB;
 
 export function maxMapFileSize(seconds: number | undefined): number {
-  if (!(seconds != null && seconds > 0 && Number.isFinite(seconds))) {
+  if (seconds == null || seconds <= 0 || !Number.isFinite(seconds)) {
     return UNKNOWN_LENGTH_ALLOWANCE;
   }
   return Math.min(MAX_MAP_FILE_SIZE, BASE_ALLOWANCE + (seconds / 60) * ALLOWANCE_PER_MINUTE);
