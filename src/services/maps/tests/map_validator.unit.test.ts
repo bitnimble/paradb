@@ -47,6 +47,8 @@ class CountingReader extends Reader<Uint8Array> {
   }
 }
 
+const MIB = 1024 * 1024;
+
 const readFixture = (name: string) => fs.readFileSync(path.resolve(__dirname, 'files', name));
 
 const archiveOf = (bytes: Uint8Array) => ({
@@ -133,6 +135,36 @@ describe('validateMap', () => {
       // The scan window is ~64KB; anything beyond that means entry contents are being read.
       expect(readCounts[0]).toBeLessThan(128 * 1024);
     });
+
+    // Same length as the rejected archive below, so it's the size being judged, not the song.
+    it('a short song whose archive is inside its budget', async () => {
+      const buffer = buildMapZip({
+        folder: 'Test',
+        title: 'Test',
+        artist: 'Artist',
+        difficulties: [{ name: 'Easy', lengthSeconds: 60 }],
+        padBytes: 40 * MIB,
+      });
+
+      const result = await validateMap({ id: 'test', archive: archiveOf(buffer) });
+
+      expect(result.success).toBe(true);
+    });
+
+    // Same archive size as the rejected one below, so it's the song being judged, not the size.
+    it('a long song whose archive would be over the budget for a short one', async () => {
+      const buffer = buildMapZip({
+        folder: 'Test',
+        title: 'Test',
+        artist: 'Artist',
+        difficulties: [{ name: 'Easy', lengthSeconds: 600 }],
+        padBytes: 90 * MIB,
+      });
+
+      const result = await validateMap({ id: 'test', archive: archiveOf(buffer) });
+
+      expect(result.success).toBe(true);
+    });
   });
 
   describe('rejects invalid maps', () => {
@@ -198,7 +230,7 @@ describe('validateMap', () => {
         title: 'Test',
         artist: 'Artist',
         difficulties: [{ name: 'Easy', lengthSeconds: 60 }],
-        padBytes: 90 * 1024 * 1024,
+        padBytes: 90 * MIB,
       });
 
       const result = await validateMap({ id: 'test', archive: archiveOf(buffer) });
@@ -209,23 +241,7 @@ describe('validateMap', () => {
       );
     });
   });
-
-  it('accepts a long song whose archive would be over the budget for a short one', async () => {
-    const buffer = buildMapZip({
-      folder: 'Test',
-      title: 'Test',
-      artist: 'Artist',
-      difficulties: [{ name: 'Easy', lengthSeconds: 600 }],
-      padBytes: 90 * 1024 * 1024,
-    });
-
-    const result = await validateMap({ id: 'test', archive: archiveOf(buffer) });
-
-    expect(result.success).toBe(true);
-  });
 });
-
-const MIB = 1024 * 1024;
 
 describe('maxMapFileSize', () => {
   it('scales with song length', () => {
