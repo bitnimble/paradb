@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import * as unzipper from 'unzipper';
+import { FileEntry, Uint8ArrayReader, ZipReader } from '@zip.js/zip.js';
 import { MapFixture } from '../fixtures';
 
 /**
@@ -7,16 +7,20 @@ import { MapFixture } from '../fixtures';
  * expected file entry, and its .rlrr still carries the fixture's title. The download path stores and
  * serves the uploaded bytes verbatim, so this round-trips the whole upload -> S3 -> download flow.
  */
-export async function assertZipMatchesFixture(zipBuffer: Buffer, fixture: MapFixture) {
-  const directory = await unzipper.Open.buffer(zipBuffer);
-  const filePaths = directory.files.filter((f) => f.type === 'File').map((f) => f.path);
+export async function assertZipMatchesFixture(
+  zipBuffer: Buffer,
+  fixture: MapFixture
+): Promise<void> {
+  const entries = await new ZipReader(new Uint8ArrayReader(zipBuffer)).getEntries();
+  const files = entries.filter((e): e is FileEntry => !e.directory);
+  const filenames = files.map((f) => f.filename);
 
   for (const entry of fixture.expectedEntries) {
-    expect(filePaths, `downloaded zip should contain ${entry}`).toContain(entry);
+    expect(filenames, `downloaded zip should contain ${entry}`).toContain(entry);
   }
 
-  const rlrr = directory.files.find((f) => f.path.endsWith('.rlrr'));
+  const rlrr = files.find((f) => f.filename.endsWith('.rlrr'));
   expect(rlrr, 'downloaded zip should contain a .rlrr').toBeTruthy();
-  const metadata = JSON.parse((await rlrr!.buffer()).toString());
+  const metadata = JSON.parse(Buffer.from(await rlrr!.arrayBuffer()).toString());
   expect(metadata.recordingMetadata.title).toBe(fixture.title);
 }

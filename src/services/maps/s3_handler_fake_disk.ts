@@ -1,10 +1,11 @@
+import { FileEntry } from '@zip.js/zip.js';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { getEnvVars } from 'services/env';
-import * as unzipper from 'unzipper';
-import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
+import { RangeReader, readEntry, zipBasename } from 'services/maps/zip';
+import { MapArchive, MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 // Disk-backed fake S3 handler for `bun dev` (selected via S3_IMPLEMENTATION=dev). Mirrors the
 // key layout of the real S3 handler so the same temp -> permanent promotion flow works without
@@ -32,7 +33,7 @@ async function readFile(key: string): PromisedResult<Buffer, S3Error> {
   }
 }
 
-async function writeFile(key: string, body: Buffer): Promise<Result<undefined, S3Error>> {
+async function writeFile(key: string, body: Uint8Array): Promise<Result<undefined, S3Error>> {
   try {
     const filePath = devS3Path(key);
     await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -70,29 +71,71 @@ export const devS3 = {
   write: writeFile,
 };
 
+/** Disk counterpart to the real handler's ranged S3 GETs: reads only the requested bytes. */
+class FileRangeReader extends RangeReader {
+  constructor(
+    private readonly filePath: string,
+    size: number
+  ) {
+    super(filePath, size);
+  }
+
+  protected async fetchRange(index: number, length: number): Promise<Uint8Array> {
+    const handle = await fs.open(this.filePath);
+    try {
+      const buffer = new Uint8Array(length);
+      // A single read can come up short, which would leave the rest of the buffer zeroed and
+      // silently corrupt what the zip parser sees.
+      let read = 0;
+      while (read < buffer.length) {
+        const { bytesRead } = await handle.read(buffer, read, buffer.length - read, index + read);
+        if (bytesRead === 0) {
+          return buffer.subarray(0, read);
+        }
+        read += bytesRead;
+      }
+      return buffer;
+    } finally {
+      await handle.close();
+    }
+  }
+}
+
 export class FileFakeS3Handler implements S3Handler {
   async uploadAlbumArtFiles(
     id: string,
-    albumArtFiles: unzipper.File[],
+    albumArtFiles: FileEntry[],
     temp: boolean
   ): Promise<Result<string | undefined, S3Error>> {
     for (const a of albumArtFiles) {
       const albumArt = checkExists(a, 'albumArt');
-      const filename = path.basename(albumArt.path);
-      const writeResult = await writeFile(
-        `${albumArtPrefix(id, temp)}${filename}`,
-        await albumArt.buffer()
-      );
+      const filename = zipBasename(albumArt.filename);
+      let entry: Uint8Array;
+      try {
+        entry = await readEntry(albumArt);
+      } catch (e) {
+        // Decompressing an entry can throw, and the caller only rolls the upload back on an error
+        // Result.
+        return { success: false, errors: [wrapError(e, S3Error.S3_WRITE_ERROR, { id })] };
+      }
+      const writeResult = await writeFile(`${albumArtPrefix(id, temp)}${filename}`, entry);
       if (!writeResult.success) return writeResult;
     }
     return {
       success: true,
-      value: albumArtFiles.length > 0 ? path.basename(albumArtFiles[0]!.path) : undefined,
+      value: albumArtFiles.length > 0 ? zipBasename(albumArtFiles[0]!.filename) : undefined,
     };
   }
 
-  async getMapFile(id: string, temp: boolean): PromisedResult<Buffer, S3Error> {
-    return readFile(mapKey(id, temp));
+  async openMapFile(id: string, temp: boolean): PromisedResult<MapArchive, S3Error> {
+    const key = mapKey(id, temp);
+    try {
+      const filePath = devS3Path(key);
+      const { size } = await fs.stat(filePath);
+      return { success: true, value: { reader: new FileRangeReader(filePath, size), size } };
+    } catch (e) {
+      return { success: false, errors: [wrapError(e, S3Error.S3_GET_ERROR, { key })] };
+    }
   }
 
   async mintUploadUrl(id: string): Promise<MintUploadUrlResult> {

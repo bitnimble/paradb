@@ -3,17 +3,19 @@ import {
   DeleteObjectCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
+  GetObjectCommandOutput,
+  HeadObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { FileEntry } from '@zip.js/zip.js';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
-import * as path from 'path';
 import { getEnvVars } from 'services/env';
-import * as unzipper from 'unzipper';
-import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
+import { RangeReader, readEntry, zipBasename } from 'services/maps/zip';
+import { MapArchive, MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 let s3: { client: S3Client; bucket: string } | undefined;
 
@@ -43,42 +45,45 @@ function getS3Client() {
   return s3;
 }
 
-async function s3Get(key: string): PromisedResult<Buffer, S3Error> {
-  try {
-    const s3 = getS3Client();
-    const resp = await s3.client.send(
+/** Just the part of `S3Client` a ranged read needs, so tests can stand one in. */
+export type RangeGetter = {
+  send(command: GetObjectCommand): Promise<GetObjectCommandOutput>;
+};
+
+/** Serves a zip's reads as ranged S3 GETs, so only the bytes zip.js asks for are transferred. */
+export class S3RangeReader extends RangeReader {
+  constructor(
+    private readonly client: RangeGetter,
+    private readonly bucket: string,
+    private readonly key: string,
+    size: number
+  ) {
+    super(key, size);
+  }
+
+  protected async fetchRange(index: number, length: number): Promise<Uint8Array> {
+    const resp = await this.client.send(
       new GetObjectCommand({
-        Bucket: s3.bucket,
-        Key: key,
+        Bucket: this.bucket,
+        Key: this.key,
+        Range: this.rangeHeader(index, length),
       })
     );
     if (!resp.Body) {
-      return {
-        success: false,
-        errors: [
-          {
-            type: S3Error.S3_GET_ERROR,
-            internalMessage: 'Missing S3 body',
-            details: { key },
-          },
-        ],
-      };
+      throw new Error(`Missing S3 body for ${this.key}`);
     }
-    return {
-      success: true,
-      value: Buffer.from(await resp.Body.transformToByteArray()),
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errors: [wrapError(e, S3Error.S3_GET_ERROR, { key })],
-    };
+    return resp.Body.transformToByteArray();
+  }
+
+  /** HTTP byte ranges are inclusive on both ends; S3 clamps a range that runs past the object. */
+  private rangeHeader(index: number, length: number): string {
+    return `bytes=${index}-${index + length - 1}`;
   }
 }
 
 async function s3Put(
   key: string,
-  buffer: Buffer,
+  buffer: Uint8Array,
   contentType: string
 ): PromisedResult<undefined, S3Error> {
   try {
@@ -182,28 +187,67 @@ function guessContentType(filename: string): string {
 export class RealS3Handler implements S3Handler {
   async uploadAlbumArtFiles(
     id: string,
-    albumArtFiles: unzipper.File[],
+    albumArtFiles: FileEntry[],
     temp: boolean
   ): Promise<Result<string | undefined, S3Error>> {
-    // Write album art files to S3
     // TODO: display all of the album arts in the FE, e.g. in a carousel, or when selecting a difficulty
-    await Promise.all(
-      albumArtFiles.map(async (a) => {
-        const albumArt = checkExists(a, 'albumArt');
-        const buffer = await albumArt.buffer();
-        const filename = path.basename(albumArt.path);
-        return s3Put(`${albumArtPrefix(id, temp)}${filename}`, buffer, guessContentType(filename));
-      })
-    );
+    let writes: Result<undefined, S3Error>[];
+    try {
+      writes = await Promise.all(
+        albumArtFiles.map(async (a) => {
+          const albumArt = checkExists(a, 'albumArt');
+          const buffer = await readEntry(albumArt);
+          const filename = zipBasename(albumArt.filename);
+          return s3Put(
+            `${albumArtPrefix(id, temp)}${filename}`,
+            buffer,
+            guessContentType(filename)
+          );
+        })
+      );
+    } catch (e) {
+      // Decompressing an entry can throw, and the caller only rolls the upload back on an error
+      // Result.
+      return { success: false, errors: [wrapError(e, S3Error.S3_WRITE_ERROR, { id })] };
+    }
+    const failed = writes.find((w) => !w.success);
+    if (failed != null && !failed.success) {
+      return failed;
+    }
 
     return {
       success: true,
-      value: albumArtFiles.length > 0 ? path.basename(albumArtFiles[0]!.path) : undefined,
+      value: albumArtFiles.length > 0 ? zipBasename(albumArtFiles[0]!.filename) : undefined,
     };
   }
 
-  async getMapFile(id: string, temp: boolean): PromisedResult<Buffer, S3Error> {
-    return s3Get(mapKey(id, temp));
+  async openMapFile(id: string, temp: boolean): PromisedResult<MapArchive, S3Error> {
+    const key = mapKey(id, temp);
+    try {
+      const s3 = getS3Client();
+      const head = await s3.client.send(new HeadObjectCommand({ Bucket: s3.bucket, Key: key }));
+      if (head.ContentLength == null) {
+        return {
+          success: false,
+          errors: [
+            {
+              type: S3Error.S3_GET_ERROR,
+              internalMessage: 'Missing S3 content length',
+              details: { key },
+            },
+          ],
+        };
+      }
+      return {
+        success: true,
+        value: {
+          reader: new S3RangeReader(s3.client, s3.bucket, key, head.ContentLength),
+          size: head.ContentLength,
+        },
+      };
+    } catch (e) {
+      return { success: false, errors: [wrapError(e, S3Error.S3_GET_ERROR, { key })] };
+    }
   }
 
   async mintUploadUrl(id: string): Promise<MintUploadUrlResult> {

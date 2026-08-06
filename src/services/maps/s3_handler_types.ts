@@ -1,5 +1,12 @@
+import { FileEntry, Reader } from '@zip.js/zip.js';
 import { PromisedResult, Result } from 'base/result';
-import * as unzipper from 'unzipper';
+
+/**
+ * A map archive in blob storage, opened for random access: the zip's central directory and the few
+ * entries validation actually reads are fetched on demand, so a large archive is never held in
+ * memory in full.
+ */
+export type MapArchive = { reader: Reader<unknown>; size: number };
 
 export const enum S3Error {
   S3_GET_ERROR = 's3_get_error',
@@ -19,10 +26,10 @@ export type MintUploadUrlResult =
 export interface S3Handler {
   uploadAlbumArtFiles(
     id: string,
-    albumArtFiles: unzipper.File[],
+    albumArtFiles: FileEntry[],
     temp: boolean
   ): Promise<Result<string | undefined, S3Error>>;
-  getMapFile(id: string, temp: boolean): PromisedResult<Buffer, S3Error>;
+  openMapFile(id: string, temp: boolean): PromisedResult<MapArchive, S3Error>;
   mintUploadUrl(id: string): Promise<MintUploadUrlResult>;
   deleteFiles(id: string, temp: boolean): Promise<Result<undefined, S3Error>>;
   promoteTempMapFiles(id: string): PromisedResult<undefined, S3Error>;

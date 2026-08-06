@@ -1,9 +1,7 @@
-import { PromisedResult, Result, ResultError } from 'base/result';
+import { FileEntry, Reader, ZipReader } from '@zip.js/zip.js';
+import { PromisedResult, Result, ResultError, wrapError } from 'base/result';
 import { PDMap } from 'schema/maps';
-// @ts-expect-error - encoding does not provide types
-import * as encoding from 'encoding';
-import path from 'path';
-import * as unzipper from 'unzipper';
+import { readEntry, zipBasename, zipDirname } from 'services/maps/zip';
 
 type RawMap = Pick<
   PDMap,
@@ -26,30 +24,34 @@ export const enum ValidateMapDifficultyError {
 
 export async function validateMap(opts: {
   id: string;
-  buffer: Buffer;
+  reader: Reader<unknown>;
 }): PromisedResult<
-  RawMap & { albumArtFiles: unzipper.File[] },
+  RawMap & { albumArtFiles: FileEntry[] },
   ValidateMapError | ValidateMapDifficultyError
 > {
-  let map: unzipper.CentralDirectory;
+  // Reading an entry decompresses and CRC-checks it, and on a remote archive fetches more of it, so
+  // anything in here can throw. A throw escaping to the caller would strand the map mid-validation:
+  // its upload only gets rolled back on an error Result.
   try {
-    map = await unzipper.Open.buffer(opts.buffer);
-  } catch {
-    // Failed to open zip -- corrupted, or incorrect format
-    return { success: false, errors: [{ type: ValidateMapError.NO_DATA }] };
+    const entries = await new ZipReader(opts.reader).getEntries();
+    const files = entries.filter((e): e is FileEntry => !e.directory);
+    if (files.length === 0) {
+      return { success: false, errors: [{ type: ValidateMapError.NO_DATA }] };
+    }
+    // A submitted map must have exactly one directory in it, and all of the files must be directly
+    // under that directory.
+    let mapName = files[0].filename.match(/(.+?)\//)?.[1];
+    if (mapName?.startsWith('/')) {
+      mapName = mapName.substring(1);
+    }
+    if (mapName == null || !files.every((f) => zipDirname(f.filename) === mapName)) {
+      return { success: false, errors: [{ type: ValidateMapError.INCORRECT_FOLDER_STRUCTURE }] };
+    }
+    return await validateMapFiles({ expectedMapName: mapName, mapFiles: files });
+  } catch (e) {
+    // Corrupted, not a zip at all, or unreadable from storage.
+    return { success: false, errors: [wrapError(e, ValidateMapError.NO_DATA)] };
   }
-  // A submitted map must have exactly one directory in it, and all of the files must be directly
-  // under that directory.
-  const files = map.files.filter((f) => f.type === 'File');
-  let mapName = files[0].path.match(/(.+?)\//)?.[1];
-  if (mapName?.startsWith('/')) {
-    mapName = mapName.substring(1);
-  }
-  if (mapName == null || !files.every((f) => path.dirname(f.path) === mapName)) {
-    return { success: false, errors: [{ type: ValidateMapError.INCORRECT_FOLDER_STRUCTURE }] };
-  }
-  const validatedResult = validateMapFiles({ expectedMapName: mapName, mapFiles: files });
-  return validatedResult;
 }
 
 function allExists<T>(a: (T | undefined)[]): a is T[] {
@@ -61,24 +63,24 @@ type RawMapMetadata = Pick<
 >;
 async function validateMapFiles(opts: {
   expectedMapName: string;
-  mapFiles: unzipper.File[];
+  mapFiles: FileEntry[];
 }): PromisedResult<
-  RawMap & { albumArtFiles: unzipper.File[] },
+  RawMap & { albumArtFiles: FileEntry[] },
   ValidateMapError | ValidateMapDifficultyError
 > {
   // The map directory needs to have the same name as the rlrr files.
   // TODO: remove this check once Paradiddle supports arbitrary folder names
-  const difficultyFiles = opts.mapFiles.filter((f) => f.path.endsWith('.rlrr'));
-  if (!difficultyFiles.every((f) => path.basename(f.path).startsWith(opts.expectedMapName))) {
+  const difficultyFiles = opts.mapFiles.filter((f) => f.filename.endsWith('.rlrr'));
+  if (!difficultyFiles.every((f) => zipBasename(f.filename).startsWith(opts.expectedMapName))) {
     return { success: false, errors: [{ type: ValidateMapError.INCORRECT_FOLDER_NAME }] };
   }
   // Gets a file in the map archive, relative to the primary map directory
   const getMapFile = (filename: string) =>
-    opts.mapFiles.find((f) => f.path === `${opts.expectedMapName}${path.sep}${filename}`);
+    opts.mapFiles.find((f) => f.filename === `${opts.expectedMapName}/${filename}`);
 
   const difficultyResults = await Promise.all(
     difficultyFiles.map((f) =>
-      f.buffer().then((b) => validateMapDifficulty(path.basename(f.path), b, getMapFile))
+      readEntry(f).then((b) => validateMapDifficulty(zipBasename(f.filename), b, getMapFile))
     )
   );
   if (difficultyResults.length === 0) {
@@ -158,12 +160,12 @@ async function validateMapFiles(opts: {
 
 function validateMapDifficulty(
   filename: string,
-  mapBuffer: Buffer,
-  getMapFile: (filename: string) => unzipper.File | undefined
+  rlrr: Uint8Array,
+  getMapFile: (filename: string) => FileEntry | undefined
 ): Result<RawMapMetadata & { difficultyName: string }, ValidateMapDifficultyError> {
   let map: any;
   try {
-    map = parseJsonBuffer(mapBuffer);
+    map = parseJson(rlrr);
   } catch {
     return { success: false, errors: [{ type: ValidateMapDifficultyError.INVALID_FORMAT }] };
   }
@@ -247,9 +249,9 @@ function validateMapDifficulty(
   };
 }
 
-function parseJsonBuffer(buffer: Buffer) {
-  if (buffer.indexOf('\uFEFF', 0, 'utf16le') === 0) {
-    return JSON.parse(encoding.convert(buffer, 'utf8', 'utf16le'));
-  }
-  return JSON.parse(buffer.toString());
+function parseJson(bytes: Uint8Array) {
+  // Paradiddle writes some rlrr files as UTF-16LE with a byte order mark. Both decoders strip the
+  // mark themselves; leaving one in front would fail the parse.
+  const isUtf16le = bytes[0] === 0xff && bytes[1] === 0xfe;
+  return JSON.parse(new TextDecoder(isUtf16le ? 'utf-16le' : 'utf-8').decode(bytes));
 }

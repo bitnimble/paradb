@@ -69,19 +69,19 @@ export async function completeMapUpload(id: string, isReupload: boolean) {
     }
   }
 
-  // Fetch it and begin processing
-  const getMapResult = await s3Handler.getMapFile(id, true);
-  if (!getMapResult.success) {
+  // Open it for reading and begin processing
+  const openMapResult = await s3Handler.openMapFile(id, true);
+  if (!openMapResult.success) {
     await cleanupFailedUpload();
     return actionError({
       errorBody: {},
       message: 'The file could not be processed.',
-      resultError: getMapResult,
+      resultError: openMapResult,
       shouldLog: true,
     });
   }
-  const mapFile = getMapResult.value;
-  if (mapFile.byteLength > 1024 * 1024 * 100) {
+  const archive = openMapResult.value;
+  if (archive.size > 1024 * 1024 * 100) {
     await cleanupFailedUpload();
     // 100MiB. We use MiB because that's what Windows displays in Explorer and therefore what users will expect.
     return actionError({
@@ -91,7 +91,7 @@ export async function completeMapUpload(id: string, isReupload: boolean) {
   }
   const processMapResult = await mapsRepo.validateUploadedMap({
     id,
-    mapFile,
+    archive,
     uploader: session.id,
   });
   if (!processMapResult.success) {
