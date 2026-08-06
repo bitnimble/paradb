@@ -1,10 +1,10 @@
-import { FileEntry, Reader } from '@zip.js/zip.js';
+import { FileEntry } from '@zip.js/zip.js';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { getEnvVars } from 'services/env';
-import { readEntry, zipBasename } from 'services/maps/zip';
+import { RangeReader, readEntry, zipBasename } from 'services/maps/zip';
 import { MapArchive, MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 // Disk-backed fake S3 handler for `bun dev` (selected via S3_IMPLEMENTATION=dev). Mirrors the
@@ -72,19 +72,18 @@ export const devS3 = {
 };
 
 /** Disk counterpart to the real handler's ranged S3 GETs: reads only the requested bytes. */
-class FileRangeReader extends Reader<string> {
+class FileRangeReader extends RangeReader {
   constructor(
     private readonly filePath: string,
     size: number
   ) {
-    super(filePath);
-    this.size = size;
+    super(filePath, size);
   }
 
-  async readUint8Array(index: number, length: number): Promise<Uint8Array> {
+  protected async fetchRange(index: number, length: number): Promise<Uint8Array> {
     const handle = await fs.open(this.filePath);
     try {
-      const buffer = Buffer.alloc(Math.max(Math.min(length, this.size - index), 0));
+      const buffer = Buffer.alloc(length);
       // A single read can come up short, which would leave the rest of the buffer zeroed and
       // silently corrupt what the zip parser sees.
       let read = 0;

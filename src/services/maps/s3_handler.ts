@@ -9,11 +9,11 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { FileEntry, Reader } from '@zip.js/zip.js';
+import { FileEntry } from '@zip.js/zip.js';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
 import { getEnvVars } from 'services/env';
-import { readEntry, zipBasename } from 'services/maps/zip';
+import { RangeReader, readEntry, zipBasename } from 'services/maps/zip';
 import { MapArchive, MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 let s3: { client: S3Client; bucket: string } | undefined;
@@ -50,19 +50,15 @@ export function rangeHeader(index: number, length: number): string {
 }
 
 /** Serves a zip's reads as ranged S3 GETs, so only the bytes zip.js asks for are transferred. */
-class S3RangeReader extends Reader<string> {
+class S3RangeReader extends RangeReader {
   constructor(
     private readonly key: string,
     size: number
   ) {
-    super(key);
-    this.size = size;
+    super(key, size);
   }
 
-  async readUint8Array(index: number, length: number): Promise<Uint8Array> {
-    if (length === 0) {
-      return new Uint8Array(0);
-    }
+  protected async fetchRange(index: number, length: number): Promise<Uint8Array> {
     const s3 = getS3Client();
     const resp = await s3.client.send(
       new GetObjectCommand({
