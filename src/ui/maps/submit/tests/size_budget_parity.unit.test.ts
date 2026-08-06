@@ -6,8 +6,10 @@ import { readZipSongLength } from 'ui/maps/submit/read_zip_song_length';
 
 /**
  * The client decides before uploading whether an archive fits its budget, and the server decides
- * again afterwards. They read the length by different routes, so this pins them to the same verdict
- * - a disagreement means either a wasted upload or a valid map the client refuses to send.
+ * again afterwards. Deriving the length is shared code, but reaching it isn't: the two read the zip
+ * through different zip.js builds and readers, over a local file against ranged S3 GETs, and the
+ * server only counts rlrr files under the map's own directory. A disagreement means either a wasted
+ * upload or a valid map the client refuses to send.
  */
 const verdicts = async (spec: MapZipSpec) => {
   const zip = buildMapZip(spec);
