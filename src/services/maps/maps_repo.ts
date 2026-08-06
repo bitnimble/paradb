@@ -413,7 +413,7 @@ export class MapsRepo {
       existingMap.success && existingMap.value.validity === MapValidity.REUPLOADED;
 
     await this.setValidity(id, MapValidity.VALIDATING);
-    const validatedMapResult = await validateMap({ id, reader: archive.reader });
+    const validatedMapResult = await validateMap({ id, archive });
     if (!validatedMapResult.success) {
       return validatedMapResult;
     }
@@ -532,6 +532,7 @@ export const submitErrorMap: Record<
   [ValidateMapError.MISSING_ALBUM_ART]: [400, 'Missing album art'],
   [ValidateMapError.NO_DATA]: [400, 'Invalid map archive; could not find map data'],
   [ValidateMapError.DESCRIPTION_TOO_LONG]: [400, 'Description is too long'],
+  [ValidateMapError.FILE_TOO_LARGE]: [400, 'File is over the filesize limit for this song length'],
   [ValidateMapDifficultyError.NO_AUDIO]: [400, 'Invalid map archive; missing audio files'],
   [ValidateMapDifficultyError.INVALID_FORMAT]: [
     400,

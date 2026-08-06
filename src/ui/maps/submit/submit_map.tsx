@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import { observer, useLocalObservable } from 'mobx-react-lite';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import { MAX_MAP_FILE_SIZE, formatMaxFileSize, maxMapFileSize } from 'services/maps/map_size';
 import { Button } from 'ui/base/button/button';
 import { T } from 'ui/base/text/text';
 import styles from './submit_map.module.css';
@@ -53,13 +54,13 @@ export const SubmitMap = observer((props: { id?: string }) => {
   };
 
   const DropInput = observer(() => {
-    const { filenames } = store;
+    const { selectedFiles } = store;
 
     return (
       <button
         className={classNames(
           styles.fileContainer,
-          (filenames.length || isDraggingOver) && styles.hasMapData
+          (selectedFiles.length || isDraggingOver) && styles.hasMapData
         )}
       >
         <input
@@ -74,8 +75,15 @@ export const SubmitMap = observer((props: { id?: string }) => {
         />
         <div className={styles.filenames}>
           <T.Small>
-            {filenames.length
-              ? filenames.map((f, i) => <p key={i}>{f}</p>)
+            {selectedFiles.length
+              ? selectedFiles.map((u, i) => (
+                  <p key={i}>
+                    {u.file.name}
+                    {u.state === 'error' && (
+                      <span className={styles.fileError}>: {u.errorMessage}</span>
+                    )}
+                  </p>
+                ))
               : 'Click or drag to upload your zipped map.'}
           </T.Small>
         </div>
@@ -122,7 +130,13 @@ export const SubmitMap = observer((props: { id?: string }) => {
 │  ├─ drums.ogg
 │  ├─ ...`}
       </T.Medium>
-      <T.Medium>The maximum file size is 40MB.</T.Medium>
+      <T.Medium>
+        The maximum file size scales with the length of your song, up to{' '}
+        {formatMaxFileSize(MAX_MAP_FILE_SIZE)}: a 5 minute song gets{' '}
+        {formatMaxFileSize(maxMapFileSize(5 * 60))}, which fits lossless audio, and a 30 minute one
+        gets {formatMaxFileSize(maxMapFileSize(30 * 60))}. Longer songs get proportionally less per
+        minute, so they will need lossy audio (Opus, AAC or MP3).
+      </T.Medium>
       {showProgressScreen ? (
         <div className={classNames(styles.fileContainer, styles.hasMapData, styles.isSubmitting)}>
           <div className={styles.filenames}>
@@ -138,8 +152,9 @@ export const SubmitMap = observer((props: { id?: string }) => {
         <DropInput />
       )}
       <Button
-        disabled={showProgressScreen}
-        loading={uploader.isUploading}
+        // Submitting mid-check would upload a file the check was about to reject.
+        disabled={showProgressScreen || store.checksInFlight > 0}
+        loading={uploader.isUploading || store.checksInFlight > 0}
         onClick={presenter.onSubmit}
       >
         Submit

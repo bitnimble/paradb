@@ -1,6 +1,9 @@
-import { FileEntry, Reader, ZipReader } from '@zip.js/zip.js';
+import { FileEntry, ZipReader } from '@zip.js/zip.js';
 import { PromisedResult, Result, ResultError, wrapError } from 'base/result';
 import { PDMap } from 'schema/maps';
+import { longestSongLength, maxMapFileSize, overBudgetMessage } from 'services/maps/map_size';
+import { parseRlrr, rlrrSongLength } from 'services/maps/rlrr';
+import { MapArchive } from 'services/maps/s3_handler_types';
 import { readEntry, zipBasename, zipDirname } from 'services/maps/zip';
 
 type RawMap = Pick<
@@ -15,6 +18,7 @@ export const enum ValidateMapError {
   NO_DATA = 'no_data',
   MISSING_ALBUM_ART = 'missing_album_art',
   DESCRIPTION_TOO_LONG = 'description_too_long',
+  FILE_TOO_LARGE = 'file_too_large',
 }
 export const enum ValidateMapDifficultyError {
   INVALID_FORMAT = 'invalid_format',
@@ -24,7 +28,7 @@ export const enum ValidateMapDifficultyError {
 
 export async function validateMap(opts: {
   id: string;
-  reader: Reader<unknown>;
+  archive: MapArchive;
 }): PromisedResult<
   RawMap & { albumArtFiles: FileEntry[] },
   ValidateMapError | ValidateMapDifficultyError
@@ -33,7 +37,7 @@ export async function validateMap(opts: {
   // anything in here can throw. A throw escaping to the caller would strand the map mid-validation:
   // its upload only gets rolled back on an error Result.
   try {
-    const entries = await new ZipReader(opts.reader).getEntries();
+    const entries = await new ZipReader(opts.archive.reader).getEntries();
     const files = entries.filter((e): e is FileEntry => !e.directory);
     if (files.length === 0) {
       return { success: false, errors: [{ type: ValidateMapError.NO_DATA }] };
@@ -47,7 +51,11 @@ export async function validateMap(opts: {
     if (mapName == null || !files.every((f) => zipDirname(f.filename) === mapName)) {
       return { success: false, errors: [{ type: ValidateMapError.INCORRECT_FOLDER_STRUCTURE }] };
     }
-    return await validateMapFiles({ expectedMapName: mapName, mapFiles: files });
+    return await validateMapFiles({
+      expectedMapName: mapName,
+      mapFiles: files,
+      archiveSize: opts.archive.size,
+    });
   } catch (e) {
     // Corrupted, not a zip at all, or unreadable from storage.
     return { success: false, errors: [wrapError(e, ValidateMapError.NO_DATA)] };
@@ -64,6 +72,7 @@ type RawMapMetadata = Pick<
 async function validateMapFiles(opts: {
   expectedMapName: string;
   mapFiles: FileEntry[];
+  archiveSize: number;
 }): PromisedResult<
   RawMap & { albumArtFiles: FileEntry[] },
   ValidateMapError | ValidateMapDifficultyError
@@ -104,7 +113,8 @@ async function validateMapFiles(opts: {
       // Complexity is not, but some existing maps have mismatched complexities between rlrr files,
       // and so this check has been skipped temporarily.
       // TODO: fix all maps with mismatched complexities
-      if (key === 'difficultyName' || key === 'complexity') {
+      // Song length can differ slightly between separately-recorded difficulties.
+      if (key === 'difficultyName' || key === 'complexity' || key === 'length') {
         continue;
       }
       const expected = validDifficultyResults[0].value[key as keyof RawMapMetadata];
@@ -126,6 +136,21 @@ async function validateMapFiles(opts: {
     validDifficultyResults.some((d) => d.value.description && d.value.description.length > 50000)
   ) {
     return { success: false, errors: [{ type: ValidateMapError.DESCRIPTION_TOO_LONG }] };
+  }
+
+  const sizeLimit = maxMapFileSize(
+    longestSongLength(validDifficultyResults.map((d) => d.value.length))
+  );
+  if (opts.archiveSize > sizeLimit) {
+    return {
+      success: false,
+      errors: [
+        {
+          type: ValidateMapError.FILE_TOO_LARGE,
+          userMessage: overBudgetMessage(sizeLimit),
+        },
+      ],
+    };
   }
 
   const albumArtFiles = validDifficultyResults
@@ -162,10 +187,13 @@ function validateMapDifficulty(
   filename: string,
   rlrr: Uint8Array,
   getMapFile: (filename: string) => FileEntry | undefined
-): Result<RawMapMetadata & { difficultyName: string }, ValidateMapDifficultyError> {
+): Result<
+  RawMapMetadata & { difficultyName: string; length: number | undefined },
+  ValidateMapDifficultyError
+> {
   let map: any;
   try {
-    map = parseJson(rlrr);
+    map = parseRlrr(rlrr);
   } catch {
     return { success: false, errors: [{ type: ValidateMapDifficultyError.INVALID_FORMAT }] };
   }
@@ -245,13 +273,11 @@ function validateMapDifficulty(
 
   return {
     success: true,
-    value: { ...requiredFields, ...optionalFields, difficultyName: difficultyMatch[1] },
+    value: {
+      ...requiredFields,
+      ...optionalFields,
+      difficultyName: difficultyMatch[1],
+      length: rlrrSongLength(map),
+    },
   };
-}
-
-function parseJson(bytes: Uint8Array) {
-  // Paradiddle writes some rlrr files as UTF-16LE with a byte order mark. Both decoders strip the
-  // mark themselves; leaving one in front would fail the parse.
-  const isUtf16le = bytes[0] === 0xff && bytes[1] === 0xfe;
-  return JSON.parse(new TextDecoder(isUtf16le ? 'utf-16le' : 'utf-8').decode(bytes));
 }

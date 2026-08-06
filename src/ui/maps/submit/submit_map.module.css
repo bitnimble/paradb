@@ -84,3 +84,7 @@
     min-height: calc(var(--gridBaseline) * 4);
     border: 1px solid var(--colorRed);
 }
+
+.fileError {
+    color: var(--colorRed);
+}

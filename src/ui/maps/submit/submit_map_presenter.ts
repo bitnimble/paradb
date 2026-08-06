@@ -2,6 +2,12 @@ import { Api } from 'app/api/api';
 import { action, computed, observable, runInAction } from 'mobx';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { getLog } from 'services/logging/client_logger';
+import {
+  MAX_MAP_FILE_SIZE,
+  formatMaxFileSize,
+  maxMapFileSize,
+  overBudgetMessage,
+} from 'services/maps/map_size';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
 
@@ -161,9 +167,15 @@ export type SubmitMapField = 'files';
 export class SubmitMapStore extends FormStore<SubmitMapField> {
   id?: string = undefined;
   @observable accessor files = new Map<string, UploadState>();
+  /** Files whose song length is still being read out of the archive. */
+  @observable accessor checksInFlight = 0;
 
-  @computed get filenames() {
-    return [...this.files.values()].map((f) => f.file.name).sort((a, b) => a.localeCompare(b));
+  @computed get selectedFiles() {
+    return [...this.files.values()].sort((a, b) => a.file.name.localeCompare(b.file.name));
+  }
+
+  @computed get uploadableFiles() {
+    return this.selectedFiles.filter((f) => f.state !== 'error');
   }
 
   constructor(id?: string) {
@@ -195,20 +207,56 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
       let f: UploadState;
       if (!zipTypes.includes(file.type)) {
         f = { state: 'error', file, errorMessage: 'File is not a zip' };
-      } else if (file.size > 1024 * 1024 * 100) {
-        // 100MiB. We use MiB because that's what Windows displays in Explorer and therefore what users will expect.
-        f = { state: 'error', file, errorMessage: 'File is over 100MB' };
+      } else if (file.size > MAX_MAP_FILE_SIZE) {
+        f = {
+          state: 'error',
+          file,
+          errorMessage: `File is over ${formatMaxFileSize(MAX_MAP_FILE_SIZE)}`,
+        };
       } else {
         f = { state: 'pending', file };
       }
       // Deduplicate by both filename and byte size
       const key = `${file.name}-${file.size}`;
       this.store.files.set(key, f);
+      if (f.state === 'pending') {
+        void this.checkSizeAgainstSongLength(key, file);
+      }
     }
   }
 
+  private async checkSizeAgainstSongLength(key: string, file: File): Promise<void> {
+    this.setChecksInFlight(this.store.checksInFlight + 1);
+    try {
+      // Loaded on demand so the zip reader isn't in the page's initial payload.
+      const { readZipSongLength } = await import('ui/maps/submit/read_zip_song_length');
+      const limit = maxMapFileSize(await readZipSongLength(file));
+      if (file.size > limit) {
+        this.setUploadError(key, file, overBudgetMessage(limit));
+      }
+    } finally {
+      this.setChecksInFlight(this.store.checksInFlight - 1);
+    }
+  }
+
+  @action.bound private setChecksInFlight(count: number): void {
+    this.store.checksInFlight = count;
+  }
+
+  @action.bound private setUploadError(key: string, file: File, errorMessage: string): void {
+    const upload = this.store.files.get(key);
+    // Reading the archive is slow enough that the entry may have been cleared, replaced by a
+    // same-name-and-size file, or already started uploading.
+    if (upload?.state !== 'pending' || upload.file !== file) {
+      return;
+    }
+    this.store.files.set(key, { state: 'error', file, errorMessage });
+  }
+
   readonly onSubmit = async () => {
-    this.uploader.addFiles([...this.store.files.values()]);
+    // Files rejected here never go to the uploader: it latches `hasErrors`, which would swap the
+    // page to the progress screen for good and leave no way back to the file picker.
+    this.uploader.addFiles(this.store.uploadableFiles);
     this.store.reset();
     const [ids, errors] = await this.uploader.start(this.store.id);
 

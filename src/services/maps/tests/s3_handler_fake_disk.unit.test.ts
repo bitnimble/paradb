@@ -30,10 +30,10 @@ describe('FileFakeS3Handler', () => {
     const opened = await new FileFakeS3Handler().openMapFile('abc', true);
 
     expect(opened.success).toBe(true);
-    const { reader, size } = (opened as Extract<typeof opened, { success: true }>).value;
-    expect(size).toEqual(zip.byteLength);
+    const archive = (opened as Extract<typeof opened, { success: true }>).value;
+    expect(archive.size).toEqual(zip.byteLength);
     // Reading through the reader is what exercises the ranged file reads.
-    const result = await validateMap({ id: 'abc', reader });
+    const result = await validateMap({ id: 'abc', archive });
     expect(result.success).toBe(true);
   });
 
