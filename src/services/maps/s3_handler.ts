@@ -8,11 +8,11 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { FileEntry } from '@zip.js/zip.js';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
-import * as path from 'path';
 import { getEnvVars } from 'services/env';
-import * as unzipper from 'unzipper';
+import { readEntry, zipBasename } from 'services/maps/zip';
 import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 let s3: { client: S3Client; bucket: string } | undefined;
@@ -182,7 +182,7 @@ function guessContentType(filename: string): string {
 export class RealS3Handler implements S3Handler {
   async uploadAlbumArtFiles(
     id: string,
-    albumArtFiles: unzipper.File[],
+    albumArtFiles: FileEntry[],
     temp: boolean
   ): Promise<Result<string | undefined, S3Error>> {
     // Write album art files to S3
@@ -190,15 +190,15 @@ export class RealS3Handler implements S3Handler {
     await Promise.all(
       albumArtFiles.map(async (a) => {
         const albumArt = checkExists(a, 'albumArt');
-        const buffer = await albumArt.buffer();
-        const filename = path.basename(albumArt.path);
+        const buffer = await readEntry(albumArt);
+        const filename = zipBasename(albumArt.filename);
         return s3Put(`${albumArtPrefix(id, temp)}${filename}`, buffer, guessContentType(filename));
       })
     );
 
     return {
       success: true,
-      value: albumArtFiles.length > 0 ? path.basename(albumArtFiles[0]!.path) : undefined,
+      value: albumArtFiles.length > 0 ? zipBasename(albumArtFiles[0]!.filename) : undefined,
     };
   }
 

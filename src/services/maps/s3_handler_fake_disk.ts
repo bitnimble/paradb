@@ -1,9 +1,10 @@
+import { FileEntry } from '@zip.js/zip.js';
 import { checkExists } from 'base/preconditions';
 import { PromisedResult, Result, wrapError } from 'base/result';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { getEnvVars } from 'services/env';
-import * as unzipper from 'unzipper';
+import { readEntry, zipBasename } from 'services/maps/zip';
 import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 // Disk-backed fake S3 handler for `bun dev` (selected via S3_IMPLEMENTATION=dev). Mirrors the
@@ -73,21 +74,21 @@ export const devS3 = {
 export class FileFakeS3Handler implements S3Handler {
   async uploadAlbumArtFiles(
     id: string,
-    albumArtFiles: unzipper.File[],
+    albumArtFiles: FileEntry[],
     temp: boolean
   ): Promise<Result<string | undefined, S3Error>> {
     for (const a of albumArtFiles) {
       const albumArt = checkExists(a, 'albumArt');
-      const filename = path.basename(albumArt.path);
+      const filename = zipBasename(albumArt.filename);
       const writeResult = await writeFile(
         `${albumArtPrefix(id, temp)}${filename}`,
-        await albumArt.buffer()
+        await readEntry(albumArt)
       );
       if (!writeResult.success) return writeResult;
     }
     return {
       success: true,
-      value: albumArtFiles.length > 0 ? path.basename(albumArtFiles[0]!.path) : undefined,
+      value: albumArtFiles.length > 0 ? zipBasename(albumArtFiles[0]!.filename) : undefined,
     };
   }
 

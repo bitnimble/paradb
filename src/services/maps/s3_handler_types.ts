@@ -1,5 +1,5 @@
+import { FileEntry } from '@zip.js/zip.js';
 import { PromisedResult, Result } from 'base/result';
-import * as unzipper from 'unzipper';
 
 export const enum S3Error {
   S3_GET_ERROR = 's3_get_error',
@@ -19,7 +19,7 @@ export type MintUploadUrlResult =
 export interface S3Handler {
   uploadAlbumArtFiles(
     id: string,
-    albumArtFiles: unzipper.File[],
+    albumArtFiles: FileEntry[],
     temp: boolean
   ): Promise<Result<string | undefined, S3Error>>;
   getMapFile(id: string, temp: boolean): PromisedResult<Buffer, S3Error>;

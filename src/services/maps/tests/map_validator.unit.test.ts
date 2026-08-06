@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { validateMap } from 'services/maps/map_validator';
+import { readEntry } from 'services/maps/zip';
 
 const readFixture = (name: string) => fs.readFileSync(path.resolve(__dirname, 'files', name));
 
@@ -30,6 +31,17 @@ describe('validateMap', () => {
     it('a valid map whose folder name matches the rlrr files', async () => {
       const result = await validate('Test_valid_different_folder_name.zip');
       expect(result.success).toBe(true);
+    });
+
+    // The album art entries outlive the call, and are only read later, when they're uploaded to S3.
+    it('returns album art entries that are still readable afterwards', async () => {
+      const result = await validate('Test_valid.zip');
+      const { albumArtFiles } = (result as Extract<typeof result, { success: true }>).value;
+      expect(albumArtFiles.length).toBeGreaterThan(0);
+
+      const bytes = await readEntry(albumArtFiles[0]);
+      // JPEG start-of-image marker: the entry decompressed to the real album art.
+      expect([bytes[0], bytes[1]]).toEqual([0xff, 0xd8]);
     });
   });
 

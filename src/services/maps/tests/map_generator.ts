@@ -57,7 +57,7 @@ export function buildMapZip(spec: MapZipSpec): Buffer {
 
 type ZipEntry = { name: string; data: Buffer };
 
-// Minimal STORED (uncompressed) zip writer. STORED keeps this dependency-free, and `unzipper` (the
+// Minimal STORED (uncompressed) zip writer. STORED keeps this dependency-free, and zip.js (the
 // reader the validator uses) handles it; compression buys nothing for tiny test fixtures.
 function buildZip(entries: ZipEntry[]): Buffer {
   const localParts: Buffer[] = [];

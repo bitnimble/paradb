@@ -1,6 +1,6 @@
+import { FileEntry } from '@zip.js/zip.js';
 import { PromisedResult, Result } from 'base/result';
-import * as path from 'path';
-import * as unzipper from 'unzipper';
+import { zipBasename } from 'services/maps/zip';
 import { MintUploadUrlResult, S3Error, S3Handler } from './s3_handler_types';
 
 /**
@@ -33,12 +33,12 @@ export class MemoryFakeS3Handler implements S3Handler {
 
   async uploadAlbumArtFiles(
     _id: string,
-    albumArtFiles: unzipper.File[],
+    albumArtFiles: FileEntry[],
     _temp: boolean
   ): Promise<Result<string | undefined, S3Error>> {
     return {
       success: true,
-      value: albumArtFiles.length > 0 ? path.basename(albumArtFiles[0]!.path) : undefined,
+      value: albumArtFiles.length > 0 ? zipBasename(albumArtFiles[0]!.filename) : undefined,
     };
   }
 
