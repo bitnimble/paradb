@@ -1,6 +1,7 @@
 import { Reader, Uint8ArrayReader } from '@zip.js/zip.js';
 import * as fs from 'fs';
 import * as path from 'path';
+import { MAX_MAP_FILE_SIZE, maxMapFileSize } from 'services/maps/map_size';
 import { validateMap } from 'services/maps/map_validator';
 import { readEntry } from 'services/maps/zip';
 import { buildMapZip } from './map_generator';
@@ -48,8 +49,13 @@ class CountingReader extends Reader<Uint8Array> {
 
 const readFixture = (name: string) => fs.readFileSync(path.resolve(__dirname, 'files', name));
 
+const archiveOf = (bytes: Uint8Array) => ({
+  reader: new Uint8ArrayReader(bytes),
+  size: bytes.byteLength,
+});
+
 const validate = (name: string) =>
-  validateMap({ id: 'test', reader: new Uint8ArrayReader(readFixture(name)) });
+  validateMap({ id: 'test', archive: archiveOf(readFixture(name)) });
 
 const expectError = async (name: string, type: string) => {
   const result = await validate(name);
@@ -85,7 +91,7 @@ describe('validateMap', () => {
         utf16le: true,
       });
 
-      const result = await validateMap({ id: 'test', reader: new Uint8ArrayReader(buffer) });
+      const result = await validateMap({ id: 'test', archive: archiveOf(buffer) });
 
       expect(result.success).toBe(true);
       expect((result as Extract<typeof result, { success: true }>).value.title).toEqual(
@@ -114,7 +120,10 @@ describe('validateMap', () => {
         [8 * 1024 * 1024, 32 * 1024 * 1024].map(async (padBytes) => {
           const buffer = build(padBytes);
           const reader = new CountingReader(buffer);
-          const result = await validateMap({ id: 'test', reader });
+          const result = await validateMap({
+            id: 'test',
+            archive: { reader, size: buffer.byteLength },
+          });
           expect(result.success).toBe(true);
           return reader.bytesRead;
         })
@@ -173,14 +182,70 @@ describe('validateMap', () => {
     it('storage failing partway through reading the archive', async () => {
       const buffer = readFixture('Test_valid.zip');
       // The central directory is read first; the failure lands on an entry's contents.
-      const reader = new FailingReader(buffer, 2);
+      const archive = { reader: new FailingReader(buffer, 2), size: buffer.byteLength };
 
-      const result = await validateMap({ id: 'test', reader });
+      const result = await validateMap({ id: 'test', archive });
 
       expect(result.success).toBe(false);
       expect((result as Extract<typeof result, { success: false }>).errors[0].type).toEqual(
         'no_data'
       );
     });
+
+    it('an archive over the size budget for the song length', async () => {
+      const buffer = buildMapZip({
+        folder: 'Test',
+        title: 'Test',
+        artist: 'Artist',
+        difficulties: [{ name: 'Easy', lengthSeconds: 60 }],
+        padBytes: 90 * 1024 * 1024,
+      });
+
+      const result = await validateMap({ id: 'test', archive: archiveOf(buffer) });
+
+      expect(result.success).toBe(false);
+      expect((result as Extract<typeof result, { success: false }>).errors[0].type).toEqual(
+        'file_too_large'
+      );
+    });
+  });
+
+  it('accepts a long song whose archive would be over the budget for a short one', async () => {
+    const buffer = buildMapZip({
+      folder: 'Test',
+      title: 'Test',
+      artist: 'Artist',
+      difficulties: [{ name: 'Easy', lengthSeconds: 600 }],
+      padBytes: 90 * 1024 * 1024,
+    });
+
+    const result = await validateMap({ id: 'test', archive: archiveOf(buffer) });
+
+    expect(result.success).toBe(true);
+  });
+});
+
+const MIB = 1024 * 1024;
+
+describe('maxMapFileSize', () => {
+  it('scales with song length', () => {
+    expect(maxMapFileSize(600)).toBeGreaterThan(maxMapFileSize(60));
+  });
+
+  it('fits lossless audio for a standard-length song', () => {
+    expect(maxMapFileSize(5 * 60)).toEqual(95 * MIB);
+  });
+
+  it('only fits lossy audio for an hour-long song', () => {
+    expect(maxMapFileSize(60 * 60)).toEqual(260 * MIB);
+  });
+
+  it('never exceeds the hard cap', () => {
+    expect(maxMapFileSize(60 * 60 * 24)).toEqual(MAX_MAP_FILE_SIZE);
+  });
+
+  it('falls back to the hard cap when the length is unknown', () => {
+    expect(maxMapFileSize(undefined)).toEqual(MAX_MAP_FILE_SIZE);
+    expect(maxMapFileSize(0)).toEqual(MAX_MAP_FILE_SIZE);
   });
 });

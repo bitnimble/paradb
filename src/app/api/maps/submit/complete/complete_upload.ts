@@ -1,5 +1,6 @@
 import { MapValidity } from 'schema/maps';
 import { actionError } from 'services/helpers';
+import { MAX_MAP_FILE_SIZE, formatFileSize } from 'services/maps/map_size';
 import { submitErrorMap } from 'services/maps/maps_repo';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
@@ -81,11 +82,11 @@ export async function completeMapUpload(id: string, isReupload: boolean) {
     });
   }
   const archive = openMapResult.value;
-  if (archive.size > 1024 * 1024 * 100) {
+  // Cheap upfront reject; the length-based limit is applied during validation, once the rlrr is read.
+  if (archive.size > MAX_MAP_FILE_SIZE) {
     await cleanupFailedUpload();
-    // 100MiB. We use MiB because that's what Windows displays in Explorer and therefore what users will expect.
     return actionError({
-      message: 'File is over the filesize limit (100MB)',
+      message: `File is over the filesize limit (${formatFileSize(MAX_MAP_FILE_SIZE)})`,
       errorBody: {},
     });
   }

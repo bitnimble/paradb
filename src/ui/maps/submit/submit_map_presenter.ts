@@ -2,6 +2,7 @@ import { Api } from 'app/api/api';
 import { action, computed, observable, runInAction } from 'mobx';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { getLog } from 'services/logging/client_logger';
+import { MAX_MAP_FILE_SIZE, formatFileSize } from 'services/maps/map_size';
 import { FormPresenter, FormStore } from 'ui/base/form/form_presenter';
 import { RoutePath, routeFor } from 'utils/routes';
 
@@ -195,9 +196,12 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
       let f: UploadState;
       if (!zipTypes.includes(file.type)) {
         f = { state: 'error', file, errorMessage: 'File is not a zip' };
-      } else if (file.size > 1024 * 1024 * 100) {
-        // 100MiB. We use MiB because that's what Windows displays in Explorer and therefore what users will expect.
-        f = { state: 'error', file, errorMessage: 'File is over 100MB' };
+      } else if (file.size > MAX_MAP_FILE_SIZE) {
+        f = {
+          state: 'error',
+          file,
+          errorMessage: `File is over ${formatFileSize(MAX_MAP_FILE_SIZE)}`,
+        };
       } else {
         f = { state: 'pending', file };
       }
