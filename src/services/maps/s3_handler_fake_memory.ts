@@ -13,15 +13,15 @@ import { MapArchive, MintUploadUrlResult, S3Error, S3Handler } from './s3_handle
 export class MemoryFakeS3Handler implements S3Handler {
   // Map archive bytes keyed by id. Pending uploads live in `temp` and are promoted to `permanent`
   // by promoteTempMapFiles, mirroring the real handler's `.temp` suffix scheme.
-  private tempMapFiles = new Map<string, Buffer>();
-  private permanentMapFiles = new Map<string, Buffer>();
+  private tempMapFiles = new Map<string, Uint8Array>();
+  private permanentMapFiles = new Map<string, Uint8Array>();
 
   private mapFileStore(temp: boolean) {
     return temp ? this.tempMapFiles : this.permanentMapFiles;
   }
 
   /** Test seam: stand in for the client uploading a zip to the presigned URL (writes to temp). */
-  _putMapFileForTesting(id: string, buffer: Buffer) {
+  _putMapFileForTesting(id: string, buffer: Uint8Array) {
     this.tempMapFiles.set(id, buffer);
   }
 

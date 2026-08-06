@@ -24,6 +24,8 @@ export type MapZipSpec = {
   complexity?: number;
   /** Filler, added as an extra file, to stand in for a large archive's audio. */
   padBytes?: number;
+  /** Writes the .rlrr as UTF-16LE with a byte order mark, as Paradiddle itself sometimes does. */
+  utf16le?: boolean;
 };
 
 export function buildMapZip(spec: MapZipSpec): Buffer {
@@ -49,7 +51,7 @@ export function buildMapZip(spec: MapZipSpec): Buffer {
   const entries: ZipEntry[] = [
     {
       name: `${spec.folder}/${spec.folder}_${difficulty}.rlrr`,
-      data: Buffer.from(JSON.stringify(rlrr, null, 2)),
+      data: encodeRlrr(JSON.stringify(rlrr, null, 2), spec.utf16le ?? false),
     },
     { name: `${spec.folder}/album.jpg`, data: albumArt },
     { name: `${spec.folder}/song.ogg`, data: silence },
@@ -59,6 +61,13 @@ export function buildMapZip(spec: MapZipSpec): Buffer {
     entries.push({ name: `${spec.folder}/pad.bin`, data: Buffer.alloc(spec.padBytes) });
   }
   return buildZip(entries);
+}
+
+function encodeRlrr(json: string, utf16le: boolean): Buffer {
+  if (!utf16le) {
+    return Buffer.from(json, 'utf8');
+  }
+  return Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(json, 'utf16le')]);
 }
 
 type ZipEntry = { name: string; data: Buffer };

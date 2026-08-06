@@ -83,7 +83,7 @@ export class S3RangeReader extends RangeReader {
 
 async function s3Put(
   key: string,
-  buffer: Buffer,
+  buffer: Uint8Array,
   contentType: string
 ): PromisedResult<undefined, S3Error> {
   try {

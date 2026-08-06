@@ -33,7 +33,7 @@ async function readFile(key: string): PromisedResult<Buffer, S3Error> {
   }
 }
 
-async function writeFile(key: string, body: Buffer): Promise<Result<undefined, S3Error>> {
+async function writeFile(key: string, body: Uint8Array): Promise<Result<undefined, S3Error>> {
   try {
     const filePath = devS3Path(key);
     await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -83,7 +83,7 @@ class FileRangeReader extends RangeReader {
   protected async fetchRange(index: number, length: number): Promise<Uint8Array> {
     const handle = await fs.open(this.filePath);
     try {
-      const buffer = Buffer.alloc(length);
+      const buffer = new Uint8Array(length);
       // A single read can come up short, which would leave the rest of the buffer zeroed and
       // silently corrupt what the zip parser sees.
       let read = 0;
@@ -110,7 +110,7 @@ export class FileFakeS3Handler implements S3Handler {
     for (const a of albumArtFiles) {
       const albumArt = checkExists(a, 'albumArt');
       const filename = zipBasename(albumArt.filename);
-      let entry: Buffer;
+      let entry: Uint8Array;
       try {
         entry = await readEntry(albumArt);
       } catch (e) {

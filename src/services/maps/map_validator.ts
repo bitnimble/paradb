@@ -1,8 +1,6 @@
 import { FileEntry, Reader, ZipReader } from '@zip.js/zip.js';
 import { PromisedResult, Result, ResultError, wrapError } from 'base/result';
 import { PDMap } from 'schema/maps';
-// @ts-expect-error - encoding does not provide types
-import * as encoding from 'encoding';
 import { readEntry, zipBasename, zipDirname } from 'services/maps/zip';
 
 type RawMap = Pick<
@@ -162,12 +160,12 @@ async function validateMapFiles(opts: {
 
 function validateMapDifficulty(
   filename: string,
-  mapBuffer: Buffer,
+  rlrr: Uint8Array,
   getMapFile: (filename: string) => FileEntry | undefined
 ): Result<RawMapMetadata & { difficultyName: string }, ValidateMapDifficultyError> {
   let map: any;
   try {
-    map = parseJsonBuffer(mapBuffer);
+    map = parseJson(rlrr);
   } catch {
     return { success: false, errors: [{ type: ValidateMapDifficultyError.INVALID_FORMAT }] };
   }
@@ -251,9 +249,9 @@ function validateMapDifficulty(
   };
 }
 
-function parseJsonBuffer(buffer: Buffer) {
-  if (buffer.indexOf('\uFEFF', 0, 'utf16le') === 0) {
-    return JSON.parse(encoding.convert(buffer, 'utf8', 'utf16le'));
-  }
-  return JSON.parse(buffer.toString());
+function parseJson(bytes: Uint8Array) {
+  // Paradiddle writes some rlrr files as UTF-16LE with a byte order mark. Both decoders strip the
+  // mark themselves; leaving one in front would fail the parse.
+  const isUtf16le = bytes[0] === 0xff && bytes[1] === 0xfe;
+  return JSON.parse(new TextDecoder(isUtf16le ? 'utf-16le' : 'utf-8').decode(bytes));
 }

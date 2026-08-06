@@ -77,6 +77,22 @@ describe('validateMap', () => {
       expect(result.success).toBe(true);
     });
 
+    it('a map whose rlrr is UTF-16LE with a byte order mark', async () => {
+      const buffer = buildMapZip({
+        folder: 'Test',
+        title: 'Utf16 Title',
+        artist: 'Artist',
+        utf16le: true,
+      });
+
+      const result = await validateMap({ id: 'test', reader: new Uint8ArrayReader(buffer) });
+
+      expect(result.success).toBe(true);
+      expect((result as Extract<typeof result, { success: true }>).value.title).toEqual(
+        'Utf16 Title'
+      );
+    });
+
     // The album art entries outlive the call, and are only read later, when they're uploaded to S3.
     it('returns album art entries that are still readable afterwards', async () => {
       const result = await validate('Test_valid.zip');

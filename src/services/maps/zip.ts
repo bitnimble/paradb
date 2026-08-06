@@ -42,8 +42,8 @@ export abstract class RangeReader extends Reader<string> {
   }
 }
 
-export async function readEntry(entry: FileEntry): Promise<Buffer> {
-  return Buffer.from(await entry.arrayBuffer());
+export async function readEntry(entry: FileEntry): Promise<Uint8Array> {
+  return new Uint8Array(await entry.arrayBuffer());
 }
 
 // Zip entry names always use '/', regardless of the platform the archive was built on, so the
