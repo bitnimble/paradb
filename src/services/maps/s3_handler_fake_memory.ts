@@ -7,7 +7,7 @@ import { MapArchive, MintUploadUrlResult, S3Error, S3Handler } from './s3_handle
  * In-memory S3 handler used in tests (selected via `S3_IMPLEMENTATION=fake`) so they don't require a
  * real S3 bucket / minio. Unlike a pure stub it actually round-trips uploaded map archives: a test
  * seeds the upload with `_putMapFileForTesting` (standing in for the client's PUT to the presigned
- * URL), and getMapFile / promoteTempMapFiles / deleteFiles then behave like the real handler's
+ * URL), and openMapFile / promoteTempMapFiles / deleteFiles then behave like the real handler's
  * temp-vs-permanent storage, so the upload-completion flow can be exercised end to end.
  */
 export class MemoryFakeS3Handler implements S3Handler {

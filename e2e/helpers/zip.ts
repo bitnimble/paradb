@@ -10,12 +10,10 @@ import { MapFixture } from '../fixtures';
 export async function assertZipMatchesFixture(zipBuffer: Buffer, fixture: MapFixture) {
   const entries = await new ZipReader(new Uint8ArrayReader(zipBuffer)).getEntries();
   const files = entries.filter((e): e is FileEntry => !e.directory);
+  const filenames = files.map((f) => f.filename);
 
   for (const entry of fixture.expectedEntries) {
-    expect(
-      files.map((f) => f.filename),
-      `downloaded zip should contain ${entry}`
-    ).toContain(entry);
+    expect(filenames, `downloaded zip should contain ${entry}`).toContain(entry);
   }
 
   const rlrr = files.find((f) => f.filename.endsWith('.rlrr'));

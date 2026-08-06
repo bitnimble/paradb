@@ -85,7 +85,16 @@ class FileRangeReader extends Reader<string> {
     const handle = await fs.open(this.filePath);
     try {
       const buffer = Buffer.alloc(Math.max(Math.min(length, this.size - index), 0));
-      await handle.read(buffer, 0, buffer.length, index);
+      // A single read can come up short, which would leave the rest of the buffer zeroed and
+      // silently corrupt what the zip parser sees.
+      let read = 0;
+      while (read < buffer.length) {
+        const { bytesRead } = await handle.read(buffer, read, buffer.length - read, index + read);
+        if (bytesRead === 0) {
+          return buffer.subarray(0, read);
+        }
+        read += bytesRead;
+      }
       return buffer;
     } finally {
       await handle.close();

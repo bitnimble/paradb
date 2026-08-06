@@ -78,39 +78,6 @@ class S3RangeReader extends Reader<string> {
   }
 }
 
-async function s3Get(key: string): PromisedResult<Buffer, S3Error> {
-  try {
-    const s3 = getS3Client();
-    const resp = await s3.client.send(
-      new GetObjectCommand({
-        Bucket: s3.bucket,
-        Key: key,
-      })
-    );
-    if (!resp.Body) {
-      return {
-        success: false,
-        errors: [
-          {
-            type: S3Error.S3_GET_ERROR,
-            internalMessage: 'Missing S3 body',
-            details: { key },
-          },
-        ],
-      };
-    }
-    return {
-      success: true,
-      value: Buffer.from(await resp.Body.transformToByteArray()),
-    };
-  } catch (e) {
-    return {
-      success: false,
-      errors: [wrapError(e, S3Error.S3_GET_ERROR, { key })],
-    };
-  }
-}
-
 async function s3Put(
   key: string,
   buffer: Buffer,

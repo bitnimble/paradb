@@ -15,6 +15,10 @@ class CountingReader extends Reader<Uint8Array> {
     this.size = data.byteLength;
   }
 
+  async init(): Promise<void> {
+    await this.delegate.init?.();
+  }
+
   async readUint8Array(index: number, length: number): Promise<Uint8Array> {
     this.bytesRead += length;
     return this.delegate.readUint8Array(index, length);
@@ -23,13 +27,8 @@ class CountingReader extends Reader<Uint8Array> {
 
 const readFixture = (name: string) => fs.readFileSync(path.resolve(__dirname, 'files', name));
 
-const validate = (name: string) => {
-  const buffer = readFixture(name);
-  return validateMap({
-    id: 'test',
-    archive: { reader: new Uint8ArrayReader(buffer), size: buffer.byteLength },
-  });
-};
+const validate = (name: string) =>
+  validateMap({ id: 'test', reader: new Uint8ArrayReader(readFixture(name)) });
 
 const expectError = async (name: string, type: string) => {
   const result = await validate(name);
@@ -79,10 +78,7 @@ describe('validateMap', () => {
         [8 * 1024 * 1024, 32 * 1024 * 1024].map(async (padBytes) => {
           const buffer = build(padBytes);
           const reader = new CountingReader(buffer);
-          const result = await validateMap({
-            id: 'test',
-            archive: { reader, size: buffer.byteLength },
-          });
+          const result = await validateMap({ id: 'test', reader });
           expect(result.success).toBe(true);
           return reader.bytesRead;
         })

@@ -413,7 +413,7 @@ export class MapsRepo {
       existingMap.success && existingMap.value.validity === MapValidity.REUPLOADED;
 
     await this.setValidity(id, MapValidity.VALIDATING);
-    const validatedMapResult = await validateMap({ id, archive });
+    const validatedMapResult = await validateMap({ id, reader: archive.reader });
     if (!validatedMapResult.success) {
       return validatedMapResult;
     }
