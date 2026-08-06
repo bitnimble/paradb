@@ -7,6 +7,8 @@ This is a website that allows users to host custom maps and songs for a rhythm d
 Custom maps consist of a zip file, which contains a .rlrr metadata file along with the audio tracks for the song. The audio tracks can either be the song itself, or the audio stems of the song that can allow the game to play the song without any drum track (as the player will be drumming along themselves).
 The codebase uses Docker to run third-party services locally (Minio for a local S3 instance), the local Supabase CLI for running the Supabase database locally, and the standad Next.js dev mode to run the backend and frontend locally.
 
+The official .rlrr schema (fields and types) is at https://raw.githubusercontent.com/emretanirgan/ParadiddleUtilities/refs/heads/master/docs/rlrrschema.json - fetch it if you need to reference what a .rlrr file contains.
+
 # Tech stack
 
 - Typescript, Next.js with App Routing running on Vercel, Postgres running on Supabase
