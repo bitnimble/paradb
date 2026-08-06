@@ -1,6 +1,6 @@
 import { MapValidity } from 'schema/maps';
 import { actionError } from 'services/helpers';
-import { MAX_MAP_FILE_SIZE, formatFileSize } from 'services/maps/map_size';
+import { MAX_MAP_FILE_SIZE, formatMaxFileSize } from 'services/maps/map_size';
 import { submitErrorMap } from 'services/maps/maps_repo';
 import { getServerContext } from 'services/server_context';
 import { getUserSession } from 'services/session/session';
@@ -86,7 +86,7 @@ export async function completeMapUpload(id: string, isReupload: boolean) {
   if (archive.size > MAX_MAP_FILE_SIZE) {
     await cleanupFailedUpload();
     return actionError({
-      message: `File is over the filesize limit (${formatFileSize(MAX_MAP_FILE_SIZE)})`,
+      message: `File is over the filesize limit (${formatMaxFileSize(MAX_MAP_FILE_SIZE)})`,
       errorBody: {},
     });
   }

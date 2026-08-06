@@ -147,7 +147,7 @@ async function validateMapFiles(opts: {
       errors: [
         {
           type: ValidateMapError.FILE_TOO_LARGE,
-          userMessage: overBudgetMessage(opts.archiveSize, sizeLimit),
+          userMessage: overBudgetMessage(sizeLimit),
         },
       ],
     };

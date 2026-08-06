@@ -4,7 +4,7 @@ import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.share
 import { getLog } from 'services/logging/client_logger';
 import {
   MAX_MAP_FILE_SIZE,
-  formatFileSize,
+  formatMaxFileSize,
   maxMapFileSize,
   overBudgetMessage,
 } from 'services/maps/map_size';
@@ -211,7 +211,7 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
         f = {
           state: 'error',
           file,
-          errorMessage: `File is over ${formatFileSize(MAX_MAP_FILE_SIZE)}`,
+          errorMessage: `File is over ${formatMaxFileSize(MAX_MAP_FILE_SIZE)}`,
         };
       } else {
         f = { state: 'pending', file };
@@ -232,7 +232,7 @@ export class SubmitMapPresenter extends FormPresenter<SubmitMapField> {
       const { readZipSongLength } = await import('ui/maps/submit/read_zip_song_length');
       const limit = maxMapFileSize(await readZipSongLength(file));
       if (file.size > limit) {
-        this.setUploadError(key, file, overBudgetMessage(file.size, limit));
+        this.setUploadError(key, file, overBudgetMessage(limit));
       }
     } finally {
       this.setChecksInFlight(this.store.checksInFlight - 1);

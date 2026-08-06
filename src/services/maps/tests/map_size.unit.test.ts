@@ -1,6 +1,6 @@
 import {
   MAX_MAP_FILE_SIZE,
-  formatFileSize,
+  formatMaxFileSize,
   longestSongLength,
   maxMapFileSize,
   overBudgetMessage,
@@ -46,20 +46,34 @@ describe('longestSongLength', () => {
   });
 });
 
-describe('formatFileSize', () => {
+describe('formatMaxFileSize', () => {
   it('reports MiB, which is what the user sees in their file browser', () => {
-    expect(formatFileSize(100 * MIB)).toEqual('100MB');
-    expect(formatFileSize(1.6 * MIB)).toEqual('2MB');
+    expect(formatMaxFileSize(100 * MIB)).toEqual('100MB');
+  });
+
+  // Naming a limit larger than it is would tell the user a file that gets rejected should fit.
+  it('never names a size larger than the limit it was given', () => {
+    for (const mib of [0.05, 1.99, 49.99, 50.5, 95.9, 260.75]) {
+      expect(parseFloat(formatMaxFileSize(mib * MIB))).toBeLessThanOrEqual(mib);
+    }
+  });
+
+  it('keeps a decimal below 50MB, where a whole megabyte is a big share of the limit', () => {
+    expect(formatMaxFileSize(1.66 * MIB)).toEqual('1.6MB');
+    expect(formatMaxFileSize(49.99 * MIB)).toEqual('49.9MB');
+    expect(formatMaxFileSize(40 * MIB)).toEqual('40MB');
+  });
+
+  it('drops to whole megabytes above that, where the decimal is noise', () => {
+    expect(formatMaxFileSize(50.5 * MIB)).toEqual('50MB');
+    expect(formatMaxFileSize(260.75 * MIB)).toEqual('260MB');
   });
 });
 
 describe('overBudgetMessage', () => {
-  // Rounding both to nearest would report a file 0.2MiB over its limit as the same size as it.
-  it('never reports the file and the limit as the same size', () => {
-    const limit = maxMapFileSize(5 * 60);
-
-    const message = overBudgetMessage(limit + 0.2 * MIB, limit);
-
-    expect(message).toEqual('File is 96MB, over the 95MB limit for a song of this length');
+  it('names the limit', () => {
+    expect(overBudgetMessage(maxMapFileSize(5 * 60))).toEqual(
+      'File is over the 95MB limit for a song of this length'
+    );
   });
 });

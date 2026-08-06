@@ -26,13 +26,19 @@ export function longestSongLength(lengths: (number | undefined)[]): number | und
   return declared.length === 0 ? undefined : Math.max(...declared);
 }
 
-export function overBudgetMessage(bytes: number, limit: number): string {
-  // Round the two in opposite directions, so a file just over its limit can't report both as the
-  // same number.
-  return `File is ${formatFileSize(bytes, Math.ceil)}, over the ${formatFileSize(limit, Math.floor)} limit for a song of this length`;
+export function overBudgetMessage(limit: number): string {
+  return `File is over the ${formatMaxFileSize(limit)} limit for a song of this length`;
 }
 
-export function formatFileSize(bytes: number, round: (n: number) => number = Math.round): string {
+/**
+ * A limit, as a size the user can compare their file against. Always rounds down, so a file the
+ * size it names is never over the limit it names.
+ */
+export function formatMaxFileSize(bytes: number): string {
   // Labelled MB but computed as MiB: matches what Windows Explorer shows users.
-  return `${round(bytes / MIB)}MB`;
+  const mib = bytes / MIB;
+  // A whole megabyte is a big share of a small limit, so keep a decimal until the limits get big
+  // enough for it to be noise.
+  const rounded = mib < 50 ? Math.floor(mib * 10) / 10 : Math.floor(mib);
+  return `${rounded}MB`;
 }
